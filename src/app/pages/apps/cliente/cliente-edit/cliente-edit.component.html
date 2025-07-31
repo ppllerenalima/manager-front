@@ -1,0 +1,206 @@
+<div
+  class="d-flex align-items-center justify-content-between m-b-16 p-x-20 p-t-16"
+>
+  <h3>{{action}} Cliente</h3>
+  <button
+    mat-icon-button
+    mat-dialog-close
+    class="d-flex justify-content-center"
+  >
+    <i-tabler name="x" class="icon-20 d-flex"></i-tabler>
+  </button>
+</div>
+
+@if(action !== 'Delete') {
+<mat-dialog-content>
+  <form #userForm="ngForm">
+    <mat-label class="f-w-600 m-b-8 d-block">Subir imagen</mat-label>
+    <div class="file-input-container m-b-16">
+      @if(local_data.image){
+      <img
+        [src]="local_data.image"
+        alt="Selected Image"
+        class="m-r-16"
+        height="100"
+        width="100"
+      />
+      }
+      <input type="file" (change)="onFileSelected($event)" accept="image/*" />
+    </div>
+    <div class="row">
+      <div class="col-md-4">
+        <mat-label class="f-w-600 m-b-8 d-block">Ruc</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <input
+            type="text"
+            matInput
+            required
+            minlength="11"
+            maxlength="11"
+            name="ruc"
+            [(ngModel)]="local_data.ruc"
+            placeholder="Ruc"
+          />
+          <mat-error *ngIf="rucErrorMessage()">
+            {{ rucErrorMessage() }}
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div class="col-md-8">
+        <mat-label class="f-w-600 m-b-8 d-block">Razon social</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <input
+            type="text"
+            matInput
+            required
+            name="razonsocial"
+            [(ngModel)]="local_data.razonsocial"
+            placeholder="Razon social"
+          />
+        </mat-form-field>
+      </div>
+    </div>
+
+    <mat-label class="f-w-600 m-b-8 d-block">Dirección</mat-label>
+    <mat-form-field appearance="outline" class="w-100">
+      <input
+        type="text"
+        matInput
+        required
+        name="direccion"
+        [(ngModel)]="local_data.direccion"
+        placeholder="Dirección"
+      />
+    </mat-form-field>
+
+    <div class="row">
+      <div class="col-md-6">
+        <mat-label class="f-w-600 m-b-8 d-block">Post</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-select [(value)]="local_data.ContactPost" name="post" required>
+            <mat-option value="Web Designer">Web Designer</mat-option>
+            <mat-option value="Theme Designer">Theme Designer</mat-option>
+            <mat-option value="Front End Developer"
+              >Front End Developer</mat-option
+            >
+            <mat-option value="Hacker">Hacker</mat-option>
+            <mat-option value="Back End Developer"
+              >Back End Developer</mat-option
+            >
+            <mat-option value="Graphics Designer">Graphics Designer</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="col-md-6">
+        <mat-label class="f-w-600 m-b-8 d-block">Número Contacto</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <input
+            type="text"
+            matInput
+            required
+            name="numero"
+            [(ngModel)]="local_data.numero"
+            pattern="[0-9]*"
+            maxlength="15"
+            placeholder="Número Contacto"
+          />
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6">
+        <mat-label class="f-w-600 m-b-8 d-block">Usuario</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <input
+            type="text"
+            matInput
+            required
+            name="username"
+            [(ngModel)]="local_data.username"
+            placeholder="Usuario"
+          />
+        </mat-form-field>
+      </div>
+      <div class="col-md-6">
+        <mat-label class="f-w-600 m-b-8 d-block">Contraseña</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <input
+            type="text"
+            matInput
+            required
+            name="password"
+            [(ngModel)]="local_data.password"
+            placeholder="Constraseña"
+          />
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6">
+        <mat-label class="f-w-600 m-b-8 d-block">Client ID</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <input
+            type="text"
+            matInput
+            required
+            name="clientId"
+            [(ngModel)]="local_data.clientId"
+            placeholder="Client ID"
+          />
+        </mat-form-field>
+      </div>
+      <div class="col-md-6">
+        <mat-label class="f-w-600 m-b-8 d-block">Client Secret</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <input
+            type="text"
+            matInput
+            required
+            name="clientSecret"
+            [(ngModel)]="local_data.clientSecret"
+            placeholder="Client Secret"
+          />
+        </mat-form-field>
+      </div>
+    </div>
+  </form>
+</mat-dialog-content>
+<mat-divider></mat-divider>
+<mat-dialog-actions>
+  <button
+    mat-flat-button
+    [mat-dialog-close]="true"
+    [disabled]="!userForm.form.valid"
+    color="primary"
+    (click)="doAction();"
+  >
+    Agregar Cliente
+  </button>
+  <button mat-flat-button class="bg-error text-white" mat-dialog-close>
+    Cancelar
+  </button>
+</mat-dialog-actions>
+}
+<!-- -------------------------------------------------------------- -->
+<!-- Delete Cliente info -->
+<!-- -------------------------------------------------------------- -->
+
+@else {
+<div class="p-x-24 m-y-8">
+  <p class="f-s-14">
+    Estas seguro de eliminar: <span class="f-w-600">{{local_data.razonsocial}}</span> ?
+  </p>
+</div>
+<div mat-dialog-actions class="p-x-24 p-b-24">
+  <button (click)="doAction()" mat-flat-button>{{action}}</button>
+  <button
+    mat-flat-button
+    (click)="closeDialog()"
+    class="m-l-8 bg-error text-white"
+  >
+    Cancelar
+  </button>
+</div>
+}

@@ -1,0 +1,111 @@
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <div class="row justify-content-between gap-16">
+      <div class="col-sm-4">
+        <mat-form-field appearance="outline" class="w-100 hide-hint">
+          <input
+            matInput
+            placeholder="Busca aquí..."
+            (keyup)="applyFilter($event)"
+          />
+          <mat-icon matSuffix>
+            <i-tabler name="search" class="icon-20 d-flex m-t-2"></i-tabler>
+          </mat-icon>
+        </mat-form-field>
+        @if(customers().length === 0){
+        <p>No customers available.</p>
+        }
+      </div>
+      <div class="col-sm-6 d-flex align-items-center justify-content-end">
+        <button mat-flat-button (click)="openDialog('Add', {})" color="primary">
+          Agregar Cliente
+        </button>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<div class="row">
+  @for(customer of customers(); track customer.razonsocial ) {
+  <div class="col-sm-6 col-lg-4">
+    <mat-card class="cardWithShadow">
+      <!-- contact actions -->
+      <div class="d-flex align-items-center p-x-16 p-y-8">
+        <button
+          mat-icon-button
+          matTooltip="Editar"
+          (click)="this.openEditDialog(customer)"
+          class="d-flex align-items-center justify-content-center"
+        >
+          <i-tabler
+            name="edit"
+            class="icon-18 d-flex align-items-center"
+          ></i-tabler>
+        </button>
+
+        <button
+          mat-icon-button
+          matTooltip="Eliminar"
+          class="d-flex align-items-center justify-content-center"
+          (click)="this.openDeleteDialog(customer)"
+        >
+          <i-tabler
+            name="trash"
+            class="icon-18 d-flex align-items-center"
+          ></i-tabler>
+        </button>
+      </div>
+
+      <!-- <mat-divider></mat-divider> -->
+
+      <mat-card-content class="text-center">
+        <img
+          [src]="FileUtils.getClienteImage(customer.image)"
+          alt="Foto"
+          class="rounded-circle border p-5"
+          width="100"
+        />
+
+        <div class="d-flex flex-col gap-20 m-t-16">
+          <div>
+            <h4 mat-card-title>
+              {{ customer.razonsocial }}
+            </h4>
+            <span class="f-s-12">{{ customer.direccion }}</span>
+          </div>
+          <div class="d-flex gap-8 justify-content-center">
+            <button
+              mat-flat-button
+              color="primary"
+              (click)="goToCompras(customer)"
+            >
+              Compras
+            </button>
+            <button mat-flat-button class="bg-secondary text-white">
+              Ventas
+            </button>
+          </div>
+          <span class="f-s-14"> {{ customer.direccion }}</span>
+          <span class="f-s-14"> Mo: {{ customer.numero }}</span>
+        </div>
+      </mat-card-content>
+      <mat-divider></mat-divider>
+    </mat-card>
+  </div>
+  }
+
+  <p class="text-center" *ngIf="customers().length === 0">
+    No hay clientes disponibles.
+  </p>
+
+  <div class="col-12 mt-4">
+    <mat-paginator
+      [length]="this.totalItems()"
+      [pageSize]="this.pageSize"
+      [pageSizeOptions]="[5, 10, 25]"
+      (page)="onPageChange($event)"
+      aria-label="Select page"
+    >
+    </mat-paginator>
+  </div>
+</div>

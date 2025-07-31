@@ -1,0 +1,83 @@
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    @if( invoice()) {
+    <span>
+      <form #invoiceForm="ngForm">
+        <div class="row m-b-24">
+          <div class="col-sm-4 d-flex align-items-center">
+            <h4 class="f-s-14 f-s-18 f-w-600">
+              #
+              <span name="id" [(ngModel)]="invoice().id" ngDefaultControl>
+                {{ invoice().id }}</span
+              >
+            </h4>
+          </div>
+          <div class="col-sm-8 text-right">
+            <a
+              routerLink="/apps/invoice"
+              mat-flat-button
+              class="bg-error text-white m-r-10"
+            >
+              Cancelar
+            </a>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="row m-y-24 p-t-24">
+          <div class="col-sm-6">
+            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Oficina</mat-label>
+            <mat-form-field appearance="outline" class="w-100" color="primary">
+              <input
+                matInput
+                placeholder="Bill From"
+                name="from"
+                [(ngModel)]="invoice().billFrom"
+              />
+            </mat-form-field>
+          </div>
+          <div class="col-sm-6">
+            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Firma</mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input
+                matInput
+                placeholder="Bill To"
+                name="to"
+                [(ngModel)]="invoice().billTo"
+              />
+            </mat-form-field>
+          </div>
+          
+          <mat-card class="cardWithShadow">
+            <mat-card-content>
+              <mat-card-title>Recent Transactions</mat-card-title>
+
+              <div class="timeline m-t-24">
+                <div
+                  class="timeline-item d-flex overflow-hidden"
+                  *ngFor="let stat of stats; trackBy: trackByFn"
+                >
+                  <div class="time text-right f-s-14">{{ stat.time }}</div>
+                  <div class="point d-flex align-items-center">
+                    <span
+                      class="timeline-badge border-{{ stat.color }} m-y-8"
+                    ></span>
+                    <span class="timline-border d-block"></span>
+                  </div>
+                  <div class="desc">
+                    <span class="f-s-14 lh-20">{{ stat.subtext }}</span>
+                    <span class="f-s-14 lh-20 f-w-600 d-block">{{
+                      stat.title
+                    }}</span>
+                  </div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </form>
+    </span>
+    }
+  </mat-card-content>
+</mat-card>

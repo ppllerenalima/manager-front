@@ -1,0 +1,198 @@
+<mat-card class="cardWithShadow overflow-hidden position-relative">
+  <!-- ------------------------------------------------------ -->
+  <!-- Desktop App -->
+  <!-- ------------------------------------------------------ -->
+
+  <div class="bg-primary text-white p-10 d-block d-lg-none">
+    <!-- ------------------------------------------------------ -->
+    <!-- Toggle mobile -->
+    <!-- ------------------------------------------------------ -->
+    <button class="text-white" mat-icon-button>
+      <mat-icon>short_text</mat-icon>
+    </button>
+  </div>
+
+  <mat-sidenav-container class="email-box">
+    <!-- ------------------------------------------------------ -->
+    <!-- Sidebar contact -->
+    <!-- ------------------------------------------------------ -->
+    <mat-sidenav
+      #mailnav
+      [mode]="isOver() ? 'over' : 'side'"
+      [opened]="!isOver()"
+      class="mail-sidebar"
+    >
+      <div class="p-16">
+        <button
+          mat-flat-button
+          (click)="onSearchCompras()"
+          [disabled]="isLoading()"
+          color="primary"
+          class="w-100 btn-block"
+        >
+          {{ isLoading() ? 'Buscando...' : 'Búsqueda' }}
+        </button>
+      </div>
+      <ng-scrollbar
+        style="height: calc(100vh - 380px)"
+        class="position-relative"
+      >
+        <div class="p-16">
+          <div class="flex gap-10">
+            <!-- Select de Año -->
+            <mat-form-field appearance="fill" class="w-50">
+              <mat-label>Año</mat-label>
+              <mat-select [(value)]="selectedYear">
+                <mat-option *ngFor="let year of years" [value]="year">
+                  {{ year }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <!-- Select de Mes -->
+            <mat-form-field appearance="fill" class="w-50">
+              <mat-label>Mes</mat-label>
+              <mat-select [(value)]="selectedMonth">
+                <mat-option *ngFor="let month of months" [value]="month.value">
+                  {{ month.name }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <mat-divider></mat-divider>
+          <br />
+          <div class="p-16 bg-light-primary rounded">
+            <h5 class="f-s-14 text-primary d-flex align-items-center f-w-600">
+              <i-tabler
+                name="info-circle"
+                class="icon-20 m-r-8 d-flex"
+              ></i-tabler
+              >Person Info
+            </h5>
+          </div>
+        </div>
+      </ng-scrollbar>
+    </mat-sidenav>
+
+    <mat-sidenav-content>
+      <!-- ------------------------------------------------------ -->
+      <!-- contact Listing and Details-->
+      <!-- ------------------------------------------------------ -->
+      <div class="p-x-15 w-100 h-100">
+        <div class="row h-100">
+          <!-- ------------------------------------------------------ -->
+          <!-- Listing -->
+          <!-- ------------------------------------------------------ -->
+          <div class="col-md-4 b-r-1 p-0">
+            <div class="p-20 d-flex align-items-center">
+              <mat-form-field appearance="outline" class="w-100 hide-hint">
+                <input
+                  matInput
+                  #buscador
+                  placeholder="Buscar C/Pago"
+                  (input)="searchTerm.set(buscador.value)"
+                />
+                <mat-icon matSuffix>
+                  <i-tabler
+                    name="search"
+                    class="icon-18 d-flex m-t-4"
+                  ></i-tabler>
+                </mat-icon>
+              </mat-form-field>
+            </div>
+            <ng-scrollbar
+              style="height: calc(100vh - 380px)"
+              class="position-relative"
+            >
+              @if (filteredRegistros().length > 0) {
+              <div class="position-relative">
+                <mat-nav-list class="p-x-8 contact-listing">
+                  @for (registro of filteredRegistros(); track registro.numero)
+                  {
+                  <mat-list-item
+                    (click)="selectComprobante(registro)"
+                    class="gap-10 m-b-2"
+                  >
+                    <div
+                      class="d-flex align-items-center justify-content-between w-100"
+                      matListItemTitle
+                    >
+                      <h6 class="f-w-600 f-s-14 lh-sm">
+                        {{ registro.nombreProveedor }}
+                      </h6>
+                      <div class="d-flex justify-content-center gap-8 m-l-auto">
+                        <!-- star icon -->
+                        <span class="d-flex align-items-center gap-8">
+                          <i-tabler
+                            name="star"
+                            class="icon-16 fill-warning"
+                          ></i-tabler>
+                        </span>
+                        <!-- Delete Icon -->
+                        <i-tabler
+                          name="trash"
+                          class="icon-16 cursor-pointer"
+                        ></i-tabler>
+                      </div>
+                    </div>
+                    <p class="f-s-12 m-0" matListItemLine>
+                      {{ registro.serie }} - {{ registro.numero }} &nbsp;•&nbsp;
+                      <strong>TOTAL:</strong> {{ registro.total }}
+                    </p>
+                  </mat-list-item>
+                  }
+                </mat-nav-list>
+              </div>
+              } @else {
+              <div
+                class="p-15 bg-light-primary text-primary rounded m-x-20 text-center"
+              >
+                <span class="f-s-14"
+                  >{{ error() || "No se encontraron registros." }}.</span
+                >
+              </div>
+              }
+            </ng-scrollbar>
+          </div>
+
+          <!-- ------------------------------------------------------ -->
+          <!-- Details of contacts -->
+          <!-- ------------------------------------------------------ -->
+          <div
+            [ngClass]="{
+              'col-md-8 detail-part contact-detail-part p-0': true,
+              activeComprobante: isActiveComprobante
+            }"
+          >
+            @if(selectedComprobante() == null) {
+            <div
+              class="d-flex justify-content-center align-items-center h-100 w-100"
+            >
+              <div class="text-center">
+                <img
+                  src="/assets/images/backgrounds/errorimg.svg"
+                  alt="Seleccione un comprobante"
+                  width="250"
+                  class="mb-4"
+                />
+
+                <h2 class="fw-bold">¡Opps!</h2>
+                <p class="fs-5 fw-semibold mb-3 text-danger">
+                  {{
+                    mensajeError() ??
+                      "Por favor, seleccione un Comprobante de Pago para continuar."
+                  }}
+                </p>
+              </div>
+            </div>
+            } @else{
+            <div class="w-100">
+              <app-invoice-view></app-invoice-view>
+            </div>
+            }
+          </div>
+        </div>
+      </div>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</mat-card>

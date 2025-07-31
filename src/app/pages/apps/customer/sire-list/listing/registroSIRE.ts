@@ -1,0 +1,44 @@
+export interface registroSIRE {
+  ruc?: string;
+  razonSocial?: string;
+  periodo?: string;
+  carSunat?: string;
+  fechaEmision?: string;
+  fechaVencimiento?: string;
+  tipoComprobante?: string;
+  serie?: string;
+  anio?: string;
+  numero?: string;
+  numeroFinalRango?: string;
+  tipoDocIdentidad?: string;
+  numeroDocIdentidad?: string;
+  nombreProveedor?: string;
+  biGravadoDG?: number;
+  igvDG?: number;
+  biGravadoDGNG?: number;
+  igvDGNG?: number;
+  biGravadoDNG?: number;
+  igvDNG?: number;
+  valorAdqNG?: number;
+  isc?: number;
+  icbper?: number;
+  otrosTributos?: number;
+  total?: number;
+  moneda?: string;
+  tipoCambio?: number;
+  fechaEmisionMod?: string;
+  tipoCPMod?: string;
+  serieCPMod?: string;
+  codDam?: string;
+  numeroCPMod?: string;
+  clasificacion?: string;
+  idProyecto?: string;
+  porcPart?: number;
+  imb?: number;
+  carOrigen?: string;
+  detraccion?: string;
+  tipoNota?: string;
+  estadoComprobante?: string;
+  incal?: string;
+  clus?: string[]; // 39 campos: clu1 to clu39
+}

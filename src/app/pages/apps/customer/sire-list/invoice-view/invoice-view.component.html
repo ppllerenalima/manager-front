@@ -1,0 +1,148 @@
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    @if (selectedStatus()) {
+    <span>
+      <div class="row m-b-24">
+        <div class="col-sm-4 d-flex align-items-center">
+          <h4 class="f-s-14 f-s-18 f-w-600">#{{ invoice()?.ID }}</h4>
+        </div>
+        <div class="col-sm-8 text-right">
+          <a routerLink="/apps/invoice" mat-stroked-button class="m-r-10">
+            Back to Invoice
+          </a>
+
+          <a
+            [routerLink]="['/apps/editinvoice/', invoice()?.ID]"
+            mat-flat-button
+            >Descargar PDF</a
+          >
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="row p-y-24">
+        <div class="col-sm-6">
+          <span class="f-w-600 f-s-15"> Order Status: </span>
+          <h6 class="m-t-5 m-b-0 f-w-500 f-s-14">
+            {{ invoice()?.status || "Pending" }}
+          </h6>
+        </div>
+        <div class="col-sm-6 text-right">
+          <span class="f-w-600 f-s-15"> Issue Date: </span>
+          <h6 class="m-t-5 m-b-0 f-w-500 f-s-14">
+            {{ invoice()?.IssueDate | date : "fullDate" }}
+          </h6>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="row p-y-24">
+        <div class="col-sm-6">
+          <span class="f-w-600 f-s-15"> Bill From: </span>
+          <h6 class="m-t-5 m-b-0 f-w-500 f-s-14">
+            {{ invoice()?.Supplier?.Name }}
+          </h6>
+          <h6 class="m-t-5 m-b-0 f-w-500 f-s-14">
+            RUC: {{ invoice()?.Supplier?.ID }}
+          </h6>
+        </div>
+        <div class="col-sm-6 text-right">
+          <span class="f-w-600 f-s-15"> Bill To: </span>
+          <h6 class="m-t-5 m-b-0 f-w-500 f-s-14">
+            {{ invoice()?.Customer?.Name || "No especificado" }}
+          </h6>
+          <h6 class="m-t-5 m-b-0 f-w-500 f-s-14">
+            RUC: {{ invoice()?.Customer?.ID }}
+          </h6>
+        </div>
+      </div>
+
+      <div class="b-1 table-responsive">
+        <table
+          mat-table
+          [dataSource]="invoice()?.InvoiceLines || []"
+          class="no-wrap v-middle"
+        >
+          <!-- Descripción -->
+          <ng-container matColumnDef="Description">
+            <th mat-header-cell *matHeaderCellDef class="f-s-15 f-w-600">
+              Item Name
+            </th>
+            <td class="font-normal" mat-cell *matCellDef="let element">
+              {{ element.Description }}
+            </td>
+          </ng-container>
+
+          <!-- Precio Unitario -->
+          <ng-container matColumnDef="UnitPrice">
+            <th mat-header-cell *matHeaderCellDef class="f-s-15 f-w-600">
+              Unit Price
+            </th>
+            <td class="font-normal" mat-cell *matCellDef="let element">
+              {{ element.UnitPrice | number : "1.2-2" }}
+            </td>
+          </ng-container>
+
+          <!-- Cantidad -->
+          <ng-container matColumnDef="Quantity">
+            <th mat-header-cell *matHeaderCellDef class="f-s-15 f-w-600">
+              Quantity
+            </th>
+            <td class="font-normal" mat-cell *matCellDef="let element">
+              {{ element.Quantity }}
+            </td>
+          </ng-container>
+
+          <!-- Subtotal -->
+          <ng-container matColumnDef="LineExtensionAmount">
+            <th mat-header-cell *matHeaderCellDef class="f-s-15 f-w-600">
+              Total Cost
+            </th>
+            <td class="font-normal" mat-cell *matCellDef="let element">
+              {{ element.LineExtensionAmount | number : "1.2-2" }}
+            </td>
+          </ng-container>
+
+          <tr
+            mat-header-row
+            *matHeaderRowDef="[
+              'Description',
+              'UnitPrice',
+              'Quantity',
+              'LineExtensionAmount'
+            ]"
+          ></tr>
+          <tr
+            mat-row
+            *matRowDef="
+              let row;
+              columns: [
+                'Description',
+                'UnitPrice',
+                'Quantity',
+                'LineExtensionAmount'
+              ]
+            "
+          ></tr>
+        </table>
+      </div>
+
+      <div class="text-right m-t-30">
+        <h5 class="m-b-5 f-w-600 f-s-16">
+          Sub total: {{ getSubtotal() | number : "1.2-2" }}
+        </h5>
+        <span class="f-w-600 f-s-16"
+          >VAT (IGV):
+          {{ invoice()?.TaxTotal?.TaxAmount | number : "1.2-2" }}</span
+        >
+        <h3 class="m-b-0 b-t-1 p-t-20 f-s-18 m-t-24">
+          Grand Total:
+          {{ invoice()?.LegalMonetaryTotal?.PayableAmount | number : "1.2-2" }}
+        </h3>
+      </div>
+    </span>
+    }
+  </mat-card-content>
+</mat-card>

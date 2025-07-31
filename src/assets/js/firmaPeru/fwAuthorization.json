@@ -1,0 +1,5 @@
+{
+  "client_id": "3zS5GHTrgKlMOPA15fuZiT8GQA7gvywG",
+  "client_secret": "5JkERiYBQcPShNMgKXtQ0w9wwfNyLZ5CbKP",
+  "token_url": "https://apps.firmaperu.gob.pe/admin/api/security/generate-token"
+}
