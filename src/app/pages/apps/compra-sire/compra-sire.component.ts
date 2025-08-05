@@ -32,6 +32,7 @@ import { FileUtils } from 'src/app/shared/utils/FileUtils';
 import { InvoiceService } from 'src/app/services/apps/invoice-view/invoice-view.service';
 import { InvoiceViewComponent } from '../invoice-view/invoice-view.component';
 import { ConsultaCpeRequest } from '../invoice-view/Models/Requests/ConsultaCpeRequest';
+import { ArchivoReporteRequest } from './Models/Requests/ArchivoReporteRequest';
 
 @Component({
   selector: 'app-compra-sire',
@@ -97,7 +98,7 @@ export class AppCompraSireComponent implements OnInit {
     { value: 12, name: 'Diciembre' },
   ];
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(private route: ActivatedRoute) { }
 
   /** Inicializa el componente obteniendo el ID del cliente desde la ruta */
   ngOnInit(): void {
@@ -118,7 +119,10 @@ export class AppCompraSireComponent implements OnInit {
 
   /** Busca las compras de SIRE usando los filtros seleccionados */
   onSearchCompras(): void {
+    // 1️⃣ Reiniciar estados
     this.error.set(null);
+    this.registros.set([]);
+    this.selectedComprobante.set(null);
     this.isLoading.set(true);
 
     const perTributario = `${this.selectedYear}${this.selectedMonth
@@ -126,81 +130,89 @@ export class AppCompraSireComponent implements OnInit {
       .padStart(2, '0')}`;
     console.log('📅 Período tributario:', perTributario);
 
-    // Flujo reactivo: obtiene token, luego ticket, luego archivo, luego procesa el zip
-    this.tokenService
-      .getActiveToken(this.clienteId)
-      .pipe(
-        tap((token) => {
-          console.log('🔑 Token obtenido');
-          this.token = token;
-        }),
-        switchMap((token) => {
-          const request: GetTicketRequest = {
-            clienteId: this.clienteId,
-            perTributario,
-            accessToken: token,
-          };
-          return this.ticketService.getActiveTicket(request);
-        }),
-        tap((ticket) => console.log('🎫 Ticket obtenido:', ticket)),
-        switchMap((ticket) => this.descargarArchivoReporte(ticket)),
-        tap(({ blob }) => {
-          console.log('📦 Archivo descargado');
-          this.procesarArchivoZip(blob);
-        }),
-        catchError((err) => {
-          console.error('❌ Error:', err);
-          this.registros.set([]);
-          this.error.set(this.obtenerMensajeError(err));
-          return of(null);
-        }),
-        finalize(() => this.isLoading.set(false))
-      )
-      .subscribe();
-  }
-
-  /** Descarga el archivo reporte de SIRE usando el ticket obtenido */
-  private descargarArchivoReporte(
-    ticket: any
-  ): Observable<{ blob: Blob; nombre: string }> {
-    const request = {
-      token: this.token!,
-      nomArchivoReporte: ticket.nomArchivoReporte,
-      codTipoArchivoReporte: ticket.codTipoAchivoReporte ?? '00',
-      perTributario: ticket.perTributario,
-      codProceso: ticket.codProceso,
-      numTicket: ticket.numTicket,
+    const request: ArchivoReporteRequest = {
+      clienteId: this.clienteId,
+      perTributario: perTributario,
     };
 
-    return this.sireService
-      .descargarArchivoReporte(request)
-      .pipe(map((blob) => ({ blob, nombre: ticket.nomArchivoReporte })));
+    this.sireService.descargarArchivoReporte(request)
+      .pipe(finalize(() => this.isLoading.set(false))) // 2️⃣ Quita loading al terminar
+      .subscribe({
+        next: (blob: Blob) => {
+          // 3️⃣ Procesar ZIP si todo sale bien
+          this.procesarArchivoZip(blob);
+        },
+        error: (err) => {
+          // 4️⃣ Manejar errores reales del backend
+          this.manejarErrorDescarga(err);
+        }
+      });
   }
 
-  /** Procesa el ZIP descargado, busca el .txt y mapea a objetos registroSIRE */
+  /** Procesa el ZIP descargado, mapeando líneas a registros */
   private procesarArchivoZip(blob: Blob): void {
     const reader = new FileReader();
 
     reader.onload = () => {
       const arrayBuffer = reader.result as ArrayBuffer;
       const archivos = unzipSync(new Uint8Array(arrayBuffer));
-      const txtFile = Object.keys(archivos).find((key) => key.endsWith('.txt'));
 
+      const txtFile = Object.keys(archivos).find((key) => key.endsWith('.txt'));
       if (!txtFile) {
-        this.error.set('No se encontró un archivo .txt dentro del ZIP.');
+        this.error.set('El ZIP no contiene un archivo .txt válido.');
         return;
       }
 
       const contenido = strFromU8(archivos[txtFile]);
-      const lineas = contenido
+      const registros = contenido
         .split('\n')
-        .filter((linea) => linea.trim() !== '');
+        .map(linea => linea.trim())
+        .filter(linea => linea !== '')
+        .slice(1) // 🔹 Ignora la primera fila (encabezados)
+        .map(this.mapLineaARegistro);
 
-      const registros = lineas.map(this.mapLineaARegistro);
+      if (registros.length === 0) {
+        this.error.set('El archivo no contiene registros válidos.');
+        return;
+      }
+
       this.registros.set(registros);
     };
 
+    reader.onerror = () => {
+      this.error.set('Error al leer el archivo ZIP.');
+    };
+
     reader.readAsArrayBuffer(blob);
+  }
+
+  /** Muestra mensaje de error real desde backend si existe */
+  private async manejarErrorDescarga(err: any): Promise<void> {
+    console.error('Error al descargar archivo:', err);
+
+    let mensaje = 'Ocurrió un error inesperado al descargar el archivo.';
+
+    try {
+      // 1️⃣ Blob (texto plano)
+      if (err.error instanceof Blob) {
+        mensaje = await err.error.text();
+      }
+      // 2️⃣ JSON con message
+      else if (err.error?.message) {
+        mensaje = err.error.message;
+      }
+      // 3️⃣ Texto plano
+      else if (typeof err.error === 'string') {
+        mensaje = err.error;
+      }
+    } catch (e) {
+      console.warn('No se pudo parsear el error, usando mensaje genérico.');
+    }
+
+    this.error.set(
+      mensaje || 'El archivo no está disponible todavía o ocurrió un error.'
+    );
+    this.registros.set([]); // 🔹 Limpia registros si hay error
   }
 
   /** Convierte una línea del TXT a un objeto registroSIRE */
@@ -216,13 +228,6 @@ export class AppCompraSireComponent implements OnInit {
       nombreProveedor: columnas[13],
       total: FileUtils.parseToNumber(columnas[24]),
     };
-  }
-
-  /** Obtiene un mensaje de error amigable desde un error HTTP */
-  private obtenerMensajeError(err: any): string {
-    return (
-      err?.error?.detalle || err.message || 'Error inesperado al obtener datos.'
-    );
   }
 
   /** Computed: Filtra los registros por término de búsqueda y serie seleccionada */
@@ -243,11 +248,8 @@ export class AppCompraSireComponent implements OnInit {
 
   /** Permite seleccionar un comprobante y consultar el detalle (descarga XML o ZIP) */
   selectComprobante(registro: registroSIRE): void {
-    if (!this.token || !registro.numero) {
-      this.mensajeError.set('⚠️ Token o número inválido.');
-      this.selectedComprobante.set(null);
-      return;
-    }
+    this.selectedComprobante.set(null); // el registro que ya tienes seleccionado
+    this.invoiceService.setSelectedComprobante(null);
 
     const numero = Number(registro.numero);
     if (isNaN(numero)) {
@@ -257,6 +259,8 @@ export class AppCompraSireComponent implements OnInit {
     }
 
     const request: ConsultaCpeRequest = {
+      clienteId: this.clienteId,
+
       rucEmisor: registro.numeroDocIdentidad ?? '',
       tipoComprobante: registro.tipoComprobante ?? '',
       serie: registro.serie ?? '',
@@ -267,7 +271,8 @@ export class AppCompraSireComponent implements OnInit {
     this.isLoading.set(true);
 
     this.invoiceService
-      .consultaCpeUnificado(this.token, request)
+      .consultaCpeUnificado(
+        request)
       .pipe(
         tap((resp) => {
           if (!resp) return;
@@ -275,13 +280,17 @@ export class AppCompraSireComponent implements OnInit {
           console.log('📥 Respuesta unificada:', resp);
 
           if (!resp.esExito) {
-            // Unificamos el mensaje de error
-            const primerError = resp.errores?.[0];
-            const mensaje = primerError
-              ? `${primerError.status} - ${primerError.message}`
+            // Filtrar solo errores que tengan mensaje
+            const mensajesErrores = resp.errores
+              ?.filter(e => e && e.message)             // Ignoramos objetos vacíos
+              .map(e => `${e.status ?? 'Error'} - ${e.message}`); // Formateamos
+
+            // Unir todos los mensajes en uno solo o usar mensaje genérico
+            const mensajeFinal = mensajesErrores?.length
+              ? mensajesErrores.join(' | ')
               : '📄 Error desconocido al obtener el comprobante.';
 
-            this.mensajeError.set(mensaje);
+            this.mensajeError.set(mensajeFinal);
             this.selectedComprobante.set(null);
             return;
           }
@@ -296,7 +305,6 @@ export class AppCompraSireComponent implements OnInit {
           }
 
           // Guardamos info adicional en el servicio
-          this.invoiceService.setToken(this.token!);
           this.invoiceService.setInfoComprobante({
             rucEmisor: request.rucEmisor,
             tipoComprobante: request.tipoComprobante,
@@ -304,11 +312,6 @@ export class AppCompraSireComponent implements OnInit {
             numero: request.numero,
             tipo: '01',
           });
-
-          // // 🔹 Si quieres descargar automáticamente el archivo
-          // if (resp.archivo && resp.nombreArchivo) {
-          //   this.descargarArchivo(resp.archivo, resp.nombreArchivo);
-          // }
         }),
         catchError((err) => {
           console.error('❌ Error comprobante:', err);
@@ -319,49 +322,5 @@ export class AppCompraSireComponent implements OnInit {
         finalize(() => this.isLoading.set(false))
       )
       .subscribe();
-
-    // this.invoiceService
-    //   .controlCpeConsultaXml(this.token, request)
-    //   .pipe(
-    //     tap((resp) => {
-    //       if (!resp) return;
-
-    //       console.log('📥 Respuesta comprobante:', resp);
-
-    //       if (!resp.esExito) {
-    //         let mensaje = '📄 Error desconocido al obtener el comprobante.';
-    //         try {
-    //           const errorInterno = JSON.parse(resp.errores?.[0]?.msg ?? '{}');
-    //           mensaje = errorInterno.errors?.[0]?.desError ?? mensaje;
-    //         } catch (e) {
-    //           console.error('❌ Error parseando error interno:', e);
-    //         }
-    //         this.mensajeError.set(mensaje);
-    //         this.selectedComprobante.set(null);
-    //         return;
-    //       }
-
-    //       this.mensajeError.set(null);
-    //       this.selectedComprobante.set(registro);
-    //       this.invoiceService.setSelectedComprobante(resp.archivo);
-
-    //       this.invoiceService.setToken(this.token!);
-    //       this.invoiceService.setInfoComprobante({
-    //         rucEmisor: request.rucEmisor,
-    //         tipoComprobante: request.tipoComprobante,
-    //         serie: request.serie,
-    //         numero: request.numero,
-    //         tipo: '01',
-    //       });
-    //     }),
-    //     catchError((err) => {
-    //       console.error('❌ Error comprobante:', err);
-    //       this.mensajeError.set('Error al consultar el comprobante.');
-    //       this.selectedComprobante.set(null);
-    //       return of(null);
-    //     }),
-    //     finalize(() => this.isLoading.set(false))
-    //   )
-    //   .subscribe();
   }
 }

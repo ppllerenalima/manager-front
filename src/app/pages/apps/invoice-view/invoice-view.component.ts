@@ -56,12 +56,14 @@ export class InvoiceViewComponent implements OnInit {
   // Inyección del servicio InvoiceService
   invoiceService = inject(InvoiceService);
 
-  constructor() {}
+  constructor() { }
 
   ngOnInit(): void {
     // Nos suscribimos al observable del servicio para recibir el comprobante seleccionado
     this.invoiceService.selectedComprobante$.subscribe(
       (comprobanteBase64Zip) => {
+        console.log('comprobanteBase64Zip')
+
         this.comprobante = comprobanteBase64Zip;
         this.procesarComprobante(comprobanteBase64Zip);
       }
@@ -113,15 +115,14 @@ export class InvoiceViewComponent implements OnInit {
     console.log('Descargar XML desde base64 en JSON');
 
     const infoComprobante = this.invoiceService.getInfoComprobante();
-    const token = this.invoiceService.getToken();
 
-    if (!infoComprobante || !token) {
+    if (!infoComprobante) {
       console.warn('Faltan datos para continuar');
       return;
     }
 
     this.invoiceService
-      .consultaCpeComprobante(token, infoComprobante)
+      .consultaCpeComprobante(infoComprobante)
       .subscribe({
         next: async (response) => {
           console.log('(comprobanteTipoZip) response', response);
@@ -169,30 +170,4 @@ export class InvoiceViewComponent implements OnInit {
         },
       });
   }
-
-  // descargarPdf() {
-  //   console.log('Descargar ZIP presionado');
-
-  //   const infoComprobante = this.invoiceService.getInfoComprobante();
-  //   const token = this.invoiceService.getToken();
-
-  //   if (!infoComprobante || !token) {
-  //     console.warn('Faltan datos para descargar el ZIP');
-  //     return;
-  //   }
-
-  //   this.invoiceService.comprobanteTipoZip(token, infoComprobante).subscribe(blob => {
-  //     const url = window.URL.createObjectURL(blob);
-  //     const a = document.createElement('a');
-
-  //     // Nombre sugerido del archivo ZIP
-  //     const nombreArchivoZip = `${infoComprobante.serie}-${infoComprobante.numero}.zip`;
-
-  //     a.href = url;
-  //     a.download = nombreArchivoZip;
-  //     a.click();
-
-  //     window.URL.revokeObjectURL(url);
-  //   });
-  // }
 }

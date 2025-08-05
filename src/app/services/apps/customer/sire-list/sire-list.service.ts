@@ -1,6 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { ArchivoReporteRequest } from 'src/app/pages/apps/compra-sire/Models/Requests/ArchivoReporteRequest';
 
 export interface AceptarPropuestaRequest {
   accessToken: string;
@@ -33,16 +34,6 @@ export interface ConsultarEstadoTicketRequest {
   numTicket?: string;
 }
 
-export interface DescargarArchivoReporteRequest {
-  token: string;
-  nomArchivoReporte: string;
-  codTipoArchivoReporte: string;
-  codLibro?: string;
-  perTributario: string;
-  codProceso: string;
-  numTicket: string;
-}
-
 @Injectable({
   providedIn: 'root'
 })
@@ -68,9 +59,9 @@ export class SireService {
     return this.http.post(`${this.baseUrl}/consultar-estado-ticket`, request);
   }
 
-  descargarArchivoReporte(request: DescargarArchivoReporteRequest): Observable<Blob> {
+  descargarArchivoReporte(request: ArchivoReporteRequest): Observable<Blob> {
     return this.http.post(`${this.baseUrl}/descargar-archivo`, request, {
-      responseType: 'blob'
+      responseType: 'blob'  // 🔹 clave para recibir archivos binarios
     });
   }
 }

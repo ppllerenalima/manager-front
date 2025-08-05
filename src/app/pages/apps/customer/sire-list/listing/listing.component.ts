@@ -149,57 +149,57 @@ export class AppListingComponent implements OnInit {
 
     console.log('perTributario', perTributario);
 
-    this.tokenService
-      .getActiveToken(this.clienteId)
-      .pipe(
-        tap((token) => {
-          console.log('✅ Token obtenido');
-          this.token = token;
-        }),
-        switchMap((token) => {
-          const request: GetTicketRequest = {
-            clienteId: this.clienteId,
-            perTributario,
-            accessToken: token,
-          };
-          return this.ticketService.getActiveTicket(request);
-        }),
-        tap((ticket) => {
-          console.log('✅ Ticket obtenido:', ticket);
-        }),
-        switchMap((ticket) => this.descargarArchivoReporte(ticket)),
-        tap(({ blob, nombre }) => {
-          console.log('✅ Archivo descargado');
-          // this.descargarArchivo(blob, nombre);
-          this.procesarArchivoZip(blob);
-        }),
-        catchError((err) => {
-          console.error('❌ Error:', err);
-          this.registros.set([]);
-          this.error.set(this.obtenerMensajeError(err));
-          return of(null);
-        }),
-        finalize(() => this.isLoading.set(false))
-      )
-      .subscribe();
+    // this.tokenService
+    //   .getActiveToken(this.clienteId)
+    //   .pipe(
+    //     tap((token) => {
+    //       console.log('✅ Token obtenido');
+    //       this.token = token;
+    //     }),
+    //     switchMap((token) => {
+    //       const request: GetTicketRequest = {
+    //         clienteId: this.clienteId,
+    //         perTributario,
+    //         accessToken: token,
+    //       };
+    //       return this.ticketService.getActiveTicket(request);
+    //     }),
+    //     tap((ticket) => {
+    //       console.log('✅ Ticket obtenido:', ticket);
+    //     }),
+    //     switchMap((ticket) => this.descargarArchivoReporte(ticket)),
+    //     tap(({ blob, nombre }) => {
+    //       console.log('✅ Archivo descargado');
+    //       // this.descargarArchivo(blob, nombre);
+    //       this.procesarArchivoZip(blob);
+    //     }),
+    //     catchError((err) => {
+    //       console.error('❌ Error:', err);
+    //       this.registros.set([]);
+    //       this.error.set(this.obtenerMensajeError(err));
+    //       return of(null);
+    //     }),
+    //     finalize(() => this.isLoading.set(false))
+    //   )
+    //   .subscribe();
   }
 
-  private descargarArchivoReporte(
-    ticket: any
-  ): Observable<{ blob: Blob; nombre: string }> {
-    const request = {
-      token: this.token!,
-      nomArchivoReporte: ticket.nomArchivoReporte,
-      codTipoArchivoReporte: ticket.codTipoAchivoReporte ?? '00',
-      perTributario: ticket.perTributario,
-      codProceso: ticket.codProceso,
-      numTicket: ticket.numTicket,
-    };
+  // private descargarArchivoReporte(
+  //   ticket: any
+  // ): Observable<{ blob: Blob; nombre: string }> {
+  //   const request = {
+  //     token: this.token!,
+  //     nomArchivoReporte: ticket.nomArchivoReporte,
+  //     codTipoArchivoReporte: ticket.codTipoAchivoReporte ?? '00',
+  //     perTributario: ticket.perTributario,
+  //     codProceso: ticket.codProceso,
+  //     numTicket: ticket.numTicket,
+  //   };
 
-    return this.sireService
-      .descargarArchivoReporte(request)
-      .pipe(map((blob) => ({ blob, nombre: ticket.nomArchivoReporte })));
-  }
+  //   return this.sireService
+  //     .descargarArchivoReporte(request)
+  //     .pipe(map((blob) => ({ blob, nombre: ticket.nomArchivoReporte })));
+  // }
 
   private obtenerMensajeError(err: any): string {
     return err?.error?.detalle || err.message || 'Error inesperado';

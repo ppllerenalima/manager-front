@@ -47,7 +47,7 @@ export class InvoiceService {
   private tokenSubject = new BehaviorSubject<string | null>(null);
   token$ = this.tokenSubject.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   setSelectedComprobante(comprobante: any): void {
     this.selectedComprobanteSubject.next(comprobante);
@@ -63,14 +63,6 @@ export class InvoiceService {
 
   getInfoComprobante(): ConsultaCpeArchivoRequest | null {
     return this.infoComprobanteSubject.getValue();
-  }
-
-  setToken(token: string) {
-    this.tokenSubject.next(token);
-  }
-
-  getToken(): string | null {
-    return this.tokenSubject.getValue();
   }
 
   statusCdr(request: ConsultarCpeRequest): Observable<any> {
@@ -93,32 +85,21 @@ export class InvoiceService {
   }
 
   consultaCpeComprobante(
-    token: string,
     request: ConsultaCpeArchivoRequest
   ): Observable<ConsultaCpeComprobanteResponse> {
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`,
-    });
-
     return this.http.post<ConsultaCpeComprobanteResponse>(
       `${this.baseUrl}/consultacpe-comprobante`,
-      request,
-      { headers }
+      request
     );
   }
 
   consultaCpeUnificado(
-    token: string,
     request: ConsultaCpeRequest
   ): Observable<ConsultaCpeUnificadoResponse> {
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`,
-    });
 
     return this.http.post<ConsultaCpeUnificadoResponse>(
       `${this.baseUrl}/consultacpe-unificado`,
-      request,
-      { headers }
+      request
     );
   }
 }
