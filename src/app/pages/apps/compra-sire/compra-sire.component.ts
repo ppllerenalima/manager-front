@@ -14,14 +14,13 @@ import { TablerIconsModule } from 'angular-tabler-icons';
 import { NgScrollbarModule } from 'ngx-scrollbar';
 import {
   catchError,
+  filter,
   finalize,
-  map,
-  Observable,
   of,
-  switchMap,
+  Subject,
+  takeUntil,
   tap,
 } from 'rxjs';
-import { GetTicketRequest } from 'src/app/core/models/get-ticket-request.model';
 import { MaterialModule } from 'src/app/material.module';
 import { SireService } from 'src/app/services/apps/customer/sire-list/sire-list.service';
 import { Ticket2Service } from 'src/app/services/apps/ticket/ticket2.service';
@@ -52,36 +51,49 @@ import { ArchivoReporteRequest } from './Models/Requests/ArchivoReporteRequest';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppCompraSireComponent implements OnInit {
-  /** Propiedades básicas */
+  /** ================================
+   * 📌 1. PROPIEDADES BÁSICAS
+   * ================================ */
   clienteId: string;
+  token: string | null = null;
 
   /** Estado de la UI */
-  token: string | null = null;
   error = signal<string | null>(null);
-  isLoading = signal(false);
   mensajeError = signal<string | null>(null);
-  isActiveComprobante: boolean = false;
+  isLoading = signal(false);
+  isActiveComprobante = false;
 
-  /** Filtros */
+  /** Control de suscripciones */
+  private destroy$ = new Subject<void>();
+
+  /** ================================
+   * 📌 2. FILTROS
+   * ================================ */
   searchTerm = signal<string>('');
   selectedSerie = signal<string>('');
   selectedYear: number;
   selectedMonth: number;
 
-  /** Datos obtenidos */
+  /** ================================
+   * 📌 3. DATOS OBTENIDOS
+   * ================================ */
   registros = signal<registroSIRE[]>([]);
   selectedComprobante = signal<registroSIRE | null>(null);
 
-  /** Responsive */
+  /** ================================
+   * 📌 4. RESPONSIVE
+   * ================================ */
   private mediaMatcher: MediaQueryList = matchMedia(`(max-width: 1199px)`);
 
-  /** Servicios */
-  private tokenService = inject(TokenService);
-  private ticketService = inject(Ticket2Service);
+  /** ================================
+   * 📌 5. SERVICIOS
+   * ================================ */
   private sireService = inject(SireService);
   private invoiceService = inject(InvoiceService);
 
-  /** Años y meses para filtros */
+  /** ================================
+   * 📌 6. DATOS DE APOYO
+   * ================================ */
   years: number[] = [];
   months = [
     { value: 1, name: 'Enero' },
@@ -98,28 +110,51 @@ export class AppCompraSireComponent implements OnInit {
     { value: 12, name: 'Diciembre' },
   ];
 
-  constructor(private route: ActivatedRoute) { }
+  constructor(private route: ActivatedRoute) {}
 
-  /** Inicializa el componente obteniendo el ID del cliente desde la ruta */
+  /** ================================
+   * 📌 7. INICIALIZACIÓN
+   * ================================ */
   ngOnInit(): void {
+    // Obtiene ID de cliente desde la URL
     this.clienteId = this.route.snapshot.paramMap.get('id')!;
+    console.log('🆔 ID del cliente:', this.clienteId);
 
+    // Inicializa años y mes actual
     const currentYear = new Date().getFullYear();
-
     this.years = Array.from({ length: 5 }, (_, i) => currentYear - i);
     this.selectedYear = currentYear;
     this.selectedMonth = new Date().getMonth() + 1;
-    console.log('🆔 ID del cliente:', this.clienteId);
+
+    // 🔹 Suscribirse a comprobantes emitidos por InvoiceService
+    this.invoiceService.selectedComprobante$
+      .pipe(
+        takeUntil(this.destroy$),
+        filter((val): val is string => !!val) // ignora null o undefined
+      )
+      .subscribe((comprobanteBase64Zip) => {
+        console.log('📦 Comprobante recibido');
+        this.procesarComprobante(comprobanteBase64Zip);
+      });
   }
 
-  /** Determina si está en modo responsive (pantalla pequeña) */
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  /** ================================
+   * 📌 8. RESPONSIVE
+   * ================================ */
   isOver(): boolean {
     return this.mediaMatcher.matches;
   }
 
-  /** Busca las compras de SIRE usando los filtros seleccionados */
+  /** ================================
+   * 📌 9. BÚSQUEDA DE COMPRAS
+   * ================================ */
   onSearchCompras(): void {
-    // 1️⃣ Reiniciar estados
+    // Reinicia estados
     this.error.set(null);
     this.registros.set([]);
     this.selectedComprobante.set(null);
@@ -132,24 +167,19 @@ export class AppCompraSireComponent implements OnInit {
 
     const request: ArchivoReporteRequest = {
       clienteId: this.clienteId,
-      perTributario: perTributario,
+      perTributario,
     };
 
-    this.sireService.descargarArchivoReporte(request)
-      .pipe(finalize(() => this.isLoading.set(false))) // 2️⃣ Quita loading al terminar
+    this.sireService
+      .descargarArchivoReporte(request)
+      .pipe(finalize(() => this.isLoading.set(false)))
       .subscribe({
-        next: (blob: Blob) => {
-          // 3️⃣ Procesar ZIP si todo sale bien
-          this.procesarArchivoZip(blob);
-        },
-        error: (err) => {
-          // 4️⃣ Manejar errores reales del backend
-          this.manejarErrorDescarga(err);
-        }
+        next: (blob: Blob) => this.procesarArchivoZip(blob),
+        error: (err) => this.manejarErrorDescarga(err),
       });
   }
 
-  /** Procesa el ZIP descargado, mapeando líneas a registros */
+  /** Procesa el ZIP descargado y llena registros */
   private procesarArchivoZip(blob: Blob): void {
     const reader = new FileReader();
 
@@ -166,9 +196,9 @@ export class AppCompraSireComponent implements OnInit {
       const contenido = strFromU8(archivos[txtFile]);
       const registros = contenido
         .split('\n')
-        .map(linea => linea.trim())
-        .filter(linea => linea !== '')
-        .slice(1) // 🔹 Ignora la primera fila (encabezados)
+        .map((linea) => linea.trim())
+        .filter((linea) => linea !== '')
+        .slice(1) // Ignora encabezados
         .map(this.mapLineaARegistro);
 
       if (registros.length === 0) {
@@ -179,43 +209,34 @@ export class AppCompraSireComponent implements OnInit {
       this.registros.set(registros);
     };
 
-    reader.onerror = () => {
-      this.error.set('Error al leer el archivo ZIP.');
-    };
-
+    reader.onerror = () => this.error.set('Error al leer el archivo ZIP.');
     reader.readAsArrayBuffer(blob);
   }
 
-  /** Muestra mensaje de error real desde backend si existe */
+  /** Maneja errores de descarga */
   private async manejarErrorDescarga(err: any): Promise<void> {
     console.error('Error al descargar archivo:', err);
-
     let mensaje = 'Ocurrió un error inesperado al descargar el archivo.';
 
     try {
-      // 1️⃣ Blob (texto plano)
       if (err.error instanceof Blob) {
         mensaje = await err.error.text();
-      }
-      // 2️⃣ JSON con message
-      else if (err.error?.message) {
+      } else if (err.error?.message) {
         mensaje = err.error.message;
-      }
-      // 3️⃣ Texto plano
-      else if (typeof err.error === 'string') {
+      } else if (typeof err.error === 'string') {
         mensaje = err.error;
       }
-    } catch (e) {
+    } catch {
       console.warn('No se pudo parsear el error, usando mensaje genérico.');
     }
 
     this.error.set(
       mensaje || 'El archivo no está disponible todavía o ocurrió un error.'
     );
-    this.registros.set([]); // 🔹 Limpia registros si hay error
+    this.registros.set([]);
   }
 
-  /** Convierte una línea del TXT a un objeto registroSIRE */
+  /** Convierte una línea del TXT a un registro */
   private mapLineaARegistro(linea: string): registroSIRE {
     const columnas = linea.split('|');
     return {
@@ -230,11 +251,10 @@ export class AppCompraSireComponent implements OnInit {
     };
   }
 
-  /** Computed: Filtra los registros por término de búsqueda y serie seleccionada */
+  /** Filtra registros según búsqueda y serie */
   filteredRegistros = computed(() => {
     const term = this.searchTerm().toLowerCase();
     const serie = this.selectedSerie();
-
     return this.registros().filter((r) => {
       const coincideBusqueda =
         r.nombreProveedor?.toLowerCase().includes(term) ||
@@ -246,21 +266,19 @@ export class AppCompraSireComponent implements OnInit {
     });
   });
 
-  /** Permite seleccionar un comprobante y consultar el detalle (descarga XML o ZIP) */
+  /** Selecciona un comprobante y lo consulta */
   selectComprobante(registro: registroSIRE): void {
-    this.selectedComprobante.set(null); // el registro que ya tienes seleccionado
+    this.selectedComprobante.set(null);
     this.invoiceService.setSelectedComprobante(null);
 
     const numero = Number(registro.numero);
     if (isNaN(numero)) {
       this.mensajeError.set(`⚠️ El número no es válido: ${registro.numero}`);
-      this.selectedComprobante.set(null);
       return;
     }
 
     const request: ConsultaCpeRequest = {
       clienteId: this.clienteId,
-
       rucEmisor: registro.numeroDocIdentidad ?? '',
       tipoComprobante: registro.tipoComprobante ?? '',
       serie: registro.serie ?? '',
@@ -271,56 +289,33 @@ export class AppCompraSireComponent implements OnInit {
     this.isLoading.set(true);
 
     this.invoiceService
-      .consultaCpeUnificado(
-        request)
-      .pipe(
-        tap((resp) => {
-          if (!resp) return;
-
-          console.log('📥 Respuesta unificada:', resp);
-
-          if (!resp.esExito) {
-            // Filtrar solo errores que tengan mensaje
-            const mensajesErrores = resp.errores
-              ?.filter(e => e && e.message)             // Ignoramos objetos vacíos
-              .map(e => `${e.status ?? 'Error'} - ${e.message}`); // Formateamos
-
-            // Unir todos los mensajes en uno solo o usar mensaje genérico
-            const mensajeFinal = mensajesErrores?.length
-              ? mensajesErrores.join(' | ')
-              : '📄 Error desconocido al obtener el comprobante.';
-
-            this.mensajeError.set(mensajeFinal);
-            this.selectedComprobante.set(null);
+      .consultaCpeUnificado(request)
+      .pipe(finalize(() => this.isLoading.set(false)))
+      .subscribe({
+        next: (resp) => {
+          if (!resp?.esExito) {
+            const mensajesErrores = resp?.errores
+              ?.filter((e) => e && e.message)
+              .map((e) => `${e.status ?? 'Error'} - ${e.message}`)
+              .join('\n');
+            this.mensajeError.set(mensajesErrores || 'Error desconocido.');
             return;
           }
 
-          // ✅ Si fue exitoso
-          this.mensajeError.set(null);
-          this.selectedComprobante.set(registro); // el registro que ya tienes seleccionado
-
-          // Guardar archivo en el servicio si quieres usarlo luego
-          if (resp.archivo) {
-            this.invoiceService.setSelectedComprobante(resp.archivo);
-          }
-
-          // Guardamos info adicional en el servicio
-          this.invoiceService.setInfoComprobante({
-            rucEmisor: request.rucEmisor,
-            tipoComprobante: request.tipoComprobante,
-            serie: request.serie,
-            numero: request.numero,
-            tipo: '01',
-          });
-        }),
-        catchError((err) => {
-          console.error('❌ Error comprobante:', err);
+          // Si es exitoso, setear comprobante seleccionado
+          this.selectedComprobante.set(registro);
+          this.invoiceService.setSelectedComprobante(resp?.archivo || null);
+        },
+        error: (err) => {
+          console.error('❌ Error al consultar CPE:', err);
           this.mensajeError.set('Error al consultar el comprobante.');
-          this.selectedComprobante.set(null);
-          return of(null);
-        }),
-        finalize(() => this.isLoading.set(false))
-      )
-      .subscribe();
+        },
+      });
+  }
+
+  /** Procesa el comprobante recibido en base64 desde InvoiceService */
+  private procesarComprobante(base64Zip: string): void {
+    console.log('📦 Procesando comprobante base64...');
+    // Aquí puedes implementar lógica para descomprimir el ZIP, mostrar detalle, etc.
   }
 }
