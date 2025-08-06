@@ -1,11 +1,13 @@
 import { Routes } from '@angular/router';
-import { BlankComponent } from './layouts/blank/blank.component';
+import { authGuard } from './guards/auth.guard';
 import { FullComponent } from './layouts/full/full.component';
+import { BlankComponent } from './layouts/blank/blank.component';
 
 export const routes: Routes = [
   {
     path: '',
     component: FullComponent,
+    canActivate: [authGuard], // 🔹 Aplica el guard a TODO este grupo
     children: [
       {
         path: '',
@@ -24,7 +26,6 @@ export const routes: Routes = [
             (m) => m.DashboardsRoutes
           ),
       },
-
       {
         path: 'forms',
         loadChildren: () =>

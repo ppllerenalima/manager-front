@@ -60,7 +60,8 @@
 
             <div class="or-border m-t-30">or sign in with</div>
 
-            <form class="m-t-30" [formGroup]="form" (ngSubmit)="submit()">
+            <form class="m-t-30" [formGroup]="form" (ngSubmit)="login()">
+              <!-- Username -->
               <mat-label class="f-s-14 f-w-600 m-b-12 d-block"
                 >Username</mat-label
               >
@@ -72,16 +73,16 @@
                 <input matInput formControlName="uname" />
                 @if(f['uname'].touched && f['uname'].invalid) {
                 <mat-hint class="m-b-16 error-msg">
-                  @if(f['uname'].errors && f['uname'].errors['required']) {
+                  @if(f['uname'].errors?.['required']) {
                   <div class="text-error">Name is required.</div>
-                  } @if(f['uname'].errors && f['uname'].errors['minlength']) {
-                  <div class="text-error">Name should be 6 character.</div>
+                  } @if(f['uname'].errors?.['minlength']) {
+                  <div class="text-error">Name should be 6 characters.</div>
                   }
                 </mat-hint>
                 }
               </mat-form-field>
 
-              <!-- password -->
+              <!-- Password -->
               <mat-label class="f-s-14 f-w-600 m-b-12 d-block"
                 >Password</mat-label
               >
@@ -93,14 +94,14 @@
                 <input matInput type="password" formControlName="password" />
                 @if(f['password'].touched && f['password'].invalid) {
                 <mat-hint class="m-b-16 error-msg">
-                  @if( f['password'].errors && f['password'].errors['required'])
-                  {
+                  @if(f['password'].errors?.['required']) {
                   <div class="text-error">Password is required.</div>
                   }
                 </mat-hint>
                 }
               </mat-form-field>
 
+              <!-- Remember device & Forgot Password -->
               <div class="d-flex align-items-center m-b-12">
                 <mat-checkbox color="primary"
                   >Remember this Device</mat-checkbox
@@ -108,19 +109,28 @@
                 <a
                   [routerLink]="['/authentication/side-forgot-pwd']"
                   class="text-primary f-w-600 text-decoration-none m-l-auto f-s-14"
-                  >Forgot Password ?</a
                 >
+                  Forgot Password ?
+                </a>
               </div>
+
+              <!-- Submit button -->
               <button
                 mat-flat-button
                 color="primary"
                 class="w-100"
                 [disabled]="!form.valid"
+                type="submit"
               >
-                Sign In
+                Iniciar Sessión
               </button>
-              <!-- input -->
+
+              <!-- Mensaje de error -->
+              <div *ngIf="errorMessage" class="text-error m-t-12">
+                {{ errorMessage }}
+              </div>
             </form>
+
             <span class="d-block f-w-500 d-block m-t-24"
               >New to Modernize?
               <a

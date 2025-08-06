@@ -4,28 +4,44 @@ import { FormGroup, FormControl, Validators, FormsModule, ReactiveFormsModule } 
 import { Router, RouterModule } from '@angular/router';
 import { MaterialModule } from '../../../material.module';
 import { BrandingComponent } from '../../../layouts/full/vertical/sidebar/branding.component';
+import { AuthService, SignInRequest } from 'src/app/services/authentication/Auth.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
-    selector: 'app-side-login',
-    imports: [RouterModule, MaterialModule, FormsModule, ReactiveFormsModule, BrandingComponent],
-    templateUrl: './side-login.component.html'
+  selector: 'app-side-login',
+  imports: [RouterModule, MaterialModule, FormsModule, ReactiveFormsModule, BrandingComponent, CommonModule],
+  templateUrl: './side-login.component.html'
 })
 export class AppSideLoginComponent {
   options = this.settings.getOptions();
-
-  constructor(private settings: CoreService, private router: Router) { }
+  errorMessage = '';
 
   form = new FormGroup({
     uname: new FormControl('', [Validators.required, Validators.minLength(6)]),
     password: new FormControl('', [Validators.required]),
   });
 
+  constructor(
+    private authService: AuthService,
+    private settings: CoreService,
+    private router: Router
+  ) { }
+
   get f() {
     return this.form.controls;
   }
 
-  submit() {
-    // console.log(this.form.value);
-    this.router.navigate(['/dashboards/dashboard1']);
+  login(): void {
+    if (this.form.invalid) return;
+
+    const request: SignInRequest = {
+      userName: this.form.value.uname!,
+      password: this.form.value.password!
+    };
+
+    this.authService.signIn(request).subscribe({
+      next: () => this.router.navigate(['/dashboards/dashboard1']),
+      error: () => this.errorMessage = 'Usuario o contraseña incorrectos',
+    });
   }
 }

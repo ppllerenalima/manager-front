@@ -13,18 +13,13 @@ import { ActivatedRoute } from '@angular/router';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { NgScrollbarModule } from 'ngx-scrollbar';
 import {
-  catchError,
   filter,
   finalize,
-  of,
   Subject,
   takeUntil,
-  tap,
 } from 'rxjs';
 import { MaterialModule } from 'src/app/material.module';
 import { SireService } from 'src/app/services/apps/customer/sire-list/sire-list.service';
-import { Ticket2Service } from 'src/app/services/apps/ticket/ticket2.service';
-import { TokenService } from 'src/app/services/apps/token/token.service';
 import { registroSIRE } from '../customer/sire-list/listing/registroSIRE';
 import { strFromU8, unzipSync } from 'fflate';
 import { FileUtils } from 'src/app/shared/utils/FileUtils';
@@ -110,7 +105,7 @@ export class AppCompraSireComponent implements OnInit {
     { value: 12, name: 'Diciembre' },
   ];
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(private route: ActivatedRoute) { }
 
   /** ================================
    * 📌 7. INICIALIZACIÓN
@@ -283,6 +278,7 @@ export class AppCompraSireComponent implements OnInit {
       tipoComprobante: registro.tipoComprobante ?? '',
       serie: registro.serie ?? '',
       numero,
+      tipo: "01"
     };
 
     console.log('📤 Consultando comprobante:', request);
@@ -305,6 +301,7 @@ export class AppCompraSireComponent implements OnInit {
           // Si es exitoso, setear comprobante seleccionado
           this.selectedComprobante.set(registro);
           this.invoiceService.setSelectedComprobante(resp?.archivo || null);
+          this.invoiceService.setInfoComprobante(request)
         },
         error: (err) => {
           console.error('❌ Error al consultar CPE:', err);

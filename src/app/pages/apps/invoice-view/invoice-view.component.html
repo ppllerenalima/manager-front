@@ -11,7 +11,7 @@
             Volver a Facturas
           </a>
 
-          <a mat-flat-button color="primary" (click)="descargarPdf()">Descargar PDF</a>
+          <a mat-flat-button color="primary" [disabled]="isLoading()" (click)="descargarPdf()">Descargar PDF</a>
         </div>
       </div>
 

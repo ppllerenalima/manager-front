@@ -5,4 +5,5 @@ export interface ConsultaCpeRequest {
   tipoComprobante: string;
   serie: string;
   numero: number;
+  tipo: string;
 }

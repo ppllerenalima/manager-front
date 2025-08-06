@@ -1,6 +1,11 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import {
+  BehaviorSubject,
+  distinctUntilChanged,
+  filter,
+  Observable,
+} from 'rxjs';
 import { ConsultaCpeArchivoRequest } from 'src/app/pages/apps/invoice-view/Models/Requests/ConsultaCpeArchivoRequest';
 import { ConsultaCpeRequest } from 'src/app/pages/apps/invoice-view/Models/Requests/ConsultaCpeRequest';
 import { ControlCpeConsultaXmlRequest } from 'src/app/pages/apps/invoice-view/Models/Requests/ControlCpeConsultaXmlRequest';
@@ -35,33 +40,47 @@ export class InvoiceService {
   // URL base del backend (ajustar según entorno real)
   private baseUrl = 'https://localhost:7149/api/Cpe';
 
-  // Subject para almacenar y compartir el comprobante seleccionado
-  private selectedComprobanteSubject = new BehaviorSubject<any | null>(null);
-  // Observable que expone el comprobante seleccionado para otros componentes
-  selectedComprobante$ = this.selectedComprobanteSubject.asObservable();
+  private selectedComprobanteSubject = new BehaviorSubject<string | null>(null);
 
-  private infoComprobanteSubject =
-    new BehaviorSubject<ConsultaCpeArchivoRequest | null>(null);
-  infoComprobante$ = this.infoComprobanteSubject.asObservable();
+  /**
+   * Observable que emite solo comprobantes válidos (no nulos y no vacíos)
+   */
+  selectedComprobante$ = this.selectedComprobanteSubject.asObservable().pipe(
+    filter(
+      (comprobante): comprobante is string =>
+        !!comprobante && comprobante.length > 10
+    ),
+    distinctUntilChanged() // ✅ evita emitir dos veces el mismo comprobante
+  );
 
-  private tokenSubject = new BehaviorSubject<string | null>(null);
-  token$ = this.tokenSubject.asObservable();
-
-  constructor(private http: HttpClient) { }
-
-  setSelectedComprobante(comprobante: any): void {
+  /**
+   * Asigna el comprobante seleccionado (base64 ZIP)
+   */
+  setSelectedComprobante(comprobante: string | null) {
     this.selectedComprobanteSubject.next(comprobante);
   }
 
-  getSelectedComprobante(): any | null {
-    return this.selectedComprobanteSubject.getValue();
+  /**
+   * Retorna el último comprobante emitido
+   */
+  getSelectedComprobante(): string | null {
+    return this.selectedComprobanteSubject.value;
   }
 
-  setInfoComprobante(registro: ConsultaCpeArchivoRequest): void {
+  // Subject para almacenar y compartir el comprobante seleccionado
+  // Observable que expone el comprobante seleccionado para otros componentes
+
+  private infoComprobanteSubject =
+    new BehaviorSubject<ConsultaCpeRequest | null>(null);
+  infoComprobante$ = this.infoComprobanteSubject.asObservable();
+
+  constructor(private http: HttpClient) {}
+
+  setInfoComprobante(registro: ConsultaCpeRequest): void {
     this.infoComprobanteSubject.next(registro);
   }
 
-  getInfoComprobante(): ConsultaCpeArchivoRequest | null {
+  getInfoComprobante(): ConsultaCpeRequest | null {
     return this.infoComprobanteSubject.getValue();
   }
 
@@ -85,7 +104,7 @@ export class InvoiceService {
   }
 
   consultaCpeComprobante(
-    request: ConsultaCpeArchivoRequest
+    request: ConsultaCpeRequest
   ): Observable<ConsultaCpeComprobanteResponse> {
     return this.http.post<ConsultaCpeComprobanteResponse>(
       `${this.baseUrl}/consultacpe-comprobante`,
@@ -96,7 +115,6 @@ export class InvoiceService {
   consultaCpeUnificado(
     request: ConsultaCpeRequest
   ): Observable<ConsultaCpeUnificadoResponse> {
-
     return this.http.post<ConsultaCpeUnificadoResponse>(
       `${this.baseUrl}/consultacpe-unificado`,
       request

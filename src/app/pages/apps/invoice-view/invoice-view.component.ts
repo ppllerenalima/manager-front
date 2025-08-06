@@ -21,7 +21,7 @@ import { ZipUtils } from 'src/app/shared/utils/ZipUtils';
 // Modelo de la factura
 import { Invoice } from './Models/invoice';
 import { ConsultaCpeArchivoRequest } from './Models/Requests/ConsultaCpeArchivoRequest';
-import { distinctUntilChanged, filter, Subject, takeUntil } from 'rxjs';
+import { distinctUntilChanged, filter, finalize, Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-invoice-view',
@@ -36,14 +36,6 @@ import { distinctUntilChanged, filter, Subject, takeUntil } from 'rxjs';
     TablerIconsModule,
   ],
 })
-// import { Component, OnInit, OnDestroy, inject, computed, signal } from '@angular/core';
-// import { Subject } from 'rxjs';
-// import { takeUntil } from 'rxjs/operators';
-// import { InvoiceService } from '../services/invoice.service';
-// import { Invoice } from '../models/invoice.model';
-// import { ZipUtils } from '../utils/zip-utils';
-// import { FileUtils } from '../utils/file-utils';
-// import { XmlParser } from '../utils/xml-parser';
 export class InvoiceViewComponent implements OnInit, OnDestroy {
   // ----------------------------
   // 🔹 Signals - Estado reactivo
@@ -58,7 +50,7 @@ export class InvoiceViewComponent implements OnInit, OnDestroy {
   // ----------------------------
   comprobante: any; // Comprobante en base64 ZIP
   error: string | null = null; // Manejo de errores
-  isLoading = false; // Indicador de carga
+  isLoading = signal(false);
   displayedColumns: string[] = [
     'Description',
     'UnitPrice',
@@ -79,25 +71,12 @@ export class InvoiceViewComponent implements OnInit, OnDestroy {
   // ----------------------------
   ngOnInit(): void {
     this.invoiceService.selectedComprobante$
-      .pipe(
-        takeUntil(this.destroy$),
-        filter((zip) => !!zip && zip.length > 50), // Evita nulos o valores corruptos
-        distinctUntilChanged() // Evita reprocesar el mismo comprobante
-      )
-      .subscribe((zip) => {
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((comprobanteBase64Zip) => {
         console.log('📥 Nuevo comprobante recibido');
-        this.comprobante = zip;
-        this.procesarComprobante(zip);
+        this.comprobante = comprobanteBase64Zip;
+        this.procesarComprobante(comprobanteBase64Zip);
       });
-
-    // this.invoiceService.selectedComprobante$
-    //   .pipe(takeUntil(this.destroy$))
-    //   .subscribe((comprobanteBase64Zip) => {
-    //     console.log('📥 Nuevo comprobante recibido');
-
-    //     this.comprobante = comprobanteBase64Zip;
-    //     this.procesarComprobante(comprobanteBase64Zip);
-    //   });
   }
 
   ngOnDestroy(): void {
@@ -114,9 +93,9 @@ export class InvoiceViewComponent implements OnInit, OnDestroy {
     const inv = this.invoice();
     return inv
       ? inv.InvoiceLines.reduce(
-          (acc, item) => acc + item.LineExtensionAmount,
-          0
-        )
+        (acc, item) => acc + item.LineExtensionAmount,
+        0
+      )
       : 0;
   }
 
@@ -124,46 +103,50 @@ export class InvoiceViewComponent implements OnInit, OnDestroy {
   descargarPdf(): void {
     console.log('Descargar XML desde base64 en JSON');
 
+    this.isLoading.set(true);
+
     const infoComprobante = this.invoiceService.getInfoComprobante();
     if (!infoComprobante) {
       console.warn('⚠️ Faltan datos para continuar');
       return;
     }
 
-    this.invoiceService.consultaCpeComprobante(infoComprobante).subscribe({
-      next: async (response) => {
-        console.log('(comprobanteTipoZip) response', response);
+    this.invoiceService.consultaCpeComprobante(infoComprobante)
+      .pipe(finalize(() => this.isLoading.set(false)))
+      .subscribe({
+        next: async (response) => {
+          console.log('(comprobanteTipoZip) response', response);
 
-        if (!response.esExito || !response.valArchivo) {
-          console.error('❌ No se pudo obtener el archivo:', response.errores);
-          return;
-        }
+          if (!response.esExito || !response.archivo) {
+            console.error('❌ No se pudo obtener el archivo:', response.errores);
+            return;
+          }
 
-        try {
-          // Convertir base64 a Blob ZIP
-          const byteCharacters = atob(response.valArchivo);
-          const byteNumbers = Array.from(byteCharacters, (c) =>
-            c.charCodeAt(0)
-          );
-          const byteArray = new Uint8Array(byteNumbers);
-          const zipBlob = new Blob([byteArray], { type: 'application/zip' });
+          try {
+            // Convertir base64 a Blob ZIP
+            const byteCharacters = atob(response.archivo);
+            const byteNumbers = Array.from(byteCharacters, (c) =>
+              c.charCodeAt(0)
+            );
+            const byteArray = new Uint8Array(byteNumbers);
+            const zipBlob = new Blob([byteArray], { type: 'application/zip' });
 
-          // ✅ Descargar el archivo ZIP directamente
-          this.descargarArchivo(zipBlob, 'comprobante.zip');
+            // ✅ Descargar el archivo ZIP directamente
+            this.descargarArchivo(zipBlob, 'comprobante.zip');
 
-          // Extraer y descargar el PDF del ZIP
-          const { pdfFileName, pdfBlob } = await ZipUtils.extractPdfFromBlob(
-            zipBlob
-          );
-          this.descargarArchivo(pdfBlob, pdfFileName || 'archivo.pdf');
-        } catch (error) {
-          console.error('❌ Error al extraer el archivo ZIP:', error);
-        }
-      },
-      error: (err) => {
-        console.error('❌ Error al consultar el comprobante:', err);
-      },
-    });
+            // Extraer y descargar el PDF del ZIP
+            const { pdfFileName, pdfBlob } = await ZipUtils.extractPdfFromBlob(
+              zipBlob
+            );
+            this.descargarArchivo(pdfBlob, pdfFileName || 'archivo.pdf');
+          } catch (error) {
+            console.error('❌ Error al extraer el archivo ZIP:', error);
+          }
+        },
+        error: (err) => {
+          console.error('❌ Error al consultar el comprobante:', err);
+        },
+      });
   }
 
   // ----------------------------
