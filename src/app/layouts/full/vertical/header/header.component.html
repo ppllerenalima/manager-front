@@ -65,9 +65,7 @@
                   </span>
 
                   <div class="m-l-16">
-                    <h5
-                      class="f-s-14 f-w-600 m-0 textprimary  hover-text"
-                    >
+                    <h5 class="f-s-14 f-w-600 m-0 textprimary hover-text">
                       {{ appdd.title }}
                     </h5>
                     <span class="f-s-12 text-body">{{ appdd.subtitle }}</span>
@@ -80,9 +78,7 @@
           <div
             class="b-t-1 p-24 d-none d-lg-flex align-items-center justify-content-between"
           >
-            <span
-              class="d-flex align-items-center  f-s-16 f-w-500"
-            >
+            <span class="d-flex align-items-center f-s-16 f-w-500">
               <i-tabler name="help" class="icon-20 m-r-8"></i-tabler>Frequently
               Asked Questions
             </span>
@@ -96,7 +92,7 @@
         </div>
         <div class="col-sm-4">
           <div class="p-x-16 p-y-32">
-            <h4 class="f-s-18 f-w-600  m-b-16">Quick Links</h4>
+            <h4 class="f-s-18 f-w-600 m-b-16">Quick Links</h4>
             @for(quicklink of quicklinks; track quicklink.title) {
             <div class="text-hover-primary">
               <a
@@ -127,83 +123,28 @@
   </button>
 
   <!-- --------------------------------------------------------------- -->
-  <!-- langugage Dropdown -->
+  <!-- Dropdown -->
   <!-- --------------------------------------------------------------- -->
-  <button [matMenuTriggerFor]="flags" mat-icon-button class="m-r-5">
-    <img
-      [src]="selectedLanguage.icon"
-      class="rounded-circle object-cover icon-20"
-    />
-  </button>
-  <mat-menu #flags="matMenu" class="cardWithShadow">
-    @for(lang of languages; track lang.icon) {
-    <button mat-menu-item (click)="changeLanguage(lang)">
-      <div class="d-flex align-items-center">
-        <img
-          [src]="lang.icon"
-          class="rounded-circle object-cover m-r-8 icon-20"
-        />
-        <span class=" f-s-14">{{ lang.language }}</span>
-      </div>
-    </button>
-    }
-  </mat-menu>
 
   @if(options.theme=='light'){
-    <button mat-icon-button aria-label="lightdark" class="d-flex justify-content-center" (click)="setlightDark('dark')" >
-      <i-tabler class="d-flex icon-22" [name]="'moon'"></i-tabler>
-    </button>
-    }@else{
-    <button mat-icon-button aria-label="lightdark" class="d-flex justify-content-center" (click)="setlightDark('light')">
-      <i-tabler class="d-flex icon-22" [name]="'sun'"></i-tabler>
-    </button>
-  }
-
-  <!-- --------------------------------------------------------------- -->
-  <!-- Notification Dropdown -->
-  <!-- --------------------------------------------------------------- -->
   <button
     mat-icon-button
-    [matMenuTriggerFor]="notificationmenu"
-    aria-label="Notifications" class="m-x-5"
+    aria-label="lightdark"
+    class="d-flex justify-content-center"
+    (click)="setlightDark('dark')"
   >
-    <i-tabler
-      class="d-flex"
-      name="bell"
-      matBadge="1"
-      matBadgeColor="primary"
-    ></i-tabler>
+    <i-tabler class="d-flex icon-22" [name]="'moon'"></i-tabler>
   </button>
-  <mat-menu #notificationmenu="matMenu" class="topbar-dd cardWithShadow">
-    <div class="d-flex align-items-center p-x-32 p-y-16">
-      <h6 class="f-s-16 f-w-600 m-0 ">Notifications</h6>
-      <span class="m-l-auto">
-        <span class="bg-primary text-white p-x-8 p-y-4 f-w-500 rounded f-s-12"
-          >5 new</span
-        >
-      </span>
-    </div>
-
-    @for(notification of notifications; track notification.title) {
-    <button mat-menu-item class="p-x-32 p-y-16">
-      <div class="d-flex align-items-center">
-        <img [src]="notification.img" class="rounded-circle" width="48" />
-        <div class="m-l-16">
-          <h5 class="f-s-14 f-w-600 m-0 ">
-            {{ notification.title }}
-          </h5>
-          <span>{{ notification.subtitle }}</span>
-        </div>
-      </div>
-    </button>
-    }
-
-    <div class="p-y-12 p-x-32">
-      <button mat-stroked-button color="primary" class="w-100">
-        See all notifications
-      </button>
-    </div>
-  </mat-menu>
+  }@else{
+  <button
+    mat-icon-button
+    aria-label="lightdark"
+    class="d-flex justify-content-center"
+    (click)="setlightDark('light')"
+  >
+    <i-tabler class="d-flex icon-22" [name]="'sun'"></i-tabler>
+  </button>
+  }
 
   <!-- --------------------------------------------------------------- -->
   <!-- profile Dropdown -->
@@ -211,7 +152,8 @@
   <button
     mat-icon-button
     [matMenuTriggerFor]="profilemenu"
-    aria-label="Notifications" class="m-l-8"
+    aria-label="Notifications"
+    class="m-l-8"
   >
     <img
       src="/assets/images/profile/user-1.jpg"
@@ -220,9 +162,9 @@
     />
   </button>
   <mat-menu #profilemenu="matMenu" class="topbar-dd cardWithShadow">
-    <ng-scrollbar class="position-relative" style="height: 647px">
+    <ng-scrollbar class="position-relative" style="height: 300px">
       <div class="p-x-32 p-y-16">
-        <h6 class="f-s-16 f-w-600 m-0 ">User Profile</h6>
+        <h6 class="f-s-16 f-w-600 m-0">User Profile</h6>
 
         <div class="d-flex align-items-center p-b-24 b-b-1 m-t-16">
           <img
@@ -231,7 +173,7 @@
             width="95"
           />
           <div class="m-l-16">
-            <h6 class="f-s-14 f-w-600 m-0 ">Mathew Anderson</h6>
+            <h6 class="f-s-14 f-w-600 m-0">Mathew Anderson</h6>
             <span class="f-s-14 d-block m-b-4">Designer</span>
             <span class="d-flex align-items-center">
               <i-tabler name="mail" class="icon-15 m-r-4"></i-tabler>
@@ -240,62 +182,10 @@
           </div>
         </div>
       </div>
-      <div class="p-x-32">
-        @for(profile of profiledd; track profile.title) {
-        <a
-          class="p-y-16 text-decoration-none d-block text-hover-primary"
-          [routerLink]="[profile.link]"
-        >
-          <div class="d-flex align-items-center">
-            <button
-              mat-mini-fab
-              class="text-primary bg-light shadow-none rounded"
-            >
-              <img [src]="profile.img" width="20" />
-            </button>
-
-            <div class="m-l-16">
-              <h5
-                class="f-s-14 f-w-600 m-0 textprimary  hover-text"
-              >
-                {{ profile.title }}
-              </h5>
-              <span class="f-s-14 text-body">{{ profile.subtitle }}</span>
-            </div>
-          </div>
-        </a>
-        }
-
-        <!-- upgrade -->
-        <div
-          class="p-24 overflow-hidden bg-light-primary rounded position-relative m-y-16"
-        >
-          <div class="d-flex align-items-center">
-            <div>
-              <h5 class="f-s-18 m-0 f-w-600 m-b-12 ">
-                Unlimited <br />
-                Access
-              </h5>
-              <button mat-flat-button color="primary">Upgrade</button>
-            </div>
-            <div class="m-l-auto">
-              <img
-                src="/assets/images/backgrounds/unlimited-bg.png"
-                alt="upgrade-bg"
-                class="upgrade-bg"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
 
       <div class="p-y-12 p-x-32">
-        <a
-          [routerLink]="['/authentication/login']"
-          mat-stroked-button
-          color="primary"
-          class="w-100"
-          >Logout</a
+        <a mat-stroked-button color="primary" class="w-100" (click)="logout()"
+          >Cerrar sesión</a
         >
       </div>
     </ng-scrollbar>

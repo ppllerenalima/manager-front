@@ -16,56 +16,70 @@ export interface TokenResponse {
   clienteId: string;
 }
 
-
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private apiUrl = 'https://localhost:7149/api/user/auth'; // Ajusta tu puerto
+  /** URL base de autenticación */
+  private apiUrl = 'https://localhost:7149/api/user/auth'; // Ajusta el puerto si es necesario
 
+  /** Clave donde se guarda el token en localStorage */
   private readonly tokenKey = 'token';
 
-  loading = signal(false); // Estado global de carga
+  /** Estado global de carga (para mostrar spinners en la UI) */
+  loading = signal(false);
 
-  // Opción pro: usar signal para estado reactivo
+  /** Estado reactivo de sesión (true si existe token) */
   isLoggedIn = signal<boolean>(!!localStorage.getItem(this.tokenKey));
 
   constructor(private http: HttpClient) { }
 
+  // ──────────────── MÉTODOS DE AUTENTICACIÓN ────────────────
+
+  /**
+   * Inicia sesión enviando credenciales al backend
+   * @param request { userName, password }
+   * @returns Observable con el TokenResponse
+   */
   signIn(request: SignInRequest): Observable<TokenResponse> {
     return this.http.post<TokenResponse>(this.apiUrl, request).pipe(
       tap((response) => {
         if (response.accessToken) {
-          // Guardamos el token para que el guard lo use
-          localStorage.setItem('token', response.accessToken);
+          this.saveToken(response.accessToken);
         }
       })
     );
   }
 
-  signOut(): void {
-    localStorage.removeItem('token');
-  }
-
-  /** Devuelve el token actual */
-  getToken(): string | null {
-    return localStorage.getItem(this.tokenKey);
-  }
-
-  /** Valida si el usuario está logueado */
-  isAuthenticated(): boolean {
-    return !!localStorage.getItem('token');
-  }
-
-  /** Guarda token y actualiza estado */
-  login(token: string): void {
+  /**
+   * Guarda el token en localStorage y actualiza el estado de sesión
+   */
+  private saveToken(token: string): void {
     localStorage.setItem(this.tokenKey, token);
     this.isLoggedIn.set(true);
   }
 
-  /** Cierra sesión */
+  /**
+   * Elimina el token del almacenamiento y actualiza el estado de sesión
+   */
   logout(): void {
     localStorage.removeItem(this.tokenKey);
     this.isLoggedIn.set(false);
+  }
+
+  // ──────────────── MÉTODOS DE CONSULTA ────────────────
+
+  /**
+   * Devuelve el token actual o null si no existe
+   */
+  getToken(): string | null {
+    return localStorage.getItem(this.tokenKey);
+  }
+
+  /**
+   * Indica si el usuario está autenticado
+   */
+  isAuthenticated(): boolean {
+    return !!this.getToken();
   }
 }

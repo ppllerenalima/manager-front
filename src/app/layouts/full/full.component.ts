@@ -20,6 +20,7 @@ import { AppHorizontalHeaderComponent } from './horizontal/header/header.compone
 import { AppHorizontalSidebarComponent } from './horizontal/sidebar/sidebar.component';
 import { AppBreadcrumbComponent } from './shared/breadcrumb/breadcrumb.component';
 import { CustomizerComponent } from './shared/customizer/customizer.component';
+import { AuthService } from 'src/app/services/authentication/Auth.service';
 
 const MOBILE_VIEW = 'screen and (max-width: 768px)';
 const TABLET_VIEW = 'screen and (min-width: 769px) and (max-width: 1024px)';
@@ -42,24 +43,24 @@ interface quicklinks {
 }
 
 @Component({
-    selector: 'app-full',
-    imports: [
-        RouterModule,
-        AppNavItemComponent,
-        MaterialModule,
-        CommonModule,
-        SidebarComponent,
-        NgScrollbarModule,
-        TablerIconsModule,
-        HeaderComponent,
-        AppHorizontalHeaderComponent,
-        AppHorizontalSidebarComponent,
-        AppBreadcrumbComponent,
-        CustomizerComponent,
-    ],
-    templateUrl: './full.component.html',
-    styleUrls: [],
-    encapsulation: ViewEncapsulation.None
+  selector: 'app-full',
+  imports: [
+    RouterModule,
+    AppNavItemComponent,
+    MaterialModule,
+    CommonModule,
+    SidebarComponent,
+    NgScrollbarModule,
+    TablerIconsModule,
+    HeaderComponent,
+    AppHorizontalHeaderComponent,
+    AppHorizontalSidebarComponent,
+    AppBreadcrumbComponent,
+    CustomizerComponent,
+  ],
+  templateUrl: './full.component.html',
+  styleUrls: [],
+  encapsulation: ViewEncapsulation.None
 })
 export class FullComponent implements OnInit {
   navItems = navItems;
@@ -190,9 +191,10 @@ export class FullComponent implements OnInit {
   constructor(
     private settings: CoreService,
     private mediaMatcher: MediaMatcher,
-    private router: Router,
     private breakpointObserver: BreakpointObserver,
-    private navService: NavService
+    private navService: NavService,
+    private authService: AuthService,
+    private router: Router
   ) {
     this.htmlElement = document.querySelector('html')!;
     this.layoutChangesSubscription = this.breakpointObserver
@@ -219,7 +221,12 @@ export class FullComponent implements OnInit {
       });
   }
 
-  ngOnInit(): void {}
+  logout() {
+    this.authService.logout(); // 👈 Borra el token y actualiza estado
+    this.router.navigate(['/authentication/login']); // 👈 Redirige a login
+  }
+
+  ngOnInit(): void { }
 
   ngOnDestroy() {
     this.layoutChangesSubscription.unsubscribe();
@@ -246,7 +253,7 @@ export class FullComponent implements OnInit {
   }
 
   receiveOptions(options: AppSettings): void {
-   // this.options = options;
+    // this.options = options;
     this.toggleDarkTheme(options);
     this.toggleColorsTheme(options);
   }

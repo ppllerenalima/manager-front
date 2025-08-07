@@ -11,11 +11,12 @@ import { navItems } from '../sidebar/sidebar-data';
 import { TranslateService } from '@ngx-translate/core';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { MaterialModule } from 'src/app/material.module';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgScrollbarModule } from 'ngx-scrollbar';
 import { AppSettings } from 'src/app/config';
+import { AuthService } from 'src/app/services/authentication/Auth.service';
 
 interface notifications {
   id: number;
@@ -47,16 +48,16 @@ interface quicklinks {
 }
 
 @Component({
-    selector: 'app-header',
-    imports: [
-        RouterModule,
-        CommonModule,
-        NgScrollbarModule,
-        TablerIconsModule,
-        MaterialModule,
-    ],
-    templateUrl: './header.component.html',
-    encapsulation: ViewEncapsulation.None
+  selector: 'app-header',
+  imports: [
+    RouterModule,
+    CommonModule,
+    NgScrollbarModule,
+    TablerIconsModule,
+    MaterialModule,
+  ],
+  templateUrl: './header.component.html',
+  encapsulation: ViewEncapsulation.None
 })
 export class HeaderComponent {
   @Input() showToggle = true;
@@ -104,9 +105,16 @@ export class HeaderComponent {
     private settings: CoreService,
     private vsidenav: CoreService,
     public dialog: MatDialog,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private authService: AuthService,
+    private router: Router
   ) {
     translate.setDefaultLang('en');
+  }
+
+  logout() {
+    this.authService.logout(); // 👈 Borra el token y actualiza estado
+    this.router.navigate(['/authentication/login']); // 👈 Redirige a login
   }
 
   options = this.settings.getOptions();
@@ -294,9 +302,9 @@ export class HeaderComponent {
 }
 
 @Component({
-    selector: 'search-dialog',
-    imports: [RouterModule, MaterialModule, TablerIconsModule, FormsModule],
-    templateUrl: 'search-dialog.component.html'
+  selector: 'search-dialog',
+  imports: [RouterModule, MaterialModule, TablerIconsModule, FormsModule],
+  templateUrl: 'search-dialog.component.html'
 })
 export class AppSearchDialogComponent {
   searchText: string = '';
@@ -307,4 +315,14 @@ export class AppSearchDialogComponent {
   // filtered = this.navItemsData.find((obj) => {
   //   return obj.displayName == this.searchinput;
   // });
+
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) { }
+
+  logout() {
+    this.authService.logout(); // 👈 Borra el token y actualiza estado
+    this.router.navigate(['/authentication/login']); // 👈 Redirige a login
+  }
 }
