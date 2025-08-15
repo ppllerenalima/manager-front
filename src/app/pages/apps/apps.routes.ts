@@ -26,6 +26,7 @@ import { AppListingComponent } from './customer/sire-list/listing/listing.compon
 import { AppSireInvoiceViewComponent } from './customer/sire-list/invoice-view/invoice-view.component';
 import { AppClienteComponent } from './cliente/cliente.component';
 import { AppCompraSireComponent } from './compra-sire/compra-sire.component';
+import { AppGrupoListComponent } from './grupo/grupo-list/grupo-list.component';
 
 
 export const AppsRoutes: Routes = [
@@ -145,7 +146,17 @@ export const AppsRoutes: Routes = [
           ],
         },
       },
-
+      {
+        path: 'grupo',
+        component: AppGrupoListComponent,
+        data: {
+          title: 'Grupo',
+          urls: [
+            { title: 'Dashboard', url: '/dashboards/dashboard1' },
+            { title: 'Grupo' },
+          ],
+        },
+      },
       {
         path: 'cliente',
         component: AppClienteComponent,

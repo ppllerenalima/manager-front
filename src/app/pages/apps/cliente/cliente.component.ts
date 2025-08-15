@@ -1,18 +1,39 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, DestroyRef, Inject, inject, OnInit, Optional, signal } from '@angular/core';
-import { FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  Inject,
+  inject,
+  OnInit,
+  Optional,
+  signal,
+} from '@angular/core';
+import {
+  FormControl,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { MaterialModule } from 'src/app/material.module';
 import { ClienteService } from 'src/app/services/apps/cliente/cliente.service';
 import { Cliente } from './models/cliente';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialog,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { FileUtils } from 'src/app/shared/utils/FileUtils';
 import { FormUtils } from 'src/app/shared/utils/FormUtils';
 import { InputUtils } from 'src/app/shared/utils/input-utils';
 import { ClienteData } from './models/clienteData';
 import { PageEvent } from '@angular/material/paginator';
 import { Router } from '@angular/router';
+import { GrupoService } from 'src/app/services/apps/grupo/grupo.service';
+import { Grupo } from '../grupo/models/Grupo';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-cliente',
@@ -27,7 +48,7 @@ import { Router } from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppClienteComponent implements OnInit {
-  dialog = inject(MatDialog)
+  dialog = inject(MatDialog);
   snackBar = inject(MatSnackBar);
   clienteService = inject(ClienteService);
   cliente = signal<Cliente[]>([]);
@@ -42,7 +63,7 @@ export class AppClienteComponent implements OnInit {
   // Utilidades
   fileUtils = FileUtils;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
 
   ngOnInit(): void {
     this.loadCliente();
@@ -50,16 +71,22 @@ export class AppClienteComponent implements OnInit {
 
   // Carga la lista de clientes paginada
   loadCliente() {
-    this.clienteService.getsPaginated(this.searchText(), this.pageSize, this.pageIndex).subscribe({
-      next: (res) => {
-        this.cliente.set(res.data);
-        this.totalItems.set(res.total);
-      },
-      error: (err) => {
-        console.error('Error al cargar clientes:', err);
-        this.snackBar.open('Error al cargar clientes', 'Cerrar', { duration: 3000 });
-      }
-    });
+    this.clienteService
+      .getsPaginated(this.searchText(), this.pageSize, this.pageIndex)
+      .subscribe({
+        next: (res) => {
+          console.log('res.data', res.data)
+
+          this.cliente.set(res.data);
+          this.totalItems.set(res.total);
+        },
+        error: (err) => {
+          console.error('Error al cargar clientes:', err);
+          this.snackBar.open('Error al cargar clientes', 'Cerrar', {
+            duration: 3000,
+          });
+        },
+      });
   }
 
   // Maneja evento de cambio de página
@@ -73,6 +100,7 @@ export class AppClienteComponent implements OnInit {
   openDialog(action: string, obj: Cliente | any): void {
     obj.action = action;
 
+    console.log('openDialog obj:', obj)
     const dialogRef = this.dialog.open(AppClienteDialogContentComponent, {
       data: obj,
       autoFocus: false,
@@ -126,6 +154,7 @@ export class AppClienteComponent implements OnInit {
       clientSecret: row_obj.clientSecret,
       username: row_obj.username,
       password: row_obj.password,
+      grupoId: row_obj.grupoId,
     };
 
     this.clienteService.add(newCliente).subscribe({
@@ -139,8 +168,10 @@ export class AppClienteComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error al registrar cliente:', err);
-        this.snackBar.open('Error al registrar cliente', 'Cerrar', { duration: 3000 });
-      }
+        this.snackBar.open('Error al registrar cliente', 'Cerrar', {
+          duration: 3000,
+        });
+      },
     });
   }
 
@@ -156,8 +187,10 @@ export class AppClienteComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error al actualizar cliente:', err);
-        this.snackBar.open('Error al actualizar cliente', 'Cerrar', { duration: 3000 });
-      }
+        this.snackBar.open('Error al actualizar cliente', 'Cerrar', {
+          duration: 3000,
+        });
+      },
     });
   }
 
@@ -173,8 +206,10 @@ export class AppClienteComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error al actualizar cliente:', err);
-        this.snackBar.open('Error al actualizar cliente', 'Cerrar', { duration: 3000 });
-      }
+        this.snackBar.open('Error al actualizar cliente', 'Cerrar', {
+          duration: 3000,
+        });
+      },
     });
   }
 }
@@ -193,8 +228,11 @@ export class AppClienteComponent implements OnInit {
   ],
   templateUrl: 'cliente-edit/cliente-edit.component.html',
 })
-export class AppClienteDialogContentComponent {
+export class AppClienteDialogContentComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
+
+  grupoService = inject(GrupoService);
+  grupos = signal<Grupo[]>([]);
 
   // Formularios reactivos con validación
   readonly ruc = new FormControl('', [
@@ -220,19 +258,91 @@ export class AppClienteDialogContentComponent {
     public dialogRef: MatDialogRef<AppClienteDialogContentComponent>,
     @Optional() @Inject(MAT_DIALOG_DATA) public data: ClienteData
   ) {
-    this.local_data = { ...data };
+    console.log('constructor data:', data)
+    // this.cargarGrupos();
+    // this.cargarGrupos();
+
+    // this.local_data = { ...data };
+    // this.action = this.local_data.action;
+
+    // FormUtils.registerControlValidation(
+    //   this.destroyRef,
+    //   this.ruc,
+    //   this.rucErrorMessage,
+    //   'RUC',
+    //   11
+    // );
+    // FormUtils.registerControlValidation(
+    //   this.destroyRef,
+    //   this.razonsocial,
+    //   this.razonSocialErrorMessage,
+    //   'Razón Social'
+    // );
+  }
+
+  async ngOnInit(): Promise<void> {
+
+    this.local_data = { ...this.data };
     this.action = this.local_data.action;
 
-    FormUtils.registerControlValidation(this.destroyRef, this.ruc, this.rucErrorMessage, 'RUC', 11);
-    FormUtils.registerControlValidation(this.destroyRef, this.razonsocial, this.razonSocialErrorMessage, 'Razón Social');
+    await this.cargarGrupos();
+
+    // Ahora sí, el grupoId se asigna cuando ya hay opciones
+    if (this.data?.grupoId != null) {
+      this.local_data.grupoId = this.data.grupoId;
+    }
+
+    FormUtils.registerControlValidation(
+      this.destroyRef,
+      this.ruc,
+      this.rucErrorMessage,
+      'RUC',
+      11
+    );
+    FormUtils.registerControlValidation(
+      this.destroyRef,
+      this.razonsocial,
+      this.razonSocialErrorMessage,
+      'Razón Social'
+    );
   }
+
+  async cargarGrupos(): Promise<void> {
+    try {
+      const res = await firstValueFrom(this.grupoService.getsPaginated());
+      const mapped = res.data.map((g) => ({
+        ...g,
+        isinactive: g.isinactive ? 'true' : 'false',
+      })) as Grupo[];
+
+      this.grupos.set(mapped);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  // cargarGrupos() {
+  //   this.grupoService.getsPaginated().subscribe({
+  //     next: (res) => {
+  //       const mapped = res.data.map((g) => ({
+  //         ...g,
+  //         isinactive: g.isinactive ? 'true' : 'false',
+  //       })) as Grupo[];
+
+  //       this.grupos.set(mapped);
+  //     },
+  //     error: (err) => console.error(err),
+  //   });
+  // }
 
   // Acción principal para cerrar diálogo enviando datos (espera a la conversión de archivo)
   async doAction(): Promise<void> {
     // Si ya hay una imagen cargada, no hacemos nada
     if (!this.local_data.image) {
       // Si no hay imagen cargada, usamos una por defecto
-      const defaultBase64 = await FileUtils.loadUrlAsBase64('assets/images/profile/user-1.jpg');
+      const defaultBase64 = await FileUtils.loadUrlAsBase64(
+        'assets/images/profile/user-1.jpg'
+      );
       this.local_data.image = defaultBase64;
     }
 

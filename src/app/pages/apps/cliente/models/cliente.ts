@@ -9,4 +9,5 @@ export interface Cliente {
   clientSecret: string;
   username: string;
   password: string;
+  grupoId: string;
 }

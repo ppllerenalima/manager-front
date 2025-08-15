@@ -9,4 +9,5 @@ export interface clientePaginated {
   clientSecret: string;
   username: string;
   password: string;
+  grupoId: string;
 }

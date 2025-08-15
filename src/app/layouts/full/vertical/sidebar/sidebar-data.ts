@@ -43,6 +43,33 @@ export const navItems: NavItem[] = [
     route: 'apps/customers',
   },
   {
+    displayName: 'Grupo',
+    iconName: 'file-invoice',
+    route: '',
+    children: [
+      {
+        displayName: 'List',
+        iconName: 'point',
+        route: '/apps/grupo',
+      },
+      // {
+      //   displayName: 'Detail',
+      //   iconName: 'point',
+      //   route: '/apps/viewInvoice/101',
+      // },
+      // {
+      //   displayName: 'Create',
+      //   iconName: 'point',
+      //   route: '/apps/addInvoice',
+      // },
+      // {
+      //   displayName: 'Edit',
+      //   iconName: 'point',
+      //   route: '/apps/editinvoice/101',
+      // },
+    ],
+  },
+  {
     displayName: 'Cliente',
     iconName: 'tags',
     route: 'apps/cliente',

@@ -1,7 +1,7 @@
 <div
   class="d-flex align-items-center justify-content-between m-b-16 p-x-20 p-t-16"
 >
-  <h3>{{action}} Cliente</h3>
+  <h3>{{ action }} Cliente</h3>
   <button
     mat-icon-button
     mat-dialog-close
@@ -75,22 +75,16 @@
 
     <div class="row">
       <div class="col-md-6">
-        <mat-label class="f-w-600 m-b-8 d-block">Post</mat-label>
+        <mat-label class="f-w-600 m-b-8 d-block">Grupo</mat-label>
         <mat-form-field appearance="outline" class="w-100">
-          <mat-select [(value)]="local_data.ContactPost" name="post" required>
-            <mat-option value="Web Designer">Web Designer</mat-option>
-            <mat-option value="Theme Designer">Theme Designer</mat-option>
-            <mat-option value="Front End Developer"
-              >Front End Developer</mat-option
-            >
-            <mat-option value="Hacker">Hacker</mat-option>
-            <mat-option value="Back End Developer"
-              >Back End Developer</mat-option
-            >
-            <mat-option value="Graphics Designer">Graphics Designer</mat-option>
+          <mat-select [(value)]="local_data.grupoId" name="post" required>
+            <mat-option *ngFor="let grupo of grupos()" [value]="grupo.id">
+              {{ grupo.descripcion }}
+            </mat-option>
           </mat-select>
         </mat-form-field>
       </div>
+
       <div class="col-md-6">
         <mat-label class="f-w-600 m-b-8 d-block">Número Contacto</mat-label>
         <mat-form-field appearance="outline" class="w-100">
@@ -174,7 +168,7 @@
     [mat-dialog-close]="true"
     [disabled]="!userForm.form.valid"
     color="primary"
-    (click)="doAction();"
+    (click)="doAction()"
   >
     Agregar Cliente
   </button>
@@ -190,11 +184,12 @@
 @else {
 <div class="p-x-24 m-y-8">
   <p class="f-s-14">
-    Estas seguro de eliminar: <span class="f-w-600">{{local_data.razonsocial}}</span> ?
+    Estas seguro de eliminar:
+    <span class="f-w-600">{{ local_data.razonsocial }}</span> ?
   </p>
 </div>
 <div mat-dialog-actions class="p-x-24 p-b-24">
-  <button (click)="doAction()" mat-flat-button>{{action}}</button>
+  <button (click)="doAction()" mat-flat-button>{{ action }}</button>
   <button
     mat-flat-button
     (click)="closeDialog()"

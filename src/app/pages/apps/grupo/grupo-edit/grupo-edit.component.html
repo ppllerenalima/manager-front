@@ -1,0 +1,66 @@
+<div
+  class="d-flex align-items-center justify-content-between m-b-16 p-x-20 p-t-16"
+>
+  <h3>{{action}} Grupo</h3>
+  <button
+    mat-icon-button
+    mat-dialog-close
+    class="d-flex justify-content-center"
+  >
+    <i-tabler name="x" class="icon-20 d-flex"></i-tabler>
+  </button>
+</div>
+
+@if(action !== 'Delete') {
+<mat-dialog-content>
+  <form #userForm="ngForm">
+    <mat-label class="f-w-600 m-b-8 d-block">Descripcion</mat-label>
+    <mat-form-field appearance="outline" class="w-100">
+      <input
+        type="text"
+        matInput
+        required
+        name="direccion"
+        [(ngModel)]="local_data.descripcion"
+        placeholder="Descripción"
+      />
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-divider></mat-divider>
+<mat-dialog-actions>
+  <button
+    mat-flat-button
+    [mat-dialog-close]="true"
+    [disabled]="!userForm.form.valid"
+    color="primary"
+    (click)="doAction();"
+  >
+    Agregar Grupo
+  </button>
+  <button mat-flat-button class="bg-error text-white" mat-dialog-close>
+    Cancelar
+  </button>
+</mat-dialog-actions>
+}
+<!-- -------------------------------------------------------------- -->
+<!-- Delete Grupo info -->
+<!-- -------------------------------------------------------------- -->
+
+@else {
+<div class="p-x-24 m-y-8">
+  <p class="f-s-14">
+    Estas seguro de eliminar: <span class="f-w-600">{{local_data.descripcion}}</span> ?
+  </p>
+</div>
+<div mat-dialog-actions class="p-x-24 p-b-24">
+  <button (click)="doAction()" mat-flat-button>{{action}}</button>
+  <button
+    mat-flat-button
+    (click)="closeDialog()"
+    class="m-l-8 bg-error text-white"
+  >
+    Cancelar
+  </button>
+</div>
+}
