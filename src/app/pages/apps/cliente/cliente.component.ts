@@ -229,69 +229,69 @@ export class AppClienteComponent implements OnInit {
   templateUrl: 'cliente-edit/cliente-edit.component.html',
 })
 export class AppClienteDialogContentComponent implements OnInit {
+  // ----------------------------
+  // Dependencies & Services
+  // ----------------------------
   private readonly destroyRef = inject(DestroyRef);
+  private readonly grupoService = inject(GrupoService);
 
-  grupoService = inject(GrupoService);
+  // ----------------------------
+  // Signals & State
+  // ----------------------------
   grupos = signal<Grupo[]>([]);
+  rucErrorMessage = signal('');
+  razonSocialErrorMessage = signal('');
 
-  // Formularios reactivos con validación
+  // ----------------------------
+  // Reactive Form Controls
+  // ----------------------------
   readonly ruc = new FormControl('', [
     Validators.required,
     Validators.minLength(11),
     Validators.maxLength(11),
     Validators.pattern(/^\d+$/),
   ]);
-  rucErrorMessage = signal('');
 
   readonly razonsocial = new FormControl('', [Validators.required]);
-  razonSocialErrorMessage = signal('');
 
-  // Datos locales y utilidades
-  action: string;
-  local_data: Cliente | any;
+  // ----------------------------
+  // Data from Dialog
+  // ----------------------------
+  action!: string;
+  local_data!: Cliente;
   selectedFile: File | null = null;
 
+  // ----------------------------
+  // Utils (helpers)
+  // ----------------------------
   FormUtils = FormUtils;
   InputUtils = InputUtils;
 
+  // ----------------------------
+  // Constructor
+  // ----------------------------
   constructor(
     public dialogRef: MatDialogRef<AppClienteDialogContentComponent>,
     @Optional() @Inject(MAT_DIALOG_DATA) public data: ClienteData
   ) {
-    console.log('constructor data:', data)
-    // this.cargarGrupos();
-    // this.cargarGrupos();
-
-    // this.local_data = { ...data };
-    // this.action = this.local_data.action;
-
-    // FormUtils.registerControlValidation(
-    //   this.destroyRef,
-    //   this.ruc,
-    //   this.rucErrorMessage,
-    //   'RUC',
-    //   11
-    // );
-    // FormUtils.registerControlValidation(
-    //   this.destroyRef,
-    //   this.razonsocial,
-    //   this.razonSocialErrorMessage,
-    //   'Razón Social'
-    // );
+    console.log('constructor data:', data);
   }
 
+  // ----------------------------
+  // Lifecycle
+  // ----------------------------
   async ngOnInit(): Promise<void> {
-
     this.local_data = { ...this.data };
     this.action = this.local_data.action;
 
     await this.cargarGrupos();
 
-    // Ahora sí, el grupoId se asigna cuando ya hay opciones
+    // Set grupoId only if viene en data
     if (this.data?.grupoId != null) {
       this.local_data.grupoId = this.data.grupoId;
     }
 
+    // Register validations (con señales para errores)
     FormUtils.registerControlValidation(
       this.destroyRef,
       this.ruc,
@@ -307,7 +307,10 @@ export class AppClienteDialogContentComponent implements OnInit {
     );
   }
 
-  async cargarGrupos(): Promise<void> {
+  // ----------------------------
+  // Data Loading
+  // ----------------------------
+  private async cargarGrupos(): Promise<void> {
     try {
       const res = await firstValueFrom(this.grupoService.getsPaginated());
       const mapped = res.data.map((g) => ({
@@ -317,45 +320,32 @@ export class AppClienteDialogContentComponent implements OnInit {
 
       this.grupos.set(mapped);
     } catch (err) {
-      console.error(err);
+      console.error('Error cargando grupos:', err);
     }
   }
 
-  // cargarGrupos() {
-  //   this.grupoService.getsPaginated().subscribe({
-  //     next: (res) => {
-  //       const mapped = res.data.map((g) => ({
-  //         ...g,
-  //         isinactive: g.isinactive ? 'true' : 'false',
-  //       })) as Grupo[];
-
-  //       this.grupos.set(mapped);
-  //     },
-  //     error: (err) => console.error(err),
-  //   });
-  // }
-
-  // Acción principal para cerrar diálogo enviando datos (espera a la conversión de archivo)
+  // ----------------------------
+  // Actions
+  // ----------------------------
   async doAction(): Promise<void> {
-    // Si ya hay una imagen cargada, no hacemos nada
     if (!this.local_data.image) {
-      // Si no hay imagen cargada, usamos una por defecto
+      // default image si no se subió ninguna
       const defaultBase64 = await FileUtils.loadUrlAsBase64(
         'assets/images/profile/user-1.jpg'
       );
       this.local_data.image = defaultBase64;
     }
 
-    // Cierra el diálogo y envía los datos
     this.dialogRef.close({ event: this.action, data: this.local_data });
   }
 
-  // Cierra el diálogo sin cambios
   closeDialog(): void {
     this.dialogRef.close({ event: 'Cancel' });
   }
 
-  // Evento para seleccionar archivo e imprimir base64 en local_data.image
+  // ----------------------------
+  // File Handling
+  // ----------------------------
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
 
@@ -364,7 +354,7 @@ export class AppClienteDialogContentComponent implements OnInit {
       const reader = new FileReader();
 
       reader.onload = (e) => {
-        this.local_data.image = e.target?.result as string; // Base64 de imagen
+        this.local_data.image = e.target?.result as string; // Base64
       };
 
       reader.readAsDataURL(this.selectedFile);
