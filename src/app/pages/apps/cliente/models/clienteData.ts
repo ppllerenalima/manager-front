@@ -1,13 +1,5 @@
-export interface ClienteData {
+import { Cliente } from './cliente';
+
+export interface ClienteData extends Cliente {
   action: string;
-  ruc: string;
-  razonsocial: string;
-  numero: string;
-  direccion: string;
-  image: string;
-  clientId: string;
-  clientSecret: string;
-  username: string;
-  password: string;
-  grupoId: string;
 }

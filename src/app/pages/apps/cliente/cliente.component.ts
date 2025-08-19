@@ -63,7 +63,7 @@ export class AppClienteComponent implements OnInit {
   // Utilidades
   fileUtils = FileUtils;
 
-  constructor(private router: Router) { }
+  constructor(private router: Router) {}
 
   ngOnInit(): void {
     this.loadCliente();
@@ -75,7 +75,7 @@ export class AppClienteComponent implements OnInit {
       .getsPaginated(this.searchText(), this.pageSize, this.pageIndex)
       .subscribe({
         next: (res) => {
-          console.log('res.data', res.data)
+          console.log('res.data', res.data);
 
           this.cliente.set(res.data);
           this.totalItems.set(res.total);
@@ -100,7 +100,7 @@ export class AppClienteComponent implements OnInit {
   openDialog(action: string, obj: Cliente | any): void {
     obj.action = action;
 
-    console.log('openDialog obj:', obj)
+    console.log('openDialog obj:', obj);
     const dialogRef = this.dialog.open(AppClienteDialogContentComponent, {
       data: obj,
       autoFocus: false,
@@ -282,7 +282,7 @@ export class AppClienteDialogContentComponent implements OnInit {
   // ----------------------------
   async ngOnInit(): Promise<void> {
     this.local_data = { ...this.data };
-    this.action = this.local_data.action;
+    this.action = this.data.action;
 
     await this.cargarGrupos();
 
