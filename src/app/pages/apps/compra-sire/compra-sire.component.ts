@@ -9,15 +9,10 @@ import {
 } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDividerModule } from '@angular/material/divider';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { NgScrollbarModule } from 'ngx-scrollbar';
-import {
-  filter,
-  finalize,
-  Subject,
-  takeUntil,
-} from 'rxjs';
+import { filter, finalize, Subject, takeUntil } from 'rxjs';
 import { MaterialModule } from 'src/app/material.module';
 import { SireService } from 'src/app/services/apps/customer/sire-list/sire-list.service';
 import { registroSIRE } from '../customer/sire-list/listing/registroSIRE';
@@ -40,6 +35,7 @@ import { ArchivoReporteRequest } from './Models/Requests/ArchivoReporteRequest';
     NgScrollbarModule,
     MatDividerModule,
     InvoiceViewComponent,
+    RouterModule,
   ],
   templateUrl: './compra-sire.component.html',
   styleUrls: ['./compra-sire.component.css'],
@@ -105,7 +101,7 @@ export class AppCompraSireComponent implements OnInit {
     { value: 12, name: 'Diciembre' },
   ];
 
-  constructor(private route: ActivatedRoute) { }
+  constructor(private route: ActivatedRoute) {}
 
   /** ================================
    * 📌 7. INICIALIZACIÓN
@@ -278,7 +274,7 @@ export class AppCompraSireComponent implements OnInit {
       tipoComprobante: registro.tipoComprobante ?? '',
       serie: registro.serie ?? '',
       numero,
-      tipo: "01"
+      tipo: '01',
     };
 
     console.log('📤 Consultando comprobante:', request);
@@ -301,7 +297,7 @@ export class AppCompraSireComponent implements OnInit {
           // Si es exitoso, setear comprobante seleccionado
           this.selectedComprobante.set(registro);
           this.invoiceService.setSelectedComprobante(resp?.archivo || null);
-          this.invoiceService.setInfoComprobante(request)
+          this.invoiceService.setInfoComprobante(request);
         },
         error: (err) => {
           console.error('❌ Error al consultar CPE:', err);

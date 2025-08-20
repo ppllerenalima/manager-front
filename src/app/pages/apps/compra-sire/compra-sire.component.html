@@ -30,7 +30,7 @@
           color="primary"
           class="w-100 btn-block"
         >
-          {{ isLoading() ? 'Buscando...' : 'Búsqueda' }}
+          {{ isLoading() ? "Buscando..." : "Búsqueda" }}
         </button>
       </div>
       <ng-scrollbar
@@ -70,6 +70,15 @@
               >Person Info
             </h5>
           </div>
+        </div>
+        <div class="p-16">
+          <button
+            mat-flat-button
+            class="w-100 bg-warning text-white"
+            [routerLink]="'/apps/cliente'"
+          >
+            Regresar
+          </button>
         </div>
       </ng-scrollbar>
     </mat-sidenav>
