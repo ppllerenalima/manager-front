@@ -1,0 +1,15 @@
+:host {
+  display: block;
+}
+
+.mat-column-item {
+  width: 5%;
+}
+
+.mat-column-isInactive {
+  width: 7%;
+}
+
+.mat-column-actions {
+  width: 7%;
+}

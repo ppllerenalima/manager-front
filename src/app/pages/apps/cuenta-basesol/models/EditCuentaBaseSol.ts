@@ -4,5 +4,4 @@ export interface EditCuentaBaseSol {
   clientSecret: string;
   username: string;
   password: string;
-  isinactive: boolean;
 }

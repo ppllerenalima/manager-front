@@ -1,5 +1,11 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { AfterViewInit, Component, inject, OnInit, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  inject,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
@@ -13,6 +19,8 @@ import { TablerIconsModule } from 'angular-tabler-icons';
 import { CuentaBaseSolService } from 'src/app/services/apps/cuenta-basesol/cuenta-basesol.service';
 import { DialogCuentaBaseSolComponent } from './dialog-cuentabasesol/dialog-cuentabasesol.component';
 import { CuentaBaseSolPaginated } from './models/CuentaBaseSolPaginated';
+import { ConfirmationService } from 'src/app/services/apps/confirmation/confirmation.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-cuenta-basesol',
@@ -20,7 +28,6 @@ import { CuentaBaseSolPaginated } from './models/CuentaBaseSolPaginated';
   styleUrls: ['./cuenta-basesol.component.css'],
   imports: [
     CommonModule, // 👈 Necesario para directivas básicas y pipes
-    DatePipe, // 👈 Ahora puedes usar |date en tu HTML
     MatButtonModule, // 👈 Agregar este
 
     MatTableModule,
@@ -40,32 +47,26 @@ export class AppCuentaBasesolComponent implements OnInit, AfterViewInit {
     'clientSecret',
     'username',
     'password',
-    'estado',
+    'isInactive',
     'actions',
   ];
-  dataSource =
-    new MatTableDataSource<CuentaBaseSolPaginated>(
-      []
-    );
+  dataSource = new MatTableDataSource<CuentaBaseSolPaginated>([]);
 
   search: string = '';
   pageIndex: number = 0; // MatPaginator usa base 0
   pageSize: number = 10;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild(MatSort, { static: false }) sort!: MatSort;
 
   cuentaBaseSolService = inject(CuentaBaseSolService);
+  confirmationService = inject(ConfirmationService);
 
   isLoading = false;
 
   dialog = inject(MatDialog);
 
-  // 👇 propiedad para guardar el userId
-  private userId!: string;
-  private idEntidad!: number;
-
-  constructor(private router: Router, private route: ActivatedRoute) {}
+  constructor(private snackBar: MatSnackBar) {}
 
   ngOnInit() {
     this.load_CuentaBaseSols();
@@ -91,13 +92,10 @@ export class AppCuentaBasesolComponent implements OnInit, AfterViewInit {
     this.isLoading = true;
 
     this.cuentaBaseSolService
-      .getsPaginated(
-        this.search,
-        this.pageIndex + 1, // API espera base 1
-        this.pageSize,
-      )
+      .getsPaginated(this.search, this.pageSize, this.pageIndex)
       .subscribe({
         next: (res) => {
+          console.log('res.data', res.data);
           this.dataSource.data = res.data;
           this.dataSource.paginator = this.paginator;
           this.dataSource.sort = this.sort;
@@ -120,10 +118,7 @@ export class AppCuentaBasesolComponent implements OnInit, AfterViewInit {
     const open = (data: any) => {
       this.dialog
         .open(DialogCuentaBaseSolComponent, {
-          data: {
-            data, // lo que ya traes (puede ser null o un objeto con id, etc.)
-            userId: this.userId, // 👈 aquí agregas otro valor
-          },
+          data: data, // lo que ya traes (puede ser null o un objeto con id, etc.)
         })
         .afterClosed()
         .subscribe(() => {
@@ -144,7 +139,19 @@ export class AppCuentaBasesolComponent implements OnInit, AfterViewInit {
     }
   }
 
-  volverAUsuarios() {
-    this.router.navigate(['/pages/user']);
+  onSelectedDelete(id: string) {
+    this.confirmationService.confirmAndExecute(
+      '¡No podrás revertir esto!',
+      this.cuentaBaseSolService.delete(id),
+      (response) => {
+        this.snackBar.open(
+          'Se eliminó el resgistro Cuenta Base SOL',
+          'Cerrar',
+          { duration: 3000 }
+        );
+
+        this.load_CuentaBaseSols();
+      }
+    );
   }
 }

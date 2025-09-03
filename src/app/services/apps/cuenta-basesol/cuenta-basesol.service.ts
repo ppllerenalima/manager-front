@@ -9,14 +9,14 @@ import { PaginatedResponse } from 'src/app/shared/models/PaginatedResponse';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CuentaBaseSolService {
-  apiUrl = environment.apiUrl;
+  apiUrl = environment.apiUrl + '/CuentaBaseSol';
 
   http = inject(HttpClient);
 
-  constructor() { }
+  constructor() {}
 
   public getsPaginated(
     search?: string,
@@ -35,7 +35,10 @@ export class CuentaBaseSolService {
       params = params.set('pageIndex', pageIndex.toString());
     }
 
-    return this.http.get<PaginatedResponse<CuentaBaseSolPaginated>>(this.apiUrl, { params });
+    return this.http.get<PaginatedResponse<CuentaBaseSolPaginated>>(
+      this.apiUrl,
+      { params }
+    );
   }
 
   public add(addCuentaBaseSol: AddCuentaBaseSol): Observable<any> {
@@ -46,7 +49,10 @@ export class CuentaBaseSolService {
     return this.http.get<CuentaBaseSol>(`${this.apiUrl}/${id}`);
   }
 
-  public update(id: string, editCuentaBaseSol: EditCuentaBaseSol): Observable<any> {
+  public update(
+    id: string,
+    editCuentaBaseSol: EditCuentaBaseSol
+  ): Observable<any> {
     return this.http.put(`${this.apiUrl}/${id}`, editCuentaBaseSol);
   }
 

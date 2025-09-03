@@ -31,8 +31,8 @@ import { GrupoService } from 'src/app/services/apps/grupo/grupo.service';
 import { PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { AddGrupo } from '../models/AddGrupo';
-import { GrupoPaginated } from '../models/grupoPaginated';
 import { EditGrupo } from '../models/EditGrupo';
+import { GrupoPaginated } from '../models/GrupoPaginated';
 
 @Component({
   selector: 'app-grupo-list',
@@ -51,7 +51,8 @@ export class AppGrupoListComponent implements OnInit {
   dialog = inject(MatDialog);
   snackBar = inject(MatSnackBar);
   grupoService = inject(GrupoService);
-  grupoPaginated: MatTableDataSource<GrupoPaginated> = new MatTableDataSource<GrupoPaginated>();
+  grupoPaginated: MatTableDataSource<GrupoPaginated> =
+    new MatTableDataSource<GrupoPaginated>();
 
   searchText = signal<string>('');
 
@@ -159,7 +160,7 @@ export class AppGrupoListComponent implements OnInit {
     const editGrupo: EditGrupo = {
       id: row_obj.id,
       descripcion: row_obj.descripcion,
-      isinactive: row_obj.isinactive
+      isinactive: row_obj.isinactive,
     };
 
     this.grupoService.update(Id, editGrupo).subscribe({

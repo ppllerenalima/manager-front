@@ -43,6 +43,11 @@ export const navItems: NavItem[] = [
     route: 'apps/customers',
   },
   {
+    displayName: 'Cuenta-BaseSOL',
+    iconName: 'phone',
+    route: 'apps/cuenta-basesol',
+  },
+  {
     displayName: 'Grupo',
     iconName: 'file-invoice',
     route: '',
@@ -152,7 +157,8 @@ export const navItems: NavItem[] = [
       {
         displayName: 'Detail',
         iconName: 'point',
-        route: 'apps/blog/detail/Early Black Friday Amazon deals: cheap TVs, headphones, laptops',
+        route:
+          'apps/blog/detail/Early Black Friday Amazon deals: cheap TVs, headphones, laptops',
       },
     ],
   },
