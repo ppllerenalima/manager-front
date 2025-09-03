@@ -1,17 +1,17 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { GrupoPaginated } from 'src/app/pages/apps/grupo/models/grupoPaginated';
-import { AddGrupo } from 'src/app/pages/apps/grupo/models/AddGrupo';
-import { Grupo } from 'src/app/pages/apps/grupo/models/Grupo';
+import { AddCuentaBaseSol } from 'src/app/pages/apps/cuenta-basesol/models/AddCuentaBaseSol';
+import { CuentaBaseSol } from 'src/app/pages/apps/cuenta-basesol/models/CuentaBaseSol';
+import { CuentaBaseSolPaginated } from 'src/app/pages/apps/cuenta-basesol/models/CuentaBaseSolPaginated';
+import { EditCuentaBaseSol } from 'src/app/pages/apps/cuenta-basesol/models/EditCuentaBaseSol';
 import { PaginatedResponse } from 'src/app/shared/models/PaginatedResponse';
-import { EditGrupo } from 'src/app/pages/apps/grupo/models/EditGrupo';
 
 @Injectable({
   providedIn: 'root',
 })
-export class GrupoService {
-  private baseUrl = 'https://localhost:7149/api/Grupo'; // cambia por tu URL real
+export class CuentaBaseSolService {
+  private baseUrl = 'https://localhost:7149/api/CuentaBaseSol'; // cambia por tu URL real
 
   http = inject(HttpClient);
 
@@ -21,7 +21,7 @@ export class GrupoService {
     search?: string,
     pageSize?: number,
     pageIndex?: number
-  ): Observable<PaginatedResponse<GrupoPaginated>> {
+  ): Observable<PaginatedResponse<CuentaBaseSolPaginated>> {
     let params = new HttpParams();
 
     if (search) {
@@ -34,34 +34,19 @@ export class GrupoService {
       params = params.set('pageIndex', pageIndex.toString());
     }
 
-    return this.http.get<PaginatedResponse<GrupoPaginated>>(this.baseUrl, { params });
+    return this.http.get<PaginatedResponse<CuentaBaseSolPaginated>>(this.baseUrl, { params });
   }
 
-  // public getsPaginated(
-  //   search: string,
-  //   pageSize: number,
-  //   pageIndex: number
-  // ): Observable<PaginatedResponse<GrupoPaginated>> {
-  //   const params = new HttpParams()
-  //     .set('search', search)
-  //     .set('pageSize', pageSize)
-  //     .set('pageIndex', pageIndex);
-
-  //   return this.http.get<PaginatedResponse<GrupoPaginated>>(this.baseUrl, {
-  //     params,
-  //   });
-  // }
-
-  public add(addGrupo: AddGrupo): Observable<any> {
-    return this.http.post(this.baseUrl, addGrupo);
+  public add(addCuentaBaseSol: AddCuentaBaseSol): Observable<any> {
+    return this.http.post(this.baseUrl, addCuentaBaseSol);
   }
 
-  public getById(id: string): Observable<Grupo> {
-    return this.http.get<Grupo>(`${this.baseUrl}/${id}`);
+  public getById(id: string): Observable<CuentaBaseSol> {
+    return this.http.get<CuentaBaseSol>(`${this.baseUrl}/${id}`);
   }
 
-  public update(id: string, editGrupo: EditGrupo): Observable<any> {
-    return this.http.put(`${this.baseUrl}/${id}`, editGrupo);
+  public update(id: string, editCuentaBaseSol: EditCuentaBaseSol): Observable<any> {
+    return this.http.put(`${this.baseUrl}/${id}`, editCuentaBaseSol);
   }
 
   public delete(id: string): Observable<any> {
