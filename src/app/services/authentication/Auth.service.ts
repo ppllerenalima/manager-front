@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
+import { environment } from 'src/environments/environment';
 
 export interface SignInRequest {
   userName: string;
@@ -21,7 +22,7 @@ export interface TokenResponse {
 })
 export class AuthService {
   /** URL base de autenticación */
-  private apiUrl = 'https://localhost:7149/api/user/auth'; // Ajusta el puerto si es necesario
+  apiUrl = environment.apiUrl + '/User';
 
   /** Clave donde se guarda el token en localStorage */
   private readonly tokenKey = 'token';
@@ -32,7 +33,7 @@ export class AuthService {
   /** Estado reactivo de sesión (true si existe token) */
   isLoggedIn = signal<boolean>(!!localStorage.getItem(this.tokenKey));
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   // ──────────────── MÉTODOS DE AUTENTICACIÓN ────────────────
 
@@ -42,13 +43,11 @@ export class AuthService {
    * @returns Observable con el TokenResponse
    */
   signIn(request: SignInRequest): Observable<TokenResponse> {
-    return this.http.post<TokenResponse>(this.apiUrl, request).pipe(
-      tap((response) => {
-        if (response.accessToken) {
-          this.saveToken(response.accessToken);
-        }
-      })
-    );
+    return this.http
+      .post<TokenResponse>(`${this.apiUrl}/auth`, request)
+      .pipe(
+        tap(({ accessToken }) => accessToken && this.saveToken(accessToken))
+      );
   }
 
   /**

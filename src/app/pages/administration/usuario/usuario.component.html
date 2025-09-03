@@ -1,0 +1,189 @@
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <div class="row justify-content-between">
+      <div class="col-lg-4">
+        <mat-form-field appearance="outline" class="w-100 hide-hint">
+          <input
+            matInput
+            placeholder="Buscar Cuenta-BaseSol"
+            (keyup)="applyFilter($any($event.target).value)"
+          />
+          <mat-icon matSuffix>
+            <i-tabler name="search" class="icon-20"></i-tabler>
+          </mat-icon>
+        </mat-form-field>
+      </div>
+      <!-- <div class="col-lg-4 d-flex align-items-center justify-content-end"> -->
+      <div
+        class="d-flex flex-sm-row flex-column align-items-center justify-content-center gap-8"
+      >
+        <button mat-flat-button (click)="openDialog(null)" color="primary">
+          Nuevo
+        </button>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <div class="table-responsive">
+      <table
+        mat-table
+        [dataSource]="dataSource"
+        matSort
+        class="mat-elevation-z8"
+      >
+        <!-- Columna: Item -->
+        <ng-container matColumnDef="item">
+          <th
+            mat-header-cell
+            *matHeaderCellDef
+            mat-sort-header
+            class="f-s-16 f-w-600"
+          >
+            Item
+          </th>
+          <td mat-cell *matCellDef="let row; let i = index" class="f-s-14">
+            {{ i + 1 }}
+          </td>
+        </ng-container>
+
+        <!-- Columna: ClientId -->
+        <ng-container matColumnDef="clientId">
+          <th
+            mat-header-cell
+            *matHeaderCellDef
+            mat-sort-header
+            class="f-s-16 f-w-600"
+          >
+            ClientId
+          </th>
+          <td mat-cell *matCellDef="let row" class="f-s-14">
+            {{ row.clientId }}
+          </td>
+        </ng-container>
+
+        <!-- Columna: ClientSecret -->
+        <ng-container matColumnDef="clientSecret">
+          <th
+            mat-header-cell
+            *matHeaderCellDef
+            mat-sort-header
+            class="f-s-16 f-w-600"
+          >
+            ClientSecret
+          </th>
+          <td mat-cell *matCellDef="let row" class="f-s-14">
+            {{ row.clientSecret }}
+          </td>
+        </ng-container>
+
+        <!-- Columna: Username -->
+        <ng-container matColumnDef="username">
+          <th
+            mat-header-cell
+            *matHeaderCellDef
+            mat-sort-header
+            class="f-s-16 f-w-600"
+          >
+            Username
+          </th>
+          <td mat-cell *matCellDef="let row" class="f-s-14">
+            {{ row.username }}
+          </td>
+        </ng-container>
+
+        <!-- Columna: Password -->
+        <ng-container matColumnDef="password">
+          <th
+            mat-header-cell
+            *matHeaderCellDef
+            mat-sort-header
+            class="f-s-16 f-w-600"
+          >
+            Password
+          </th>
+          <td mat-cell *matCellDef="let row" class="f-s-14">
+            {{ row.password }}
+          </td>
+        </ng-container>
+
+        <!-- Columna: Estado -->
+        <ng-container matColumnDef="isInactive">
+          <th
+            mat-header-cell
+            *matHeaderCellDef
+            mat-sort-header
+            class="f-s-16 f-w-600"
+          >
+            Estado
+          </th>
+          <td mat-cell *matCellDef="let row" class="f-s-14">
+            @if (!row.isInactive) {
+            <span
+              class="bg-light-success text-success rounded f-w-600 p-6 p-y-4 f-s-14"
+              >Activo</span
+            >
+            } @else {
+            <span
+              class="bg-light-error text-error rounded f-w-600 p-6 p-y-4 f-s-14"
+              >Inactivo</span
+            >
+            }
+          </td>
+        </ng-container>
+
+        <!-- Columna: Acciones -->
+        <ng-container matColumnDef="actions">
+          <th
+            mat-header-cell
+            *matHeaderCellDef
+            mat-sort-header
+            class="f-s-16 f-w-600"
+          >
+            Acciones
+          </th>
+          <td mat-cell *matCellDef="let row" class="action-link">
+            <a
+              class="m-r-10 cursor-pointer"
+              matTooltip="Editar"
+              matTooltipPosition="above"
+              (click)="openDialog(row.id)"
+            >
+              <i-tabler name="edit" class="icon-18"></i-tabler>
+            </a>
+            <a
+              class="m-r-10 cursor-pointer"
+              matTooltip="Eliminar"
+              matTooltipPosition="below"
+              (click)="onSelectedDelete(row.id)"
+            >
+              <i-tabler name="trash" class="icon-18"></i-tabler>
+            </a>
+          </td>
+        </ng-container>
+
+        <!-- Filas -->
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+        <!-- 🔹 Fila vacía con matNoDataRow -->
+        <tr class="mat-row" *matNoDataRow>
+          <td
+            class="mat-cell text-center"
+            [attr.colspan]="displayedColumns.length"
+          >
+            <span class="f-s-14 f-w-500 text-muted">
+              No se encontraron registros
+            </span>
+          </td>
+        </tr>
+      </table>
+      <!-- Paginador -->
+      <mat-paginator
+        [pageSizeOptions]="[10, 15, 20]"
+        showFirstLastButtons
+      ></mat-paginator>
+    </div>
+  </mat-card-content>
+</mat-card>

@@ -1,29 +1,16 @@
 import { CommonModule } from '@angular/common';
-import {
-  AfterViewInit,
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCard, MatCardContent } from '@angular/material/card';
-import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
-import { MatSort, MatSortModule } from '@angular/material/sort';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TablerIconsModule } from 'angular-tabler-icons';
-import { CuentaBaseSolService } from 'src/app/services/apps/cuenta-basesol/cuenta-basesol.service';
-import { DialogCuentaBaseSolComponent } from './dialog-cuentabasesol/dialog-cuentabasesol.component';
-import { CuentaBaseSolPaginated } from './models/CuentaBaseSolPaginated';
-import { ConfirmationService } from 'src/app/services/apps/confirmation/confirmation.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
-  selector: 'app-cuenta-basesol',
+  selector: 'app-usuario',
   imports: [
     CommonModule, // 👈 Necesario para directivas básicas y pipes
     MatButtonModule, // 👈 Agregar este
@@ -37,17 +24,15 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     MatCardContent,
     TablerIconsModule,
   ],
-  templateUrl: './cuenta-basesol.component.html',
-  styleUrls: ['./cuenta-basesol.component.css'],
+  templateUrl: './usuario.component.html',
+  styleUrl: './usuario.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppCuentaBasesolComponent implements OnInit, AfterViewInit {
+export class UsuarioComponent implements OnInit, AfterViewInit {
   displayedColumns: string[] = [
     'item',
-    'clientId',
-    'clientSecret',
-    'username',
-    'password',
+    'persona',
+    'usuario',
     'isInactive',
     'actions',
   ];
@@ -156,3 +141,4 @@ export class AppCuentaBasesolComponent implements OnInit, AfterViewInit {
     );
   }
 }
+
