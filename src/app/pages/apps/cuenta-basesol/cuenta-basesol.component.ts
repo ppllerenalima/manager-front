@@ -7,9 +7,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
-import { MatTableModule } from '@angular/material/table';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TablerIconsModule } from 'angular-tabler-icons';
+import { CuentaBaseSolService } from 'src/app/services/apps/cuenta-basesol/cuenta-basesol.service';
+import { DialogCuentaBaseSolComponent } from './dialog-cuentabasesol/dialog-cuentabasesol.component';
+import { CuentaBaseSolPaginated } from './models/CuentaBaseSolPaginated';
 
 @Component({
   selector: 'app-cuenta-basesol',
@@ -30,7 +33,7 @@ import { TablerIconsModule } from 'angular-tabler-icons';
     TablerIconsModule,
   ],
 })
-export class CuentaBasesolComponent implements OnInit, AfterViewInit {
+export class AppCuentaBasesolComponent implements OnInit, AfterViewInit {
   displayedColumns: string[] = [
     'item',
     'clientId',
@@ -41,7 +44,7 @@ export class CuentaBasesolComponent implements OnInit, AfterViewInit {
     'actions',
   ];
   dataSource =
-    new MatTableDataSource<CuentaBaseSolPaginatedResponse>(
+    new MatTableDataSource<CuentaBaseSolPaginated>(
       []
     );
 
@@ -88,12 +91,10 @@ export class CuentaBasesolComponent implements OnInit, AfterViewInit {
     this.isLoading = true;
 
     this.cuentaBaseSolService
-      .getPaginado_UsuarioAsociadoUOs(
-        this.idEntidad,
+      .getsPaginated(
         this.search,
         this.pageIndex + 1, // API espera base 1
         this.pageSize,
-        this.userId
       )
       .subscribe({
         next: (res) => {
@@ -115,10 +116,10 @@ export class CuentaBasesolComponent implements OnInit, AfterViewInit {
     this.load_CuentaBaseSols();
   }
 
-  openDialog(id: number | null) {
+  openDialog(id: string | null) {
     const open = (data: any) => {
       this.dialog
-        .open(DialogUnidadorganicaUserComponent, {
+        .open(DialogCuentaBaseSolComponent, {
           data: {
             data, // lo que ya traes (puede ser null o un objeto con id, etc.)
             userId: this.userId, // 👈 aquí agregas otro valor
@@ -136,8 +137,8 @@ export class CuentaBasesolComponent implements OnInit, AfterViewInit {
       open(null);
     } else {
       // Editar → primero consultamos al backend
-      this.cuentaBaseSolService.get(id).subscribe({
-        next: (res) => open(res.data),
+      this.cuentaBaseSolService.getById(id).subscribe({
+        next: (res) => open(res),
         error: (err) => console.error('Error obteniendo usuario UO', err),
       });
     }

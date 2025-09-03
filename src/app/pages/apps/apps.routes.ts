@@ -27,6 +27,7 @@ import { AppSireInvoiceViewComponent } from './customer/sire-list/invoice-view/i
 import { AppClienteComponent } from './cliente/cliente.component';
 import { AppCompraSireComponent } from './compra-sire/compra-sire.component';
 import { AppGrupoListComponent } from './grupo/grupo-list/grupo-list.component';
+import { AppCuentaBasesolComponent } from './cuenta-basesol/cuenta-basesol.component';
 
 
 export const AppsRoutes: Routes = [
@@ -143,6 +144,17 @@ export const AppsRoutes: Routes = [
           urls: [
             { title: 'Dashboard', url: '/dashboards/dashboard1' },
             { title: 'Contacts' },
+          ],
+        },
+      },
+      {
+        path: 'cuenta-basesol',
+        component: AppCuentaBasesolComponent,
+        data: {
+          title: 'Cuenta-BaseSOL',
+          urls: [
+            { title: 'Dashboard', url: '/dashboards/dashboard1' },
+            { title: 'Cuenta-BaseSOL' },
           ],
         },
       },

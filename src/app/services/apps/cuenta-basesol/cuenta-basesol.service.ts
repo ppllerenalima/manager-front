@@ -1,13 +1,18 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { AddCuentaBaseSol } from 'src/app/pages/apps/cuenta-basesol/models/AddCuentaBaseSol';
+import { CuentaBaseSol } from 'src/app/pages/apps/cuenta-basesol/models/CuentaBaseSol';
+import { CuentaBaseSolPaginated } from 'src/app/pages/apps/cuenta-basesol/models/CuentaBaseSolPaginated';
+import { EditCuentaBaseSol } from 'src/app/pages/apps/cuenta-basesol/models/EditCuentaBaseSol';
 import { PaginatedResponse } from 'src/app/shared/models/PaginatedResponse';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
-export class CuentaBasesolService {
-  baseUrl = environment.baseUrl;
+export class CuentaBaseSolService {
+  apiUrl = environment.apiUrl;
 
   http = inject(HttpClient);
 
@@ -17,7 +22,7 @@ export class CuentaBasesolService {
     search?: string,
     pageSize?: number,
     pageIndex?: number
-  ): Observable<PaginatedResponse<GrupoPaginated>> {
+  ): Observable<PaginatedResponse<CuentaBaseSolPaginated>> {
     let params = new HttpParams();
 
     if (search) {
@@ -30,22 +35,22 @@ export class CuentaBasesolService {
       params = params.set('pageIndex', pageIndex.toString());
     }
 
-    return this.http.get<PaginatedResponse<GrupoPaginated>>(this.baseUrl, { params });
+    return this.http.get<PaginatedResponse<CuentaBaseSolPaginated>>(this.apiUrl, { params });
   }
 
-  public add(addCuentaBaseSol: AddGrupo): Observable<any> {
-    return this.http.post(this.baseUrl, addGrupo);
+  public add(addCuentaBaseSol: AddCuentaBaseSol): Observable<any> {
+    return this.http.post(this.apiUrl, addCuentaBaseSol);
   }
 
-  public getById(id: string): Observable<Grupo> {
-    return this.http.get<Grupo>(`${this.baseUrl}/${id}`);
+  public getById(id: string): Observable<CuentaBaseSol> {
+    return this.http.get<CuentaBaseSol>(`${this.apiUrl}/${id}`);
   }
 
-  public update(id: string, editCuentaBaseSol: EditGrupo): Observable<any> {
-    return this.http.put(`${this.baseUrl}/${id}`, editGrupo);
+  public update(id: string, editCuentaBaseSol: EditCuentaBaseSol): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}`, editCuentaBaseSol);
   }
 
   public delete(id: string): Observable<any> {
-    return this.http.delete(`${this.baseUrl}/${id}`);
+    return this.http.delete(`${this.apiUrl}/${id}`);
   }
 }
