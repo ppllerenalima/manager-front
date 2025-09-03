@@ -108,9 +108,9 @@ export class AppCuentaBasesolComponent implements OnInit, AfterViewInit {
       });
   }
 
-  applyFilter(event: Event) {
-    this.search = (event.target as HTMLInputElement).value.trim().toLowerCase();
-    this.pageIndex = 0; // reiniciamos a la primera página
+  applyFilter(value: string) {
+    this.search = value.trim().toLowerCase();
+    this.pageIndex = 0;
     this.load_CuentaBaseSols();
   }
 
