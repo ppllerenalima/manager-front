@@ -1,8 +1,9 @@
 export interface Usuario {
   id: string;
-  clientId: string;
-  clientSecret: string;
-  username: string;
-  password: string;
-  isinactive: string;
+  userName: string;
+  email: string;
+
+  apePaterno: string;
+  apeMaterno: string;
+  nombre: string;
 }

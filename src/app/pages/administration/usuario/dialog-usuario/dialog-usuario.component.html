@@ -1,0 +1,112 @@
+<h2 mat-dialog-title class="m-b-24">{{ titulo }}</h2>
+
+<mat-divider></mat-divider>
+<mat-dialog-content class="mat-typography" style="max-width: 600px">
+  <form [formGroup]="usuarioForm" (ngSubmit)="onSubmit()">
+    <div class="row">
+      <div class="col-md-6">
+        <mat-label class="f-w-600 m-b-8 d-block">Apellido Paterno</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <input
+            type="text"
+            matInput
+            formControlName="apePaterno"
+            placeholder="Apellido Paterno"
+          />
+          <mat-error
+            *ngIf="usuarioForm.get('apePaterno')?.hasError('required')"
+          >
+            A. Paterno es obligatorio
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div class="col-md-6">
+        <mat-label class="f-w-600 m-b-8 d-block">Apellido Materno</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <input
+            type="text"
+            matInput
+            formControlName="apeMaterno"
+            placeholder="Apellido Materno"
+          />
+          <mat-error
+            *ngIf="usuarioForm.get('apeMaterno')?.hasError('required')"
+          >
+            A. Materno es obligatorio
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <mat-label class="f-w-600 m-b-8 d-block">Nombre(s)</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <input
+            type="text"
+            matInput
+            formControlName="nombre"
+            placeholder="Nombre(s)"
+          />
+          <mat-error
+            *ngIf="usuarioForm.get('nombre')?.hasError('required')"
+          >
+            Nombre es obligatorio
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-4">
+        <mat-label class="f-w-600 m-b-8 d-block">Usuario</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <input
+            type="text"
+            matInput
+            formControlName="userName"
+            placeholder="Usuario"
+          />
+          <mat-error
+            *ngIf="usuarioForm.get('userName')?.hasError('required')"
+          >
+            Usuario es obligatorio
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div class="col-md-8">
+        <mat-label class="f-w-600 m-b-8 d-block">Email</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <input
+            type="email"
+            matInput
+            formControlName="email"
+            placeholder="Email"
+          />
+          <mat-error
+            *ngIf="usuarioForm.get('email')?.hasError('required')"
+          >
+            Email es obligatoria
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+
+  </form>
+</mat-dialog-content>
+
+<mat-divider></mat-divider>
+<mat-dialog-actions class="p-24">
+  <button
+    mat-flat-button
+    type="submit"
+    color="primary"
+    [mat-dialog-close]="true"
+    [disabled]="usuarioForm.invalid"
+    (click)="onSubmit()"
+  >
+    Guardar
+  </button>
+  <button mat-flat-button class="bg-error text-white" mat-dialog-close>
+    Cancelar
+  </button>
+</mat-dialog-actions>

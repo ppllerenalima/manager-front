@@ -1,7 +1,9 @@
 export interface EditUsuario {
   id: string;
-  clientId: string;
-  clientSecret: string;
-  username: string;
-  password: string;
+  userName: string;
+  email: string;
+
+  apePaterno: string;
+  apeMaterno: string;
+  nombre: string;
 }

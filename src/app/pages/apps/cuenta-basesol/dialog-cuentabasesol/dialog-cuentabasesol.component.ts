@@ -23,8 +23,6 @@ import { TablerIconsModule } from 'angular-tabler-icons';
 import { MaterialModule } from 'src/app/material.module';
 import { CuentaBaseSolService } from 'src/app/services/apps/cuenta-basesol/cuenta-basesol.service';
 import { CuentaBaseSol } from '../models/CuentaBaseSol';
-import { AddCuentaBaseSol } from '../models/AddCuentaBaseSol';
-import { EditCuentaBaseSol } from '../models/EditCuentaBaseSol';
 
 interface CuentaBaseSolForm {
   clientId: FormControl<string | null>;

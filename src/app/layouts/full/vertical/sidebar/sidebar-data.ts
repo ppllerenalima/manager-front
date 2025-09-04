@@ -7,7 +7,7 @@ export const navItems: NavItem[] = [
   {
     displayName: 'Usuario',
     iconName: 'aperture',
-    route: '/administration/usuario',
+    route: 'administration/usuario',
   },
   // {
   //   displayName: 'eCommerce',

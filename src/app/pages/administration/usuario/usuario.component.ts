@@ -44,8 +44,8 @@ import { DialogUsuarioComponent } from './dialog-usuario/dialog-usuario.componen
 export class AppUsuarioComponent implements OnInit, AfterViewInit {
   displayedColumns: string[] = [
     'item',
-    'persona',
-    'usuario',
+    'nombreCompleto',
+    'userName',
     'isInactive',
     'actions',
   ];

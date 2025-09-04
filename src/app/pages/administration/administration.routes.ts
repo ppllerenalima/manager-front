@@ -13,7 +13,7 @@ export const AdministrationRoutes: Routes = [
           title: 'Usuario',
           urls: [
             { title: 'Dashboard', url: '/dashboards/dashboard1' },
-            { title: 'usuario' },
+            { title: 'Usuario' },
           ],
         },
       },
