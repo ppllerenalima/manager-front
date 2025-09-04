@@ -1,4 +1,4 @@
-export interface CuentaBaseSol {
+export interface Usuario {
   id: string;
   clientId: string;
   clientSecret: string;

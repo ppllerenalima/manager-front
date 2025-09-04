@@ -37,6 +37,13 @@ export const routes: Routes = [
           import('./pages/charts/charts.routes').then((m) => m.ChartsRoutes),
       },
       {
+        path: 'administration',
+        loadChildren: () =>
+          import('./pages/administration/administration.routes').then(
+            (m) => m.AdministrationRoutes
+          ),
+      },
+      {
         path: 'apps',
         loadChildren: () =>
           import('./pages/apps/apps.routes').then((m) => m.AppsRoutes),

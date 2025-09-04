@@ -1,4 +1,4 @@
-export interface EditCuentaBaseSol {
+export interface EditUsuario {
   id: string;
   clientId: string;
   clientSecret: string;

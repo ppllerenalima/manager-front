@@ -1,6 +1,9 @@
 export interface UsuarioPaginated {
   id: string;
-  persona: string;
-  usuario: string;
-  isinactive: boolean;
+  apePaterno: string;
+  apeMaterno: string;
+  nombre: string;
+  nombreCompleto: string;
+  userName: string;
+  isInactive: boolean;
 }

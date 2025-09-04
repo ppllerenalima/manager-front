@@ -1,13 +1,26 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatPaginatorModule } from '@angular/material/paginator';
-import { MatSortModule } from '@angular/material/sort';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TablerIconsModule } from 'angular-tabler-icons';
+import { UsuarioPaginated } from './models/UsuarioPaginated';
+import { ConfirmationService } from 'src/app/services/apps/confirmation/confirmation.service';
+import { UsuarioService } from 'src/app/services/apps/usuario/usuario.service';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { DialogUsuarioComponent } from './dialog-usuario/dialog-usuario.component';
 
 @Component({
   selector: 'app-usuario',
@@ -28,7 +41,7 @@ import { TablerIconsModule } from 'angular-tabler-icons';
   styleUrl: './usuario.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class UsuarioComponent implements OnInit, AfterViewInit {
+export class AppUsuarioComponent implements OnInit, AfterViewInit {
   displayedColumns: string[] = [
     'item',
     'persona',
@@ -36,7 +49,7 @@ export class UsuarioComponent implements OnInit, AfterViewInit {
     'isInactive',
     'actions',
   ];
-  dataSource = new MatTableDataSource<CuentaBaseSolPaginated>([]);
+  dataSource = new MatTableDataSource<UsuarioPaginated>([]);
 
   search: string = '';
   pageIndex: number = 0; // MatPaginator usa base 0
@@ -45,7 +58,7 @@ export class UsuarioComponent implements OnInit, AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort, { static: false }) sort!: MatSort;
 
-  cuentaBaseSolService = inject(CuentaBaseSolService);
+  usuarioService = inject(UsuarioService);
   confirmationService = inject(ConfirmationService);
 
   isLoading = false;
@@ -55,7 +68,7 @@ export class UsuarioComponent implements OnInit, AfterViewInit {
   constructor(private snackBar: MatSnackBar) {}
 
   ngOnInit() {
-    this.load_CuentaBaseSols();
+    this.load_Usuarios();
   }
 
   ngAfterViewInit() {
@@ -63,21 +76,21 @@ export class UsuarioComponent implements OnInit, AfterViewInit {
     this.paginator.page.subscribe(() => {
       this.pageIndex = this.paginator.pageIndex;
       this.pageSize = this.paginator.pageSize;
-      this.load_CuentaBaseSols();
+      this.load_Usuarios();
     });
 
     // 📌 Ordenamiento
     this.sort.sortChange.subscribe(() => {
       // cuando cambie el orden reiniciamos a la primera página
       this.pageIndex = 0;
-      this.load_CuentaBaseSols();
+      this.load_Usuarios();
     });
   }
 
-  load_CuentaBaseSols(): void {
+  load_Usuarios(): void {
     this.isLoading = true;
 
-    this.cuentaBaseSolService
+    this.usuarioService
       .getsPaginated(this.search, this.pageSize, this.pageIndex)
       .subscribe({
         next: (res) => {
@@ -97,19 +110,19 @@ export class UsuarioComponent implements OnInit, AfterViewInit {
   applyFilter(value: string) {
     this.search = value.trim().toLowerCase();
     this.pageIndex = 0;
-    this.load_CuentaBaseSols();
+    this.load_Usuarios();
   }
 
   openDialog(id: string | null) {
     const open = (data: any) => {
       this.dialog
-        .open(DialogCuentaBaseSolComponent, {
+        .open(DialogUsuarioComponent, {
           data: data, // lo que ya traes (puede ser null o un objeto con id, etc.)
         })
         .afterClosed()
         .subscribe(() => {
           // refrescar si es necesario
-          this.load_CuentaBaseSols();
+          this.load_Usuarios();
         });
     };
 
@@ -118,7 +131,7 @@ export class UsuarioComponent implements OnInit, AfterViewInit {
       open(null);
     } else {
       // Editar → primero consultamos al backend
-      this.cuentaBaseSolService.getById(id).subscribe({
+      this.usuarioService.getById(id).subscribe({
         next: (res) => open(res),
         error: (err) => console.error('Error obteniendo usuario UO', err),
       });
@@ -128,7 +141,7 @@ export class UsuarioComponent implements OnInit, AfterViewInit {
   onSelectedDelete(id: string) {
     this.confirmationService.confirmAndExecute(
       '¡No podrás revertir esto!',
-      this.cuentaBaseSolService.delete(id),
+      this.usuarioService.delete(id),
       (response) => {
         this.snackBar.open(
           'Se eliminó el resgistro Cuenta Base SOL',
@@ -136,9 +149,8 @@ export class UsuarioComponent implements OnInit, AfterViewInit {
           { duration: 3000 }
         );
 
-        this.load_CuentaBaseSols();
+        this.load_Usuarios();
       }
     );
   }
 }
-
