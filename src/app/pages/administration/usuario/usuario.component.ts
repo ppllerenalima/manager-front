@@ -17,7 +17,7 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { UsuarioPaginated } from './models/UsuarioPaginated';
 import { ConfirmationService } from 'src/app/services/apps/confirmation/confirmation.service';
-import { UsuarioService } from 'src/app/services/apps/usuario/usuario.service';
+import { UsuarioService } from 'src/app/services/administration/usuario/usuario.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogUsuarioComponent } from './dialog-usuario/dialog-usuario.component';
@@ -61,8 +61,6 @@ export class AppUsuarioComponent implements OnInit, AfterViewInit {
   usuarioService = inject(UsuarioService);
   confirmationService = inject(ConfirmationService);
 
-  isLoading = false;
-
   dialog = inject(MatDialog);
 
   constructor(private snackBar: MatSnackBar) {}
@@ -88,17 +86,13 @@ export class AppUsuarioComponent implements OnInit, AfterViewInit {
   }
 
   load_Usuarios(): void {
-    this.isLoading = true;
-
     this.usuarioService
       .getsPaginated(this.search, this.pageSize, this.pageIndex)
       .subscribe({
         next: (res) => {
-          console.log('res.data', res.data);
           this.dataSource.data = res.data;
           this.dataSource.paginator = this.paginator;
           this.dataSource.sort = this.sort;
-          this.isLoading = false;
         },
         error: (err) => {
           console.error('Error al obtener aplicaciones', err);
@@ -120,9 +114,15 @@ export class AppUsuarioComponent implements OnInit, AfterViewInit {
           data: data, // lo que ya traes (puede ser null o un objeto con id, etc.)
         })
         .afterClosed()
-        .subscribe(() => {
+        .subscribe((result) => {
           // refrescar si es necesario
-          this.load_Usuarios();
+          if (result) {
+            // puedes refrescar todo...
+            this.load_Usuarios();
+
+            // ...o simplemente agregarlo directo a tu lista
+            // this.usuarios.push(result);
+          }
         });
     };
 
@@ -141,15 +141,16 @@ export class AppUsuarioComponent implements OnInit, AfterViewInit {
   onSelectedDelete(id: string) {
     this.confirmationService.confirmAndExecute(
       '¡No podrás revertir esto!',
-      this.usuarioService.delete(id),
-      (response) => {
-        this.snackBar.open(
-          'Se eliminó el resgistro Cuenta Base SOL',
-          'Cerrar',
-          { duration: 3000 }
-        );
+      this.usuarioService.delete(id), // 👈 ahora devuelve Observable<void>
+      () => {
+        // ✅ no hay response porque el backend devuelve 204
+        this.snackBar.open('¡Usuario eliminado exitosamente!', 'Cerrar', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+        });
 
-        this.load_Usuarios();
+        this.load_Usuarios(); // 🔄 refrescar lista
       }
     );
   }

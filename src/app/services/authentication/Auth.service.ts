@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
+import { jwtDecode } from 'jwt-decode';
 import { Observable, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
@@ -15,6 +16,14 @@ export interface TokenResponse {
   fechaExpiracion: string;
   isInactive: boolean;
   clienteId: string;
+}
+
+export interface JwtPayload {
+  sub: string; // id del usuario (si lo incluyes en el token)
+  email?: string; // email
+  unique_name?: string; // username
+  role?: string; // rol (si lo incluyes en claims)
+  exp?: number; // fecha de expiración
 }
 
 @Injectable({
@@ -73,6 +82,15 @@ export class AuthService {
    */
   getToken(): string | null {
     return localStorage.getItem(this.tokenKey);
+  }
+
+  /**
+   * Devuelve el token decodificado como objeto (claims del JWT)
+   * o null si no existe.
+   */
+  getDecodedToken(): JwtPayload | null {
+    const token = localStorage.getItem(this.tokenKey);
+    return token ? jwtDecode<JwtPayload>(token) : null;
   }
 
   /**

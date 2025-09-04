@@ -47,9 +47,7 @@
             formControlName="nombre"
             placeholder="Nombre(s)"
           />
-          <mat-error
-            *ngIf="usuarioForm.get('nombre')?.hasError('required')"
-          >
+          <mat-error *ngIf="usuarioForm.get('nombre')?.hasError('required')">
             Nombre es obligatorio
           </mat-error>
         </mat-form-field>
@@ -65,9 +63,7 @@
             formControlName="userName"
             placeholder="Usuario"
           />
-          <mat-error
-            *ngIf="usuarioForm.get('userName')?.hasError('required')"
-          >
+          <mat-error *ngIf="usuarioForm.get('userName')?.hasError('required')">
             Usuario es obligatorio
           </mat-error>
         </mat-form-field>
@@ -81,16 +77,12 @@
             formControlName="email"
             placeholder="Email"
           />
-          <mat-error
-            *ngIf="usuarioForm.get('email')?.hasError('required')"
-          >
+          <mat-error *ngIf="usuarioForm.get('email')?.hasError('required')">
             Email es obligatoria
           </mat-error>
         </mat-form-field>
       </div>
     </div>
-
-
   </form>
 </mat-dialog-content>
 
@@ -100,12 +92,12 @@
     mat-flat-button
     type="submit"
     color="primary"
-    [mat-dialog-close]="true"
     [disabled]="usuarioForm.invalid"
     (click)="onSubmit()"
   >
     Guardar
   </button>
+
   <button mat-flat-button class="bg-error text-white" mat-dialog-close>
     Cancelar
   </button>

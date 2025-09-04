@@ -4,6 +4,7 @@ import {
   EventEmitter,
   Input,
   ViewEncapsulation,
+  inject,
 } from '@angular/core';
 import { CoreService } from 'src/app/services/core.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -57,7 +58,7 @@ interface quicklinks {
     MaterialModule,
   ],
   templateUrl: './header.component.html',
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
 })
 export class HeaderComponent {
   @Input() showToggle = true;
@@ -101,6 +102,10 @@ export class HeaderComponent {
 
   @Output() optionsChange = new EventEmitter<AppSettings>();
 
+  // 👇 Aquí guardamos lo que saquemos del token
+  currentUserName: string | null = null;
+  currentEmail: string | null = null;
+
   constructor(
     private settings: CoreService,
     private vsidenav: CoreService,
@@ -110,6 +115,13 @@ export class HeaderComponent {
     private router: Router
   ) {
     translate.setDefaultLang('en');
+
+    // 👇 Al construir el componente leemos el token decodificado
+    const decoded = this.authService.getDecodedToken();
+    if (decoded) {
+      this.currentUserName = decoded['unique_name'] ?? null; // depende de qué claim guardaste
+      this.currentEmail = decoded['email'] ?? null;
+    }
   }
 
   logout() {
@@ -304,7 +316,7 @@ export class HeaderComponent {
 @Component({
   selector: 'search-dialog',
   imports: [RouterModule, MaterialModule, TablerIconsModule, FormsModule],
-  templateUrl: 'search-dialog.component.html'
+  templateUrl: 'search-dialog.component.html',
 })
 export class AppSearchDialogComponent {
   searchText: string = '';
@@ -316,10 +328,7 @@ export class AppSearchDialogComponent {
   //   return obj.displayName == this.searchinput;
   // });
 
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) { }
+  constructor(private authService: AuthService, private router: Router) {}
 
   logout() {
     this.authService.logout(); // 👈 Borra el token y actualiza estado
