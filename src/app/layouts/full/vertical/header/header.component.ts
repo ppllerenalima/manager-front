@@ -4,7 +4,6 @@ import {
   EventEmitter,
   Input,
   ViewEncapsulation,
-  inject,
 } from '@angular/core';
 import { CoreService } from 'src/app/services/core.service';
 import { MatDialog } from '@angular/material/dialog';
