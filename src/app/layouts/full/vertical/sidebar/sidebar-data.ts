@@ -9,6 +9,11 @@ export const navItems: NavItem[] = [
     iconName: 'aperture',
     route: 'administration/usuario',
   },
+  {
+    displayName: 'Cuenta-BaseSOL',
+    iconName: 'phone',
+    route: 'administration/cuenta-basesol',
+  },
   // {
   //   displayName: 'eCommerce',
   //   iconName: 'shopping-cart',
@@ -42,11 +47,7 @@ export const navItems: NavItem[] = [
   //   iconName: 'phone',
   //   route: 'apps/customers',
   // },
-  {
-    displayName: 'Cuenta-BaseSOL',
-    iconName: 'phone',
-    route: 'apps/cuenta-basesol',
-  },
+
   {
     displayName: 'Grupo',
     iconName: 'file-invoice',

@@ -1,10 +1,10 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { AddCuentaBaseSol } from 'src/app/pages/apps/cuenta-basesol/models/AddCuentaBaseSol';
-import { CuentaBaseSol } from 'src/app/pages/apps/cuenta-basesol/models/CuentaBaseSol';
-import { CuentaBaseSolPaginated } from 'src/app/pages/apps/cuenta-basesol/models/CuentaBaseSolPaginated';
-import { EditCuentaBaseSol } from 'src/app/pages/apps/cuenta-basesol/models/EditCuentaBaseSol';
+import { AddCuentaBaseSol } from 'src/app/pages/administration/cuenta-basesol/models/AddCuentaBaseSol';
+import { CuentaBaseSol } from 'src/app/pages/administration/cuenta-basesol/models/CuentaBaseSol';
+import { CuentaBaseSolPaginated } from 'src/app/pages/administration/cuenta-basesol/models/CuentaBaseSolPaginated';
+import { EditCuentaBaseSol } from 'src/app/pages/administration/cuenta-basesol/models/EditCuentaBaseSol';
 import { PaginatedResponse } from 'src/app/shared/models/PaginatedResponse';
 import { environment } from 'src/environments/environment';
 
