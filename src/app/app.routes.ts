@@ -11,7 +11,7 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        redirectTo: '/dashboards/dashboard1',
+        redirectTo: '/apps/cliente',
         pathMatch: 'full',
       },
       {
