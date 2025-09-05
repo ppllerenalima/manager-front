@@ -1,0 +1,8 @@
+export interface RoleData {
+  id: string;
+  clientId: string;
+  clientSecret: string;
+  username: string;
+  password: string;
+  isinactive: boolean;
+}

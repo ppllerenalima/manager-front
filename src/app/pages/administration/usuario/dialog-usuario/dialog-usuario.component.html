@@ -83,6 +83,21 @@
         </mat-form-field>
       </div>
     </div>
+    <div class="row">
+      <div class="col-md-6">
+        <mat-label class="f-w-600 m-b-8 d-block">Rol</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-select formControlName="roleId" placeholder="Seleccione un rol">
+            <mat-option *ngFor="let rol of roles" [value]="rol.id">
+              {{ rol.name }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="usuarioForm.get('roleId')?.hasError('required')">
+            Rol es obligatorio
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
   </form>
 </mat-dialog-content>
 

@@ -29,6 +29,7 @@ import { MaterialModule } from 'src/app/material.module';
 import { UsuarioService } from 'src/app/services/administration/usuario/usuario.service';
 import { Usuario } from '../models/Usuario';
 import { finalize } from 'rxjs';
+import { RoleService } from 'src/app/services/administration/role/role.service';
 
 interface UsuarioForm {
   userName: FormControl<string | null>;
@@ -38,6 +39,8 @@ interface UsuarioForm {
   apePaterno: FormControl<string | null>;
   apeMaterno: FormControl<string | null>;
   nombre: FormControl<string | null>;
+
+  roleId: FormControl<string | null>;
 }
 
 @Component({
@@ -71,16 +74,20 @@ export class DialogUsuarioComponent implements OnInit {
     userName: this.fb.control<string | null>(null, Validators.required),
     email: this.fb.control<string | null>(null, Validators.required),
     personaId: this.fb.control<string | null>(null),
+
     apePaterno: this.fb.control<string | null>(null, Validators.required),
     apeMaterno: this.fb.control<string | null>(null, Validators.required),
     nombre: this.fb.control<string | null>(null, Validators.required),
+
+    roleId: this.fb.control<string | null>(null, Validators.required),// 👈 Nuevo control para rol
   });
 
   usuarioService = inject(UsuarioService);
+  roleService = inject(RoleService);
 
   titulo = '';
 
-  // saving = false;
+  roles: any[] = [];
 
   private UsuarioId!: string;
 
@@ -88,7 +95,7 @@ export class DialogUsuarioComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) private data: Usuario, // UnidadOrganicaUsuario,
     private fb: FormBuilder,
     private snackBar: MatSnackBar
-  ) {}
+  ) { }
 
   async ngOnInit(): Promise<void> {
     const esEdicion = !!this.data?.id;
@@ -101,6 +108,13 @@ export class DialogUsuarioComponent implements OnInit {
       this.prepararEdicion(this.data!);
     }
   }
+
+  // load_Roles(): void {
+  //   this.roleService.getRoles().subscribe({
+  //     next: (data) => this.roles = data,
+  //     error: (err) => console.error('Error cargando roles', err)
+  //   });
+  // }
 
   private prepararEdicion(data: Usuario): void {
     console.log('data', data);
@@ -134,9 +148,9 @@ export class DialogUsuarioComponent implements OnInit {
     // 🔹 si es edición incluimos el id
     const request$ = esEdicion
       ? this.usuarioService.update(this.data.id, {
-          id: this.data.id,
-          ...payload,
-        })
+        id: this.data.id,
+        ...payload,
+      })
       : this.usuarioService.add(payload);
 
     request$.subscribe({
