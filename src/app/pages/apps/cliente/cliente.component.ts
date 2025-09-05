@@ -66,11 +66,11 @@ export class AppClienteComponent implements OnInit {
   constructor(private router: Router) {}
 
   ngOnInit(): void {
-    this.loadCliente();
+    this.load_Clientes();
   }
 
   // Carga la lista de clientes paginada
-  loadCliente() {
+  load_Clientes() {
     this.clienteService
       .getsPaginated(this.searchText(), this.pageSize, this.pageIndex)
       .subscribe({
@@ -93,7 +93,7 @@ export class AppClienteComponent implements OnInit {
   onPageChange(event: PageEvent) {
     this.pageSize = event.pageSize;
     this.pageIndex = event.pageIndex;
-    this.loadCliente();
+    this.load_Clientes();
   }
 
   // Abre el diálogo para agregar o editar un cliente
@@ -128,10 +128,6 @@ export class AppClienteComponent implements OnInit {
   }
 
   goToCompras(cliente: Cliente): void {
-    console.log('goToCompras');
-
-    console.log('cliente.id', cliente.id);
-    // Navegación solo con el ID
     this.router.navigate(['/apps/compra-sire', cliente.id]);
   }
 
@@ -140,7 +136,7 @@ export class AppClienteComponent implements OnInit {
     const filterValue = (event.target as HTMLInputElement).value;
     this.searchText.set(filterValue);
     // Implementar filtrado si es necesario
-    this.loadCliente();
+    this.load_Clientes();
   }
 
   addCliente(row_obj: any): void {
@@ -155,11 +151,12 @@ export class AppClienteComponent implements OnInit {
       username: row_obj.username,
       password: row_obj.password,
       grupoId: row_obj.grupoId,
+      grupo: row_obj.grupo,
     };
 
     this.clienteService.add(newCliente).subscribe({
       next: () => {
-        this.loadCliente();
+        this.load_Clientes();
         this.snackBar.open('¡Nuevo cliente añadido exitosamente!', 'Close', {
           duration: 3000,
           horizontalPosition: 'center',
@@ -178,7 +175,7 @@ export class AppClienteComponent implements OnInit {
   updateCliente(Id: string, cliente: Cliente): void {
     this.clienteService.update(Id, cliente).subscribe({
       next: () => {
-        this.loadCliente();
+        this.load_Clientes();
         this.snackBar.open('¡Cliente actualizado exitosamente!', 'Cerrar', {
           duration: 3000,
           horizontalPosition: 'center',
@@ -197,7 +194,7 @@ export class AppClienteComponent implements OnInit {
   deleteCliente(Id: string): void {
     this.clienteService.delete(Id).subscribe({
       next: () => {
-        this.loadCliente();
+        this.load_Clientes();
         this.snackBar.open('¡Cliente actualizado exitosamente!', 'Cerrar', {
           duration: 3000,
           horizontalPosition: 'center',

@@ -1,5 +1,5 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
   BehaviorSubject,
   distinctUntilChanged,
@@ -11,6 +11,7 @@ import { ConsultaCpeRequest } from 'src/app/pages/apps/invoice-view/Models/Reque
 import { ControlCpeConsultaXmlRequest } from 'src/app/pages/apps/invoice-view/Models/Requests/ControlCpeConsultaXmlRequest';
 import { ConsultaCpeComprobanteResponse } from 'src/app/pages/apps/invoice-view/Models/Responses/ConsultaCpeComprobanteResponse ';
 import { ConsultaCpeUnificadoResponse } from 'src/app/pages/apps/invoice-view/Models/Responses/ConsultaCpeUnificadoResponse';
+import { environment } from 'src/environments/environment';
 /**
  * Interface para la solicitud de consulta del estado del CPE (Comprobante de Pago Electrónico).
  */
@@ -38,7 +39,8 @@ export interface ConsultaTipoZipRequest {
 })
 export class InvoiceService {
   // URL base del backend (ajustar según entorno real)
-  private baseUrl = 'https://localhost:7149/api/Cpe';
+  apiUrl = environment.apiUrl + '/Cpe';
+  http = inject(HttpClient);
 
   private selectedComprobanteSubject = new BehaviorSubject<string | null>(null);
 
@@ -74,7 +76,7 @@ export class InvoiceService {
     new BehaviorSubject<ConsultaCpeRequest | null>(null);
   infoComprobante$ = this.infoComprobanteSubject.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor() {}
 
   setInfoComprobante(registro: ConsultaCpeRequest): void {
     this.infoComprobanteSubject.next(registro);
@@ -85,7 +87,7 @@ export class InvoiceService {
   }
 
   statusCdr(request: ConsultarCpeRequest): Observable<any> {
-    return this.http.post(`${this.baseUrl}/status-cdr`, request);
+    return this.http.post(`${this.apiUrl}/status-cdr`, request);
   }
 
   controlCpeConsultaXml(
@@ -97,7 +99,7 @@ export class InvoiceService {
     });
 
     return this.http.post<ConsultaCpeComprobanteResponse>(
-      `${this.baseUrl}/controlcpe-consultaxml`,
+      `${this.apiUrl}/controlcpe-consultaxml`,
       request,
       { headers }
     );
@@ -107,7 +109,7 @@ export class InvoiceService {
     request: ConsultaCpeRequest
   ): Observable<ConsultaCpeComprobanteResponse> {
     return this.http.post<ConsultaCpeComprobanteResponse>(
-      `${this.baseUrl}/consultacpe-comprobante`,
+      `${this.apiUrl}/consultacpe-comprobante`,
       request
     );
   }
@@ -116,7 +118,7 @@ export class InvoiceService {
     request: ConsultaCpeRequest
   ): Observable<ConsultaCpeUnificadoResponse> {
     return this.http.post<ConsultaCpeUnificadoResponse>(
-      `${this.baseUrl}/consultacpe-unificado`,
+      `${this.apiUrl}/consultacpe-unificado`,
       request
     );
   }

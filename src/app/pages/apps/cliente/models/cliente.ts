@@ -10,4 +10,5 @@ export interface Cliente {
   username: string;
   password: string;
   grupoId: string;
+  grupo: string;
 }

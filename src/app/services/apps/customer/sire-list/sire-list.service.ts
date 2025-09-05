@@ -1,7 +1,8 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ArchivoReporteRequest } from 'src/app/pages/apps/compra-sire/Models/Requests/ArchivoReporteRequest';
+import { environment } from 'src/environments/environment';
 
 export interface AceptarPropuestaRequest {
   accessToken: string;
@@ -35,33 +36,35 @@ export interface ConsultarEstadoTicketRequest {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class SireService {
+  apiUrl = environment.apiUrl + '/SireCompras';
+  http = inject(HttpClient);
 
-  private baseUrl = 'https://localhost:7149/api/SireCompras'; // cambia por tu URL real
-
-  constructor(private http: HttpClient) { }
+  constructor() {}
 
   getToken(clienteId: string): Observable<any> {
-    return this.http.get(`${this.baseUrl}/${clienteId}/token`);
+    return this.http.get(`${this.apiUrl}/${clienteId}/token`);
   }
 
   aceptarPropuesta(request: AceptarPropuestaRequest): Observable<any> {
-    return this.http.post(`${this.baseUrl}/aceptar-propuesta`, request);
+    return this.http.post(`${this.apiUrl}/aceptar-propuesta`, request);
   }
 
   descargarPropuesta(request: DescargarPropuestaRequest): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/descargar-propuesta`, request);
+    return this.http.post<any>(`${this.apiUrl}/descargar-propuesta`, request);
   }
 
-  consultarEstadoTicket(request: ConsultarEstadoTicketRequest): Observable<any> {
-    return this.http.post(`${this.baseUrl}/consultar-estado-ticket`, request);
+  consultarEstadoTicket(
+    request: ConsultarEstadoTicketRequest
+  ): Observable<any> {
+    return this.http.post(`${this.apiUrl}/consultar-estado-ticket`, request);
   }
 
   descargarArchivoReporte(request: ArchivoReporteRequest): Observable<Blob> {
-    return this.http.post(`${this.baseUrl}/descargar-archivo`, request, {
-      responseType: 'blob'  // 🔹 clave para recibir archivos binarios
+    return this.http.post(`${this.apiUrl}/descargar-archivo`, request, {
+      responseType: 'blob', // 🔹 clave para recibir archivos binarios
     });
   }
 }
