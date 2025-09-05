@@ -16,7 +16,7 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TablerIconsModule } from 'angular-tabler-icons';
-import { CuentaBaseSolService } from 'src/app/services/apps/cuenta-basesol/cuenta-basesol.service';
+import { CuentaBaseSolService } from 'src/app/services/administration/cuenta-basesol/cuenta-basesol.service';
 import { DialogCuentaBaseSolComponent } from './dialog-cuentabasesol/dialog-cuentabasesol.component';
 import { CuentaBaseSolPaginated } from './models/CuentaBaseSolPaginated';
 import { ConfirmationService } from 'src/app/services/apps/confirmation/confirmation.service';

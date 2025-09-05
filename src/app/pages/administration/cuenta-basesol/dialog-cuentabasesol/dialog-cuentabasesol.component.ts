@@ -21,7 +21,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { MaterialModule } from 'src/app/material.module';
-import { CuentaBaseSolService } from 'src/app/services/apps/cuenta-basesol/cuenta-basesol.service';
+import { CuentaBaseSolService } from 'src/app/services/administration/cuenta-basesol/cuenta-basesol.service';
 import { CuentaBaseSol } from '../models/CuentaBaseSol';
 
 interface CuentaBaseSolForm {
