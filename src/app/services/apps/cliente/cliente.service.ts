@@ -4,16 +4,16 @@ import { Observable } from 'rxjs';
 import { Cliente } from 'src/app/pages/apps/cliente/models/cliente';
 import { clientePaginated } from 'src/app/pages/apps/cliente/models/clientePaginated';
 import { PaginatedResponse } from 'src/app/shared/models/PaginatedResponse';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ClienteService {
-  private baseUrl = 'https://localhost:7149/api/Cliente'; // cambia por tu URL real
-
+  apiUrl = environment.apiUrl + '/Cliente';
   http = inject(HttpClient);
 
-  constructor() { }
+  constructor() {}
 
   public getsPaginated(
     search: string,
@@ -25,22 +25,24 @@ export class ClienteService {
       .set('pageSize', pageSize)
       .set('pageIndex', pageIndex);
 
-    return this.http.get<PaginatedResponse<clientePaginated>>(this.baseUrl, { params });
+    return this.http.get<PaginatedResponse<clientePaginated>>(this.apiUrl, {
+      params,
+    });
   }
 
   public add(cliente: Cliente): Observable<any> {
-    return this.http.post(this.baseUrl, cliente);
+    return this.http.post(this.apiUrl, cliente);
   }
 
   public getById(id: string): Observable<Cliente> {
-    return this.http.get<Cliente>(`${this.baseUrl}/${id}`);
+    return this.http.get<Cliente>(`${this.apiUrl}/${id}`);
   }
 
   public update(id: string, cliente: Cliente): Observable<any> {
-    return this.http.put(`${this.baseUrl}/${id}`, cliente);
+    return this.http.put(`${this.apiUrl}/${id}`, cliente);
   }
 
   public delete(id: string): Observable<any> {
-    return this.http.delete(`${this.baseUrl}/${id}`);
+    return this.http.delete(`${this.apiUrl}/${id}`);
   }
 }

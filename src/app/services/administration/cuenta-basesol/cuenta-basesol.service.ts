@@ -13,7 +13,6 @@ import { environment } from 'src/environments/environment';
 })
 export class CuentaBaseSolService {
   apiUrl = environment.apiUrl + '/CuentaBaseSol';
-
   http = inject(HttpClient);
 
   constructor() {}
