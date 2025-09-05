@@ -103,7 +103,9 @@ export class HeaderComponent {
 
   // 👇 Aquí guardamos lo que saquemos del token
   currentUserName: string | null = null;
+  currentFullName: string | null = null;
   currentEmail: string | null = null;
+  currentRole: string | null = null;
 
   constructor(
     private settings: CoreService,
@@ -115,11 +117,13 @@ export class HeaderComponent {
   ) {
     translate.setDefaultLang('en');
 
-    // 👇 Al construir el componente leemos el token decodificado
-    const decoded = this.authService.getDecodedToken();
-    if (decoded) {
-      this.currentUserName = decoded['unique_name'] ?? null; // depende de qué claim guardaste
-      this.currentEmail = decoded['email'] ?? null;
+    // Reactivo
+    const user = this.authService.currentUser(); // 🔹 leer el valor actual
+    if (user) {
+      this.currentUserName = user.userName;
+      this.currentFullName = user.fullName;
+      this.currentEmail = user.email;
+      this.currentRole = user.role;
     }
   }
 

@@ -6,6 +6,10 @@
   width: 5%;
 }
 
+.mat-column-role {
+  width: 10%;
+}
+
 .mat-column-isInactive {
   width: 7%;
 }

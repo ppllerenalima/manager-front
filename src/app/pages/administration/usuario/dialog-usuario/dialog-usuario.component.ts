@@ -28,7 +28,6 @@ import { TablerIconsModule } from 'angular-tabler-icons';
 import { MaterialModule } from 'src/app/material.module';
 import { UsuarioService } from 'src/app/services/administration/usuario/usuario.service';
 import { Usuario } from '../models/Usuario';
-import { finalize } from 'rxjs';
 import { RoleService } from 'src/app/services/administration/role/role.service';
 
 interface UsuarioForm {
@@ -40,7 +39,7 @@ interface UsuarioForm {
   apeMaterno: FormControl<string | null>;
   nombre: FormControl<string | null>;
 
-  roleId: FormControl<string | null>;
+  role: FormControl<string | null>;
 }
 
 @Component({
@@ -79,7 +78,7 @@ export class DialogUsuarioComponent implements OnInit {
     apeMaterno: this.fb.control<string | null>(null, Validators.required),
     nombre: this.fb.control<string | null>(null, Validators.required),
 
-    roleId: this.fb.control<string | null>(null, Validators.required),// 👈 Nuevo control para rol
+    role: this.fb.control<string | null>(null, Validators.required),
   });
 
   usuarioService = inject(UsuarioService);
@@ -95,9 +94,11 @@ export class DialogUsuarioComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) private data: Usuario, // UnidadOrganicaUsuario,
     private fb: FormBuilder,
     private snackBar: MatSnackBar
-  ) { }
+  ) {}
 
   async ngOnInit(): Promise<void> {
+    await this.load_Roles();
+
     const esEdicion = !!this.data?.id;
 
     this.titulo = esEdicion ? 'Actualizar Usuario' : 'Agregar nuevo Usuario';
@@ -109,12 +110,12 @@ export class DialogUsuarioComponent implements OnInit {
     }
   }
 
-  // load_Roles(): void {
-  //   this.roleService.getRoles().subscribe({
-  //     next: (data) => this.roles = data,
-  //     error: (err) => console.error('Error cargando roles', err)
-  //   });
-  // }
+  load_Roles(): void {
+    this.roleService.gets().subscribe({
+      next: (data) => (this.roles = data),
+      error: (err) => console.error('Error cargando roles', err),
+    });
+  }
 
   private prepararEdicion(data: Usuario): void {
     console.log('data', data);
@@ -126,6 +127,8 @@ export class DialogUsuarioComponent implements OnInit {
       apePaterno: data.apePaterno,
       apeMaterno: data.apeMaterno,
       nombre: data.nombre,
+
+      role: data.role,
     });
   }
 
@@ -143,14 +146,16 @@ export class DialogUsuarioComponent implements OnInit {
       apePaterno: raw.apePaterno!,
       apeMaterno: raw.apeMaterno!,
       nombre: raw.nombre!,
+
+      role: raw.role!,
     };
 
     // 🔹 si es edición incluimos el id
     const request$ = esEdicion
       ? this.usuarioService.update(this.data.id, {
-        id: this.data.id,
-        ...payload,
-      })
+          id: this.data.id,
+          ...payload,
+        })
       : this.usuarioService.add(payload);
 
     request$.subscribe({

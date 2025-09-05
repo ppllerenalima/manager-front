@@ -46,6 +46,7 @@ export class AppUsuarioComponent implements OnInit, AfterViewInit {
     'item',
     'nombreCompleto',
     'userName',
+    'role',
     'isInactive',
     'actions',
   ];

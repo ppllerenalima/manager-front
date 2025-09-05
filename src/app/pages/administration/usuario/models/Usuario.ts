@@ -7,4 +7,6 @@ export interface Usuario {
   apePaterno: string;
   apeMaterno: string;
   nombre: string;
+
+  role: string;
 }

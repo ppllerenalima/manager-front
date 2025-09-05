@@ -15,7 +15,12 @@ export interface TokenResponse {
   fechaGeneracion: string;
   fechaExpiracion: string;
   isInactive: boolean;
-  clienteId: string;
+  userId: string;
+
+  userName: string;
+  email: string;
+  fullName: string;
+  role: string;
 }
 
 export interface JwtPayload {
@@ -42,6 +47,13 @@ export class AuthService {
   /** Estado reactivo de sesión (true si existe token) */
   isLoggedIn = signal<boolean>(!!localStorage.getItem(this.tokenKey));
 
+  /** Usuario actual en toda la aplicación */
+  currentUser = signal<TokenResponse | null>(
+    localStorage.getItem('currentUser')
+      ? JSON.parse(localStorage.getItem('currentUser')!)
+      : null
+  );
+
   constructor(private http: HttpClient) {}
 
   // ──────────────── MÉTODOS DE AUTENTICACIÓN ────────────────
@@ -52,11 +64,19 @@ export class AuthService {
    * @returns Observable con el TokenResponse
    */
   signIn(request: SignInRequest): Observable<TokenResponse> {
-    return this.http
-      .post<TokenResponse>(`${this.apiUrl}/auth`, request)
-      .pipe(
-        tap(({ accessToken }) => accessToken && this.saveToken(accessToken))
-      );
+    this.loading.set(true);
+
+    return this.http.post<TokenResponse>(`${this.apiUrl}/auth`, request).pipe(
+      tap((token) => {
+        // guardamos token
+        this.saveToken(token.accessToken);
+
+        // guardamos usuario completo
+        localStorage.setItem('currentUser', JSON.stringify(token));
+        this.currentUser.set(token); // 🔹 actualizamos el signal
+      }),
+      tap(() => this.loading.set(false))
+    );
   }
 
   /**
@@ -72,7 +92,9 @@ export class AuthService {
    */
   logout(): void {
     localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem('currentUser');
     this.isLoggedIn.set(false);
+    this.currentUser.set(null); // 🔹 limpiar usuario
   }
 
   // ──────────────── MÉTODOS DE CONSULTA ────────────────

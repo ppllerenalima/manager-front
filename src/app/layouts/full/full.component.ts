@@ -60,7 +60,7 @@ interface quicklinks {
   ],
   templateUrl: './full.component.html',
   styleUrls: [],
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
 })
 export class FullComponent implements OnInit {
   navItems = navItems;
@@ -188,6 +188,12 @@ export class FullComponent implements OnInit {
     },
   ];
 
+  // 👇 Aquí guardamos lo que saquemos del token
+  currentUserName: string | null = null;
+  currentFullName: string | null = null;
+  currentEmail: string | null = null;
+  currentRole: string | null = null;
+
   constructor(
     private settings: CoreService,
     private mediaMatcher: MediaMatcher,
@@ -219,6 +225,15 @@ export class FullComponent implements OnInit {
       .subscribe((e) => {
         this.content.scrollTo({ top: 0 });
       });
+
+    // Reactivo
+    const user = this.authService.currentUser(); // 🔹 leer el valor actual
+    if (user) {
+      this.currentUserName = user.userName;
+      this.currentFullName = user.fullName;
+      this.currentEmail = user.email;
+      this.currentRole = user.role;
+    }
   }
 
   logout() {
@@ -226,7 +241,7 @@ export class FullComponent implements OnInit {
     this.router.navigate(['/authentication/login']); // 👈 Redirige a login
   }
 
-  ngOnInit(): void { }
+  ngOnInit(): void {}
 
   ngOnDestroy() {
     this.layoutChangesSubscription.unsubscribe();

@@ -9,10 +9,10 @@ import { PaginatedResponse } from 'src/app/shared/models/PaginatedResponse';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class RoleService {
- apiUrl = environment.apiUrl + '/User';
+  apiUrl = environment.apiUrl + '/Role';
 
   http = inject(HttpClient);
 
@@ -38,6 +38,10 @@ export class RoleService {
     return this.http.get<PaginatedResponse<RolePaginated>>(this.apiUrl, {
       params,
     });
+  }
+
+  public gets(): Observable<Role[]> {
+    return this.http.get<Role[]>(`${this.apiUrl}/list`);
   }
 
   public add(addRole: AddRole): Observable<any> {

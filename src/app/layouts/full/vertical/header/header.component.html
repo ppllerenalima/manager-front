@@ -38,77 +38,8 @@
     <!-- --------------------------------------------------------------- -->
     <!--  Links -->
     <!-- --------------------------------------------------------------- -->
-    <button
-      mat-button
-      [matMenuTriggerFor]="appsmenu"
-      aria-label="Notifications"
-    >
-      <div class="d-flex align-items-center">
-        Apps <i-tabler name="chevron-down" class="icon-16 m-l-4"></i-tabler>
-      </div>
-    </button>
-    <mat-menu #appsmenu="matMenu" class="apps-dd cardWithShadow">
-      <div class="row">
-        <div class="col-sm-8 b-r-1 p-r-0">
-          <div class="p-32 p-b-0">
-            <div class="row">
-              @for(appdd of apps; track appdd.title) {
-              <div class="col-sm-6 text-hover-primary">
-                <a
-                  [routerLink]="[appdd.link]"
-                  class="d-flex align-items-center text-decoration-none m-b-24"
-                >
-                  <span
-                    class="text-primary bg-light rounded icon-40 d-flex align-items-center justify-content-center"
-                  >
-                    <img [src]="appdd.img" width="20" />
-                  </span>
-
-                  <div class="m-l-16">
-                    <h5 class="f-s-14 f-w-600 m-0 textprimary hover-text">
-                      {{ appdd.title }}
-                    </h5>
-                    <span class="f-s-12 text-body">{{ appdd.subtitle }}</span>
-                  </div>
-                </a>
-              </div>
-              }
-            </div>
-          </div>
-          <div
-            class="b-t-1 p-24 d-none d-lg-flex align-items-center justify-content-between"
-          >
-            <span class="d-flex align-items-center f-s-16 f-w-500">
-              <i-tabler name="help" class="icon-20 m-r-8"></i-tabler>Frequently
-              Asked Questions
-            </span>
-            <a
-              [routerLink]="['/theme-pages/faq']"
-              mat-flat-button
-              color="primary"
-              >Check</a
-            >
-          </div>
-        </div>
-        <div class="col-sm-4">
-          <div class="p-x-16 p-y-32">
-            <h4 class="f-s-18 f-w-600 m-b-16">Quick Links</h4>
-            @for(quicklink of quicklinks; track quicklink.title) {
-            <div class="text-hover-primary">
-              <a
-                [routerLink]="[quicklink.link]"
-                class="hover-text text-decoration-none f-s-14 f-w-600 d-block p-y-8"
-                >{{ quicklink.title }}</a
-              >
-            </div>
-            }
-          </div>
-        </div>
-      </div>
-    </mat-menu>
-    <a mat-button [routerLink]="['/apps/chat']">Chat</a>
-    <a mat-button [routerLink]="['/apps/calendar']">Calendar</a>
-    <a mat-button [routerLink]="['/apps/email/inbox']">Email</a>
+    <a mat-button [routerLink]="['/apps/grupo']">Grupo</a>
+    <a mat-button [routerLink]="['/apps/cliente']">Cliente</a>
   </div>
 
   <span class="flex-1-auto"></span>
@@ -164,7 +95,7 @@
   <mat-menu #profilemenu="matMenu" class="topbar-dd cardWithShadow">
     <ng-scrollbar class="position-relative" style="height: 300px">
       <div class="p-x-32 p-y-16">
-        <h6 class="f-s-16 f-w-600 m-0">User Profile</h6>
+        <h6 class="f-s-16 f-w-600 m-0">Perfil Usuario</h6>
 
         <div class="d-flex align-items-center p-b-24 b-b-1 m-t-16">
           <img
@@ -173,11 +104,11 @@
             width="95"
           />
           <div class="m-l-16">
-            <h6 class="f-s-14 f-w-600 m-0">{{ currentUserName }}</h6>
-            <span class="f-s-14 d-block m-b-4">Designer</span>
+            <h6 class="f-s-14 f-w-600 m-0">{{ currentFullName }}</h6>
+            <span class="f-s-14 d-block m-b-4">{{ currentRole }}</span>
             <span class="d-flex align-items-center">
               <i-tabler name="mail" class="icon-15 m-r-4"></i-tabler>
-              info&#64;modernize.com
+              {{ currentEmail }}
             </span>
           </div>
         </div>
