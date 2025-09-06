@@ -51,7 +51,7 @@ export class AppBreadcrumbComponent {
       .subscribe((event) => {
         // 6.1 Actualizar el título de la página usando los datos de la ruta
         // Se concatena el título definido en la ruta con " - Angular 19"
-        this.titleService.setTitle(event['title'] + ' - Angular 19');
+        this.titleService.setTitle(event['title'] + ' - ManagerSIRE');
 
         // 6.2 Guardar los datos de la ruta en la variable `pageInfo` para usar en otras partes del componente
         this.pageInfo = event;
