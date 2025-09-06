@@ -25,6 +25,7 @@ import { CuentaBaseSolService } from 'src/app/services/administration/cuenta-bas
 import { CuentaBaseSol } from '../models/CuentaBaseSol';
 
 interface CuentaBaseSolForm {
+  ruc: FormControl<string | null>;
   clientId: FormControl<string | null>;
   clientSecret: FormControl<string | null>;
   username: FormControl<string | null>;
@@ -58,6 +59,7 @@ export class DialogCuentaBaseSolComponent implements OnInit {
   dialogRef = inject(MatDialogRef);
 
   cuentaBaseSolForm = this.fb.group<CuentaBaseSolForm>({
+    ruc: this.fb.control<string | null>(null, Validators.required),
     clientId: this.fb.control<string | null>(null, Validators.required),
     clientSecret: this.fb.control<string | null>(null, Validators.required),
     username: this.fb.control<string | null>(null, Validators.required),
@@ -94,6 +96,7 @@ export class DialogCuentaBaseSolComponent implements OnInit {
   private prepararEdicion(data: CuentaBaseSol): void {
     console.log('data', data);
     this.cuentaBaseSolForm.patchValue({
+      ruc: data.ruc,
       clientId: data.clientId,
       clientSecret: data.clientSecret,
       username: data.username,
@@ -107,6 +110,7 @@ export class DialogCuentaBaseSolComponent implements OnInit {
     const raw = this.cuentaBaseSolForm.getRawValue();
     const esEdicion = !!this.data; // 👈 más claro
     const payload = {
+      ruc: raw.ruc!,
       clientId: raw.clientId!,
       clientSecret: raw.clientSecret!,
       username: raw.username!,

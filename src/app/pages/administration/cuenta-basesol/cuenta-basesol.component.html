@@ -48,6 +48,21 @@
           </td>
         </ng-container>
 
+        <!-- Columna: Ruc -->
+        <ng-container matColumnDef="ruc">
+          <th
+            mat-header-cell
+            *matHeaderCellDef
+            mat-sort-header
+            class="f-s-16 f-w-600"
+          >
+            Ruc
+          </th>
+          <td mat-cell *matCellDef="let row" class="f-s-14">
+            {{ row.ruc }}
+          </td>
+        </ng-container>
+
         <!-- Columna: ClientId -->
         <ng-container matColumnDef="clientId">
           <th

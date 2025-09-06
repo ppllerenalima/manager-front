@@ -44,6 +44,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 export class AppCuentaBasesolComponent implements OnInit, AfterViewInit {
   displayedColumns: string[] = [
     'item',
+    'ruc',
     'clientId',
     'clientSecret',
     'username',
