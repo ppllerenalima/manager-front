@@ -22,6 +22,7 @@ import { InvoiceService } from 'src/app/services/apps/invoice-view/invoice-view.
 import { InvoiceViewComponent } from '../invoice-view/invoice-view.component';
 import { ConsultaCpeRequest } from '../invoice-view/Models/Requests/ConsultaCpeRequest';
 import { ArchivoReporteRequest } from './Models/Requests/ArchivoReporteRequest';
+import { ClienteService } from 'src/app/services/apps/cliente/cliente.service';
 
 @Component({
   selector: 'app-compra-sire',
@@ -47,6 +48,11 @@ export class AppCompraSireComponent implements OnInit {
    * ================================ */
   clienteId: string;
   token: string | null = null;
+
+  // Signals para las propiedades
+  ruc = signal<string>('');
+  razonSocial = signal<string>('');
+  direccion = signal<string>('');
 
   /** Estado de la UI */
   error = signal<string | null>(null);
@@ -79,8 +85,9 @@ export class AppCompraSireComponent implements OnInit {
   /** ================================
    * 📌 5. SERVICIOS
    * ================================ */
-  private sireService = inject(SireService);
-  private invoiceService = inject(InvoiceService);
+  sireService = inject(SireService);
+  invoiceService = inject(InvoiceService);
+  clienteService = inject(ClienteService);
 
   /** ================================
    * 📌 6. DATOS DE APOYO
@@ -101,7 +108,7 @@ export class AppCompraSireComponent implements OnInit {
     { value: 12, name: 'Diciembre' },
   ];
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(private route: ActivatedRoute) { }
 
   /** ================================
    * 📌 7. INICIALIZACIÓN
@@ -110,6 +117,8 @@ export class AppCompraSireComponent implements OnInit {
     // Obtiene ID de cliente desde la URL
     this.clienteId = this.route.snapshot.paramMap.get('id')!;
     console.log('🆔 ID del cliente:', this.clienteId);
+
+    this.getCliente();
 
     // Inicializa años y mes actual
     const currentYear = new Date().getFullYear();
@@ -310,5 +319,21 @@ export class AppCompraSireComponent implements OnInit {
   private procesarComprobante(base64Zip: string): void {
     console.log('📦 Procesando comprobante base64...');
     // Aquí puedes implementar lógica para descomprimir el ZIP, mostrar detalle, etc.
+  }
+
+  getCliente(): void {
+    this.clienteService.getById(this.clienteId).subscribe({
+      next: (data) => {
+        this.ruc.set(data.ruc);
+        this.razonSocial.set(data.razonsocial);
+        this.direccion.set(data.direccion);
+
+        // this.cliente = data;
+        console.log('Cliente cargado:', data);
+      },
+      error: (err) => {
+        console.error('Error al obtener cliente:', err);
+      },
+    });
   }
 }
