@@ -149,8 +149,12 @@
                       </div>
                     </div>
                     <p class="f-s-12 m-0" matListItemLine>
-                      {{ registro.serie }} - {{ registro.numero }} &nbsp;•&nbsp;
-                      <strong>TOTAL:</strong> {{ registro.total }}
+                      {{ registro.numeroDocIdentidad }}-{{
+                        registro.tipoComprobante
+                      }}-{{ registro.serie }}-{{
+                        registro.numero
+                      }}
+                      &nbsp;•&nbsp; <strong>TOTAL:</strong> {{ registro.total }}
                     </p>
                   </mat-list-item>
                   }
