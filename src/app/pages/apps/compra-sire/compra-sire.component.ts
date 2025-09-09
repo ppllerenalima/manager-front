@@ -23,6 +23,12 @@ import { InvoiceViewComponent } from '../invoice-view/invoice-view.component';
 import { ConsultaCpeRequest } from '../invoice-view/Models/Requests/ConsultaCpeRequest';
 import { ArchivoReporteRequest } from './Models/Requests/ArchivoReporteRequest';
 import { ClienteService } from 'src/app/services/apps/cliente/cliente.service';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { AppInvoiceViewComponent } from "../invoice/invoice-view/invoice-view.component";
+import { MatCardModule } from '@angular/material/card';
+import { STICKY_HEADER_TABLE_HTML_SNIPPET } from '../../tables/sticky-header-footer-table/code/sticky-header-footer-table-html-snippet';
+import { STICKY_HEADER_TABLE_TS_SNIPPET } from '../../tables/sticky-header-footer-table/code/sticky-header-footer-table-ts-snippet';
+import { HighlightModule } from 'ngx-highlightjs';
 
 @Component({
   selector: 'app-compra-sire',
@@ -35,8 +41,9 @@ import { ClienteService } from 'src/app/services/apps/cliente/cliente.service';
     TablerIconsModule,
     NgScrollbarModule,
     MatDividerModule,
-    InvoiceViewComponent,
     RouterModule,
+
+    MatCardModule, MatTableModule, HighlightModule
   ],
   templateUrl: './compra-sire.component.html',
   styleUrls: ['./compra-sire.component.css'],
@@ -107,6 +114,12 @@ export class AppCompraSireComponent implements OnInit {
     { value: 11, name: 'Noviembre' },
     { value: 12, name: 'Diciembre' },
   ];
+
+  // Fixed header
+  displayedColumns1 = ['fechaEmision', 'tipoComprobante', 'serie', 'numero', 'numeroDocIdentidad', 'nombreProveedor', 'total'];
+  dataSource = new MatTableDataSource<registroSIRE>([]);
+
+  // 2 [Sticky Header with Table]
 
   constructor(private route: ActivatedRoute) { }
 
@@ -206,7 +219,8 @@ export class AppCompraSireComponent implements OnInit {
         return;
       }
 
-      this.registros.set(registros);
+      this.dataSource.data = registros;
+      // this.registros.set(registros);
     };
 
     reader.onerror = () => this.error.set('Error al leer el archivo ZIP.');

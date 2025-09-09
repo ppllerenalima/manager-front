@@ -101,7 +101,7 @@
           <!-- ------------------------------------------------------ -->
           <!-- Listing -->
           <!-- ------------------------------------------------------ -->
-          <div class="col-md-4 b-r-1 p-0">
+          <div class="col-md-12 b-r-1 p-0">
             <div class="p-20 d-flex align-items-center">
               <mat-form-field appearance="outline" class="w-100 hide-hint">
                 <input
@@ -122,91 +122,117 @@
               style="height: calc(100vh - 380px)"
               class="position-relative"
             >
-              @if (filteredRegistros().length > 0) {
-              <div class="position-relative">
-                <mat-nav-list class="p-x-8 contact-listing">
-                  @for (registro of filteredRegistros(); track registro.numero)
-                  {
-                  <mat-list-item
-                    (click)="selectComprobante(registro)"
-                    class="gap-10 m-b-2"
-                  >
-                    <div
-                      class="d-flex align-items-center justify-content-between w-100"
-                      matListItemTitle
+              <div class="table-responsive example-container">
+                <table mat-table [dataSource]="dataSource" class="w-100">
+                  <!-- FechaEmision Column -->
+                  <ng-container matColumnDef="fechaEmision">
+                    <th
+                      mat-header-cell
+                      *matHeaderCellDef
+                      class="f-w-600 mat-subtitle-1 f-s-14"
                     >
-                      <h6 class="f-w-600 f-s-14 lh-sm">
-                        {{ registro.nombreProveedor }}
-                      </h6>
-                      <div class="d-flex justify-content-center gap-8 m-l-auto">
-                        <!-- star icon -->
-                        <span class="d-flex align-items-center gap-8">
-                          <i-tabler
-                            name="star"
-                            class="icon-16 fill-warning"
-                          ></i-tabler>
-                        </span>
-                      </div>
-                    </div>
-                    <p class="f-s-12 m-0" matListItemLine>
-                      {{ registro.numeroDocIdentidad }}-{{
-                        registro.tipoComprobante
-                      }}-{{ registro.serie }}-{{
-                        registro.numero
-                      }}
-                      &nbsp;•&nbsp; <strong>TOTAL:</strong> {{ registro.total }}
-                    </p>
-                  </mat-list-item>
-                  }
-                </mat-nav-list>
+                      F/Emision
+                    </th>
+                    <td mat-cell *matCellDef="let element" class="f-s-14">
+                      {{ element.fechaEmision }}
+                    </td>
+                  </ng-container>
+
+                  <!-- TipoComprobante Column -->
+                  <ng-container matColumnDef="tipoComprobante">
+                    <th
+                      mat-header-cell
+                      *matHeaderCellDef
+                      class="f-w-600 mat-subtitle-1 f-s-14"
+                    >
+                      Tipo
+                    </th>
+                    <td mat-cell *matCellDef="let element" class="f-s-14">
+                      {{ element.tipoComprobante }}
+                    </td>
+                  </ng-container>
+
+                  <!-- Serie Column -->
+                  <ng-container matColumnDef="serie">
+                    <th
+                      mat-header-cell
+                      *matHeaderCellDef
+                      class="f-w-600 mat-subtitle-1 f-s-14"
+                    >
+                      Serie
+                    </th>
+                    <td mat-cell *matCellDef="let element" class="f-s-14">
+                      {{ element.serie }}
+                    </td>
+                  </ng-container>
+
+                  <!-- Numero Column -->
+                  <ng-container matColumnDef="numero">
+                    <th
+                      mat-header-cell
+                      *matHeaderCellDef
+                      class="f-w-600 mat-subtitle-1 f-s-14"
+                    >
+                      Número
+                    </th>
+                    <td mat-cell *matCellDef="let element" class="f-s-14">
+                      {{ element.numero }}
+                    </td>
+                  </ng-container>
+
+                  <!-- NumeroDocIdentidad Column -->
+                  <ng-container matColumnDef="numeroDocIdentidad">
+                    <th
+                      mat-header-cell
+                      *matHeaderCellDef
+                      class="f-w-600 mat-subtitle-1 f-s-14"
+                    >
+                      Ruc (Emisor)
+                    </th>
+                    <td mat-cell *matCellDef="let element" class="f-s-14">
+                      {{ element.numeroDocIdentidad }}
+                    </td>
+                  </ng-container>
+
+                  <!-- NombreProveedor Column -->
+                  <ng-container matColumnDef="nombreProveedor">
+                    <th
+                      mat-header-cell
+                      *matHeaderCellDef
+                      class="f-w-600 mat-subtitle-1 f-s-14"
+                    >
+                      Razon Social
+                    </th>
+                    <td mat-cell *matCellDef="let element" class="f-s-14">
+                      {{ element.nombreProveedor }}
+                    </td>
+                  </ng-container>
+
+                  <!-- Total Column -->
+                  <ng-container matColumnDef="total">
+                    <th
+                      mat-header-cell
+                      *matHeaderCellDef
+                      class="f-w-600 mat-subtitle-1 f-s-14"
+                    >
+                      Total
+                    </th>
+                    <td mat-cell *matCellDef="let element" class="f-s-14">
+                      {{ element.total }}
+                    </td>
+                  </ng-container>
+
+                  <tr
+                    mat-header-row
+                    *matHeaderRowDef="displayedColumns1; sticky: true"
+                  ></tr>
+                  <tr
+                    mat-row
+                    *matRowDef="let row; columns: displayedColumns1"
+                  ></tr>
+                </table>
               </div>
-              } @else {
-              <div
-                class="p-15 bg-light-primary text-primary rounded m-x-20 text-center"
-              >
-                <span class="f-s-14"
-                  >{{ error() || "No se encontraron registros." }}.</span
-                >
-              </div>
-              }
             </ng-scrollbar>
-          </div>
-
-          <!-- ------------------------------------------------------ -->
-          <!-- Details of contacts -->
-          <!-- ------------------------------------------------------ -->
-          <div
-            [ngClass]="{
-              'col-md-8 detail-part contact-detail-part p-0': true,
-              activeComprobante: isActiveComprobante
-            }"
-          >
-            @if(selectedComprobante() == null) {
-            <div
-              class="d-flex justify-content-center align-items-center h-100 w-100"
-            >
-              <div class="text-center">
-                <img
-                  src="/assets/images/backgrounds/errorimg.svg"
-                  alt="Seleccione un comprobante"
-                  width="250"
-                  class="mb-4"
-                />
-
-                <h2 class="fw-bold">¡Opps!</h2>
-                <p class="fs-5 fw-semibold mb-3 text-danger">
-                  {{
-                    mensajeError() ??
-                      "Por favor, seleccione un Comprobante de Pago para continuar."
-                  }}
-                </p>
-              </div>
-            </div>
-            } @else{
-            <div class="w-100">
-              <app-invoice-view></app-invoice-view>
-            </div>
-            }
           </div>
         </div>
       </div>

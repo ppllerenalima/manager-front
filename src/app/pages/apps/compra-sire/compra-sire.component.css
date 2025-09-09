@@ -1,3 +1,16 @@
 :host {
   display: block;
 }
+
+/* Hace que la cabecera siempre quede fija */
+.mat-header-row {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #fff; /* o el color que prefieras */
+}
+
+/* Ajuste opcional para evitar que se corte la sombra */
+.table-scroll .example-container {
+  min-width: 100%;
+}
