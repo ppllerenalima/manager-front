@@ -117,7 +117,9 @@ export class AppCompraSireComponent implements OnInit {
 
   // Fixed header
   displayedColumns1 = ['fechaEmision', 'tipoComprobante', 'serie', 'numero', 'numeroDocIdentidad', 'nombreProveedor', 'total'];
-  dataSource = new MatTableDataSource<registroSIRE>([]);
+  // dataSource = new MatTableDataSource<registroSIRE>([]);
+  dataSource: registroSIRE[] = [];
+
 
   // 2 [Sticky Header with Table]
 
@@ -219,7 +221,7 @@ export class AppCompraSireComponent implements OnInit {
         return;
       }
 
-      this.dataSource.data = registros;
+      this.dataSource = registros;
       // this.registros.set(registros);
     };
 

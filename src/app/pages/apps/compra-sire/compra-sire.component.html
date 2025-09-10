@@ -14,13 +14,25 @@
 
   <!-- card -->
   <mat-card class="shadow-none bg-light-secondary overflow-hidden">
-    <mat-card-content class="p-32 p-b-0">
-      <div>
-        <h5 class="m-0 f-w-600 f-s-16">{{ ruc() }} {{ razonSocial() }}</h5>
-        <span class="f-s-14">{{ direccion() }}</span>
+    <mat-card-content class="p-16 p-b-0">
+      <div class="d-flex justify-content-between align-items-center">
+        <!-- Columna izquierda -->
+        <div>
+          <h5 class="m-0 f-w-600 f-s-16">{{ ruc() }} {{ razonSocial() }}</h5>
+          <span class="f-s-14">{{ direccion() }}</span>
+        </div>
+
+        <!-- Columna derecha -->
+        <div>
+          <a routerLink="/apps/invoice" mat-stroked-button class="m-r-10">
+            Back to Invoice
+          </a>
+          <a mat-flat-button color="primary"> Edit Invoice </a>
+        </div>
       </div>
     </mat-card-content>
   </mat-card>
+
   <mat-sidenav-container class="email-box">
     <!-- ------------------------------------------------------ -->
     <!-- Sidebar contact -->
@@ -102,21 +114,23 @@
           <!-- Listing -->
           <!-- ------------------------------------------------------ -->
           <div class="col-md-12 b-r-1 p-0">
-            <div class="p-20 d-flex align-items-center">
-              <mat-form-field appearance="outline" class="w-100 hide-hint">
-                <input
-                  matInput
-                  #buscador
-                  placeholder="Buscar C/Pago"
-                  (input)="searchTerm.set(buscador.value)"
-                />
-                <mat-icon matSuffix>
-                  <i-tabler
-                    name="search"
-                    class="icon-18 d-flex m-t-4"
-                  ></i-tabler>
-                </mat-icon>
-              </mat-form-field>
+            <div class="row p-20">
+              <div class="col-6 d-flex align-items-center">
+                <mat-form-field appearance="outline" class="w-100 hide-hint">
+                  <input
+                    matInput
+                    #buscador
+                    placeholder="Buscar C/Pago"
+                    (input)="searchTerm.set(buscador.value)"
+                  />
+                  <mat-icon matSuffix>
+                    <i-tabler
+                      name="search"
+                      class="icon-18 d-flex m-t-4"
+                    ></i-tabler>
+                  </mat-icon>
+                </mat-form-field>
+              </div>
             </div>
             <ng-scrollbar
               style="height: calc(100vh - 380px)"
@@ -230,6 +244,16 @@
                     mat-row
                     *matRowDef="let row; columns: displayedColumns1"
                   ></tr>
+
+                  <!-- Fila cuando no hay datos -->
+                  <tr class="mat-row" *matNoDataRow>
+                    <td
+                      class="mat-cell text-center"
+                      [attr.colspan]="displayedColumns1.length"
+                    >
+                      No hay registros disponibles
+                    </td>
+                  </tr>
                 </table>
               </div>
             </ng-scrollbar>
