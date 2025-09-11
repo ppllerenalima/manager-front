@@ -1,11 +1,13 @@
 import { CommonModule } from '@angular/common';
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   computed,
   inject,
   OnInit,
   signal,
+  ViewChild,
 } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDividerModule } from '@angular/material/divider';
@@ -19,16 +21,17 @@ import { registroSIRE } from '../customer/sire-list/listing/registroSIRE';
 import { strFromU8, unzipSync } from 'fflate';
 import { FileUtils } from 'src/app/shared/utils/FileUtils';
 import { InvoiceService } from 'src/app/services/apps/invoice-view/invoice-view.service';
-import { InvoiceViewComponent } from '../invoice-view/invoice-view.component';
 import { ConsultaCpeRequest } from '../invoice-view/Models/Requests/ConsultaCpeRequest';
 import { ArchivoReporteRequest } from './Models/Requests/ArchivoReporteRequest';
 import { ClienteService } from 'src/app/services/apps/cliente/cliente.service';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { AppInvoiceViewComponent } from "../invoice/invoice-view/invoice-view.component";
 import { MatCardModule } from '@angular/material/card';
-import { STICKY_HEADER_TABLE_HTML_SNIPPET } from '../../tables/sticky-header-footer-table/code/sticky-header-footer-table-html-snippet';
-import { STICKY_HEADER_TABLE_TS_SNIPPET } from '../../tables/sticky-header-footer-table/code/sticky-header-footer-table-ts-snippet';
-import { HighlightModule } from 'ngx-highlightjs';
+import { PerTributarioResponse } from './Models/Responses/PerTributarioResponse';
+import { MatTableDataSource } from '@angular/material/table';
+import { ComprobantePaginatedResponse } from './Models/Responses/ComprobantePaginatedResponse';
+import { MatSort } from '@angular/material/sort';
+import { MatPaginator } from '@angular/material/paginator';
+import { ComprobanteService } from 'src/app/services/apps/compra-sire/comprobante.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-compra-sire',
@@ -43,18 +46,19 @@ import { HighlightModule } from 'ngx-highlightjs';
     MatDividerModule,
     RouterModule,
 
-    MatCardModule, MatTableModule, HighlightModule
+    MatCardModule,
   ],
   templateUrl: './compra-sire.component.html',
   styleUrls: ['./compra-sire.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppCompraSireComponent implements OnInit {
+export class AppCompraSireComponent implements OnInit, AfterViewInit {
   /** ================================
    * 📌 1. PROPIEDADES BÁSICAS
    * ================================ */
   clienteId: string;
   token: string | null = null;
+  perTributarioId: string;
 
   // Signals para las propiedades
   ruc = signal<string>('');
@@ -95,6 +99,7 @@ export class AppCompraSireComponent implements OnInit {
   sireService = inject(SireService);
   invoiceService = inject(InvoiceService);
   clienteService = inject(ClienteService);
+  comprobanteService = inject(ComprobanteService);
 
   /** ================================
    * 📌 6. DATOS DE APOYO
@@ -116,14 +121,29 @@ export class AppCompraSireComponent implements OnInit {
   ];
 
   // Fixed header
-  displayedColumns1 = ['fechaEmision', 'tipoComprobante', 'serie', 'numero', 'numeroDocIdentidad', 'nombreProveedor', 'total'];
-  // dataSource = new MatTableDataSource<registroSIRE>([]);
-  dataSource: registroSIRE[] = [];
+  displayedColumns = [
+    'fechaEmision',
+    'tipoComprobante',
+    'serie',
+    'numero',
+    'numeroDocIdentidad',
+    'nombreProveedor',
+    'total',
+  ];
 
+  dataSource: ComprobantePaginatedResponse[] = [];
+
+  search: string = '';
+  pageIndex: number = 0; // MatPaginator usa base 0
+  pageSize: number = 10;
+  totalRecords = 0;
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
 
   // 2 [Sticky Header with Table]
 
-  constructor(private route: ActivatedRoute) { }
+  constructor(private route: ActivatedRoute, private snackBar: MatSnackBar) {}
 
   /** ================================
    * 📌 7. INICIALIZACIÓN
@@ -140,18 +160,38 @@ export class AppCompraSireComponent implements OnInit {
     this.years = Array.from({ length: 5 }, (_, i) => currentYear - i);
     this.selectedYear = currentYear;
     this.selectedMonth = new Date().getMonth() + 1;
-
-    // 🔹 Suscribirse a comprobantes emitidos por InvoiceService
-    this.invoiceService.selectedComprobante$
-      .pipe(
-        takeUntil(this.destroy$),
-        filter((val): val is string => !!val) // ignora null o undefined
-      )
-      .subscribe((comprobanteBase64Zip) => {
-        console.log('📦 Comprobante recibido');
-        this.procesarComprobante(comprobanteBase64Zip);
-      });
   }
+
+  ngAfterViewInit() {
+    // 📌 Paginación desde el backend
+    this.paginator.page.subscribe(() => {
+      this.pageIndex = this.paginator.pageIndex;
+      this.pageSize = this.paginator.pageSize;
+      this.load_Comprobantes();
+    });
+
+    // 📌 Ordenamiento (solo si tu API soporta ordenamiento)
+    this.sort.sortChange.subscribe(() => {
+      this.pageIndex = 0; // cuando cambie orden reiniciamos a la primera página
+      this.load_Comprobantes();
+    });
+  }
+
+  // ngAfterViewInit() {
+  //   // 📌 Paginación
+  //   this.paginator.page.subscribe(() => {
+  //     this.pageIndex = this.paginator.pageIndex;
+  //     this.pageSize = this.paginator.pageSize;
+  //     this.load_Comprobantes();
+  //   });
+
+  //   // 📌 Ordenamiento
+  //   this.sort.sortChange.subscribe(() => {
+  //     // cuando cambie el orden reiniciamos a la primera página
+  //     this.pageIndex = 0;
+  //     this.load_Comprobantes();
+  //   });
+  // }
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -175,112 +215,74 @@ export class AppCompraSireComponent implements OnInit {
     this.selectedComprobante.set(null);
     this.isLoading.set(true);
 
-    const perTributario = `${this.selectedYear}${this.selectedMonth
-      .toString()
-      .padStart(2, '0')}`;
-    console.log('📅 Período tributario:', perTributario);
-
     const request: ArchivoReporteRequest = {
       clienteId: this.clienteId,
-      perTributario,
+      anio: this.selectedYear,
+      mes: this.selectedMonth,
     };
 
-    this.sireService
-      .descargarArchivoReporte(request)
-      .pipe(finalize(() => this.isLoading.set(false)))
+    this.sireService.importarComprobantes(request).subscribe({
+      next: (response: PerTributarioResponse) => {
+        console.log('✅ Respuesta del backend:', response);
+
+        this.perTributarioId = response.id;
+
+        this.load_Comprobantes();
+
+        this.snackBar.open(
+          `Se importó correctamente el período ${response.mes}/${response.anio}`,
+          'Cerrar',
+          { duration: 4000, panelClass: 'success-snackbar' }
+        );
+      },
+      error: (err) => {
+        console.error('❌ Error al importar comprobantes:', err);
+        this.error.set(err.message || 'Error al importar comprobantes');
+        this.snackBar.open('Hubo un error al importar comprobantes', 'Cerrar', {
+          duration: 4000,
+          panelClass: 'error-snackbar',
+        });
+
+        // 🔹 Asegurar que el loading se apague si ocurre error
+        this.isLoading.set(false);
+      },
+      complete: () => this.isLoading.set(false),
+    });
+  }
+
+  load_Comprobantes(): void {
+    this.isLoading.set(true);
+
+    this.comprobanteService
+      .getsPaginated(
+        this.perTributarioId,
+        this.search,
+        this.pageSize,
+        this.pageIndex + 1 // API espera base 1
+      )
       .subscribe({
-        next: (blob: Blob) => this.procesarArchivoZip(blob),
-        error: (err) => this.manejarErrorDescarga(err),
+        next: (res) => {
+          this.dataSource = res.data;
+          this.totalRecords = res.total; // solo actualizas aquí
+
+          // 🔹 Actualizar MatPaginator explícitamente
+          if (this.paginator) {
+            this.paginator.length = this.totalRecords;
+          }
+        },
+        error: (err) => {
+          console.error('Error al obtener comprobantes', err);
+          this.error.set('No se pudieron cargar los comprobantes');
+        },
+        complete: () => this.isLoading.set(false),
       });
   }
 
-  /** Procesa el ZIP descargado y llena registros */
-  private procesarArchivoZip(blob: Blob): void {
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      const arrayBuffer = reader.result as ArrayBuffer;
-      const archivos = unzipSync(new Uint8Array(arrayBuffer));
-
-      const txtFile = Object.keys(archivos).find((key) => key.endsWith('.txt'));
-      if (!txtFile) {
-        this.error.set('El ZIP no contiene un archivo .txt válido.');
-        return;
-      }
-
-      const contenido = strFromU8(archivos[txtFile]);
-      const registros = contenido
-        .split('\n')
-        .map((linea) => linea.trim())
-        .filter((linea) => linea !== '')
-        .slice(1) // Ignora encabezados
-        .map(this.mapLineaARegistro);
-
-      if (registros.length === 0) {
-        this.error.set('El archivo no contiene registros válidos.');
-        return;
-      }
-
-      this.dataSource = registros;
-      // this.registros.set(registros);
-    };
-
-    reader.onerror = () => this.error.set('Error al leer el archivo ZIP.');
-    reader.readAsArrayBuffer(blob);
+  applyFilter(value: string) {
+    this.search = value.trim().toLowerCase();
+    this.pageIndex = 0;
+    this.load_Comprobantes();
   }
-
-  /** Maneja errores de descarga */
-  private async manejarErrorDescarga(err: any): Promise<void> {
-    console.error('Error al descargar archivo:', err);
-    let mensaje = 'Ocurrió un error inesperado al descargar el archivo.';
-
-    try {
-      if (err.error instanceof Blob) {
-        mensaje = await err.error.text();
-      } else if (err.error?.message) {
-        mensaje = err.error.message;
-      } else if (typeof err.error === 'string') {
-        mensaje = err.error;
-      }
-    } catch {
-      console.warn('No se pudo parsear el error, usando mensaje genérico.');
-    }
-
-    this.error.set(
-      mensaje || 'El archivo no está disponible todavía o ocurrió un error.'
-    );
-    this.registros.set([]);
-  }
-
-  /** Convierte una línea del TXT a un registro */
-  private mapLineaARegistro(linea: string): registroSIRE {
-    const columnas = linea.split('|');
-    return {
-      ruc: columnas[0],
-      fechaEmision: columnas[4],
-      tipoComprobante: columnas[6],
-      serie: columnas[7],
-      numero: columnas[9],
-      numeroDocIdentidad: columnas[12],
-      nombreProveedor: columnas[13],
-      total: FileUtils.parseToNumber(columnas[24]),
-    };
-  }
-
-  /** Filtra registros según búsqueda y serie */
-  filteredRegistros = computed(() => {
-    const term = this.searchTerm().toLowerCase();
-    const serie = this.selectedSerie();
-    return this.registros().filter((r) => {
-      const coincideBusqueda =
-        r.nombreProveedor?.toLowerCase().includes(term) ||
-        r.numero?.toLowerCase().includes(term) ||
-        r.serie?.toLowerCase().includes(term);
-
-      const coincideSerie = !serie || r.serie === serie;
-      return coincideBusqueda && coincideSerie;
-    });
-  });
 
   /** Selecciona un comprobante y lo consulta */
   selectComprobante(registro: registroSIRE): void {
@@ -329,12 +331,6 @@ export class AppCompraSireComponent implements OnInit {
           this.mensajeError.set('Error al consultar el comprobante.');
         },
       });
-  }
-
-  /** Procesa el comprobante recibido en base64 desde InvoiceService */
-  private procesarComprobante(base64Zip: string): void {
-    console.log('📦 Procesando comprobante base64...');
-    // Aquí puedes implementar lógica para descomprimir el ZIP, mostrar detalle, etc.
   }
 
   getCliente(): void {

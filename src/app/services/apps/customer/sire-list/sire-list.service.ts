@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ArchivoReporteRequest } from 'src/app/pages/apps/compra-sire/Models/Requests/ArchivoReporteRequest';
+import { PerTributarioResponse } from 'src/app/pages/apps/compra-sire/Models/Responses/PerTributarioResponse';
 import { environment } from 'src/environments/environment';
 
 export interface AceptarPropuestaRequest {
@@ -62,9 +63,12 @@ export class SireService {
     return this.http.post(`${this.apiUrl}/consultar-estado-ticket`, request);
   }
 
-  descargarArchivoReporte(request: ArchivoReporteRequest): Observable<Blob> {
-    return this.http.post(`${this.apiUrl}/descargar-archivo`, request, {
-      responseType: 'blob', // 🔹 clave para recibir archivos binarios
-    });
+  importarComprobantes(
+    request: ArchivoReporteRequest
+  ): Observable<PerTributarioResponse> {
+    return this.http.post<PerTributarioResponse>(
+      `${this.apiUrl}/importar-comprobantes`,
+      request
+    );
   }
 }

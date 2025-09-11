@@ -25,9 +25,9 @@
         <!-- Columna derecha -->
         <div>
           <a routerLink="/apps/invoice" mat-stroked-button class="m-r-10">
-            Back to Invoice
+            Migrar a Excel
           </a>
-          <a mat-flat-button color="primary"> Edit Invoice </a>
+          <a mat-flat-button color="primary"> Importar Glosa </a>
         </div>
       </div>
     </mat-card-content>
@@ -137,7 +137,12 @@
               class="position-relative"
             >
               <div class="table-responsive example-container">
-                <table mat-table [dataSource]="dataSource" class="w-100">
+                <table
+                  mat-table
+                  [dataSource]="dataSource"
+                  matSort
+                  class="mat-elevation-z8"
+                >
                   <!-- FechaEmision Column -->
                   <ng-container matColumnDef="fechaEmision">
                     <th
@@ -236,25 +241,30 @@
                     </td>
                   </ng-container>
 
-                  <tr
-                    mat-header-row
-                    *matHeaderRowDef="displayedColumns1; sticky: true"
-                  ></tr>
+                  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
                   <tr
                     mat-row
-                    *matRowDef="let row; columns: displayedColumns1"
+                    *matRowDef="let row; columns: displayedColumns"
                   ></tr>
 
                   <!-- Fila cuando no hay datos -->
                   <tr class="mat-row" *matNoDataRow>
                     <td
                       class="mat-cell text-center"
-                      [attr.colspan]="displayedColumns1.length"
+                      [attr.colspan]="displayedColumns.length"
                     >
                       No hay registros disponibles
                     </td>
                   </tr>
                 </table>
+                <!-- Paginador -->
+                <mat-paginator
+                  [length]="totalRecords"
+                  [pageSize]="pageSize"
+                  [pageSizeOptions]="[10, 15, 20]"
+                  showFirstLastButtons
+                >
+                </mat-paginator>
               </div>
             </ng-scrollbar>
           </div>

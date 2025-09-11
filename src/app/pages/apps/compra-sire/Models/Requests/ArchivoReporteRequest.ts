@@ -1,4 +1,5 @@
 export interface ArchivoReporteRequest {
   clienteId: string;
-  perTributario: string;
+  anio: number;
+  mes: number;
 }
