@@ -38,6 +38,9 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
 // snippets
 import { EXPAND_TABLE_HTML_SNIPPET } from '../../tables/expand-table/code/expand-table-html-snippet';
 import { EXPAND_TABLE_TS_SNIPPET } from '../../tables/expand-table/code/expand-table-ts-snippet';
+import { AppDialogViewpdfComponent } from './dialog-viewpdf/dialog-viewpdf.component';
+import { MatDialog } from '@angular/material/dialog';
+import { CpeService } from 'src/app/services/apps/compra-sire/cpe.service';
 
 @Component({
   selector: 'app-compra-sire',
@@ -94,6 +97,8 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
   /** Control de suscripciones */
   private destroy$ = new Subject<void>();
 
+  dialog = inject(MatDialog);
+
   /** ================================
    * 📌 2. FILTROS
    * ================================ */
@@ -121,6 +126,8 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
   clienteService = inject(ClienteService);
   perTributarioService = inject(PerTributarioService);
   comprobanteService = inject(ComprobanteService);
+  cpeService = inject(CpeService);
+
 
   /** ================================
    * 📌 6. DATOS DE APOYO
@@ -144,6 +151,7 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
   // Fixed header
   displayedColumns = [
     'fechaEmision',
+    'tieneGlosa',
     'tipoComprobante',
     'serie',
     'numero',
@@ -153,7 +161,6 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
   ];
   columnsToDisplayWithExpand = [...this.displayedColumns, 'expand'];
   expandedElement: ComprobantePaginatedResponse | null = null;
-
 
   dataSource: ComprobantePaginatedResponse[] = [];
 
@@ -316,6 +323,53 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
     this.pageIndex = 0;
     this.load_Comprobantes();
   }
+
+  openDialog(element: any) {
+    const request = {
+      RucEmisor: element.numeroDocIdentidad,
+      TipoComprobante: element.tipoComprobante,
+      Serie: element.serie,
+      Numero: element.numero,
+      Tipo: "01" // PDF
+    };
+
+    this.cpeService.descargarPdf(request).subscribe({
+      next: (blob: Blob) => {
+        const fileURL = URL.createObjectURL(blob);
+
+        this.dialog.open(AppDialogViewpdfComponent, {
+          width: '65vw',
+          height: '75vh',
+          maxWidth: '65vw',
+          maxHeight: '75vh',
+          data: { pdfUrl: fileURL }
+        });
+
+        // this.dialog.open(AppDialogViewpdfComponent, {
+        //   width: '80%',
+        //   height: '90%',
+        //   data: { pdfUrl: fileURL } // 👈 pasar la URL al dialog
+        // });
+      },
+      error: (err) => {
+        console.error('Error al descargar PDF:', err);
+      }
+    });
+  }
+
+
+  // openDialog(element: ComprobantePaginatedResponse) {
+  //   console.log(element);
+
+  //   this.dialog
+  //     .open(AppDialogViewpdfComponent, {
+  //       data: element, // pasas el comprobante directo
+  //     })
+  //     .afterClosed()
+  //     .subscribe(() => {
+  //       this.load_Comprobantes(); // refrescar lista al cerrar
+  //     });
+  // }
 
   /** Selecciona un comprobante y lo consulta */
   selectComprobante(registro: registroSIRE): void {

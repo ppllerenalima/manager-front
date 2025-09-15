@@ -41,5 +41,6 @@ export interface ComprobantePaginatedResponse {
   estadoComprobante?: string;
   incal?: string;
   clus?: string[]; // 39 campos: clu1 to clu39
+  tieneGlosa: boolean;
   glosa?: string;
 }
