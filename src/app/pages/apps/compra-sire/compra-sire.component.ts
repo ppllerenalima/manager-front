@@ -22,7 +22,7 @@ import { strFromU8, unzipSync } from 'fflate';
 import { FileUtils } from 'src/app/shared/utils/FileUtils';
 import { InvoiceService } from 'src/app/services/apps/invoice-view/invoice-view.service';
 import { ConsultaCpeRequest } from '../invoice-view/Models/Requests/ConsultaCpeRequest';
-import { ArchivoReporteRequest } from './Models/Requests/ArchivoReporteRequest';
+import { GetPerTributarioRequest } from './Models/Requests/GetPerTributarioRequest';
 import { ClienteService } from 'src/app/services/apps/cliente/cliente.service';
 import { MatCardModule } from '@angular/material/card';
 import { PerTributarioResponse } from './Models/Responses/PerTributarioResponse';
@@ -32,6 +32,12 @@ import { MatSort } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
 import { ComprobanteService } from 'src/app/services/apps/compra-sire/comprobante.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { PerTributarioService } from 'src/app/services/apps/compra-sire/pertributario.service';
+import { animate, state, style, transition, trigger } from '@angular/animations';
+
+// snippets
+import { EXPAND_TABLE_HTML_SNIPPET } from '../../tables/expand-table/code/expand-table-html-snippet';
+import { EXPAND_TABLE_TS_SNIPPET } from '../../tables/expand-table/code/expand-table-ts-snippet';
 
 @Component({
   selector: 'app-compra-sire',
@@ -51,8 +57,22 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   templateUrl: './compra-sire.component.html',
   styleUrls: ['./compra-sire.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [
+    trigger('detailExpand', [
+      state('collapsed', style({ height: '0px', minHeight: '0' })),
+      state('expanded', style({ height: '*' })),
+      transition(
+        'expanded <=> collapsed',
+        animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')
+      ),
+    ]),
+  ],
 })
 export class AppCompraSireComponent implements OnInit, AfterViewInit {
+  // 1 [expand with Table]
+  codeForExpandTable = EXPAND_TABLE_HTML_SNIPPET;
+  codeForExpandTableTs = EXPAND_TABLE_TS_SNIPPET;
+
   /** ================================
    * 📌 1. PROPIEDADES BÁSICAS
    * ================================ */
@@ -99,6 +119,7 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
   sireService = inject(SireService);
   invoiceService = inject(InvoiceService);
   clienteService = inject(ClienteService);
+  perTributarioService = inject(PerTributarioService);
   comprobanteService = inject(ComprobanteService);
 
   /** ================================
@@ -130,6 +151,9 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
     'nombreProveedor',
     'total',
   ];
+  columnsToDisplayWithExpand = [...this.displayedColumns, 'expand'];
+  expandedElement: ComprobantePaginatedResponse | null = null;
+
 
   dataSource: ComprobantePaginatedResponse[] = [];
 
@@ -143,7 +167,7 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
 
   // 2 [Sticky Header with Table]
 
-  constructor(private route: ActivatedRoute, private snackBar: MatSnackBar) {}
+  constructor(private route: ActivatedRoute, private snackBar: MatSnackBar) { }
 
   /** ================================
    * 📌 7. INICIALIZACIÓN
@@ -177,22 +201,6 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
     });
   }
 
-  // ngAfterViewInit() {
-  //   // 📌 Paginación
-  //   this.paginator.page.subscribe(() => {
-  //     this.pageIndex = this.paginator.pageIndex;
-  //     this.pageSize = this.paginator.pageSize;
-  //     this.load_Comprobantes();
-  //   });
-
-  //   // 📌 Ordenamiento
-  //   this.sort.sortChange.subscribe(() => {
-  //     // cuando cambie el orden reiniciamos a la primera página
-  //     this.pageIndex = 0;
-  //     this.load_Comprobantes();
-  //   });
-  // }
-
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
@@ -215,18 +223,45 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
     this.selectedComprobante.set(null);
     this.isLoading.set(true);
 
-    const request: ArchivoReporteRequest = {
+    const request: GetPerTributarioRequest = {
       clienteId: this.clienteId,
       anio: this.selectedYear,
       mes: this.selectedMonth,
     };
 
+    // 🔹 Primero: verificar si existe el PerTributario
+    this.perTributarioService.getByPeriodo(request).subscribe({
+      next: (response: PerTributarioResponse) => {
+        console.log('response', response)
+        if (response) {
+          // ✅ Existe → cargar comprobantes
+          this.perTributarioId = response.id;
+          this.load_Comprobantes();
+          this.snackBar.open(
+            `Período ${response.mes}/${response.anio} ya existe. Se cargaron los comprobantes.`,
+            'Cerrar',
+            { duration: 4000, panelClass: 'info-snackbar' }
+          );
+          this.isLoading.set(false);
+        } else {
+          // ❌ No existe → importar comprobantes
+          this.importarPeriodo(request);
+        }
+      },
+      error: (err) => {
+        console.error('❌ Error al verificar PerTributario:', err);
+        this.error.set(err.message || 'Error al verificar período');
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  private importarPeriodo(request: GetPerTributarioRequest): void {
     this.sireService.importarComprobantes(request).subscribe({
       next: (response: PerTributarioResponse) => {
-        console.log('✅ Respuesta del backend:', response);
+        console.log('✅ PerTributario creado e importado:', response);
 
         this.perTributarioId = response.id;
-
         this.load_Comprobantes();
 
         this.snackBar.open(
@@ -242,13 +277,11 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
           duration: 4000,
           panelClass: 'error-snackbar',
         });
-
-        // 🔹 Asegurar que el loading se apague si ocurre error
-        this.isLoading.set(false);
       },
       complete: () => this.isLoading.set(false),
     });
   }
+
 
   load_Comprobantes(): void {
     this.isLoading.set(true);

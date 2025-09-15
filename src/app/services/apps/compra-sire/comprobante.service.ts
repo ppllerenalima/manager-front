@@ -22,6 +22,7 @@ export class ComprobanteService {
     pageIndex: number
   ): Observable<PaginatedResponse<ComprobantePaginatedResponse>> {
     const params = new HttpParams()
+      .set('perTributarioId', id)
       .set('search', search)
       .set('pageSize', pageSize)
       .set('pageIndex', pageIndex);

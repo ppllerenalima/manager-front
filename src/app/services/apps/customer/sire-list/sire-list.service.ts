@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ArchivoReporteRequest } from 'src/app/pages/apps/compra-sire/Models/Requests/ArchivoReporteRequest';
+import { GetPerTributarioRequest } from 'src/app/pages/apps/compra-sire/Models/Requests/GetPerTributarioRequest';
 import { PerTributarioResponse } from 'src/app/pages/apps/compra-sire/Models/Responses/PerTributarioResponse';
 import { environment } from 'src/environments/environment';
 
@@ -43,7 +43,7 @@ export class SireService {
   apiUrl = environment.apiUrl + '/SireCompras';
   http = inject(HttpClient);
 
-  constructor() {}
+  constructor() { }
 
   getToken(clienteId: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/${clienteId}/token`);
@@ -64,7 +64,7 @@ export class SireService {
   }
 
   importarComprobantes(
-    request: ArchivoReporteRequest
+    request: GetPerTributarioRequest
   ): Observable<PerTributarioResponse> {
     return this.http.post<PerTributarioResponse>(
       `${this.apiUrl}/importar-comprobantes`,

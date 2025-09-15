@@ -2,15 +2,16 @@
   display: block;
 }
 
-/* .example-container {
-    height: 570px;
-    overflow: auto;
-  }
 
-  tr.mat-footer-row {
-    font-weight: bold;
-  }
+table {
+  width: 100%;
+}
 
-  .mat-table-sticky {
-    border-top: 1px solid #e0e0e0;
-  } */
+tr.example-detail-row {
+  height: 0;
+
+}
+
+.example-element-row td {
+  border-bottom-width: 0;
+}
