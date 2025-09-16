@@ -9,7 +9,7 @@ import { environment } from 'src/environments/environment';
 })
 export class Ticket2Service {
   private http = inject(HttpClient);
-  private readonly baseUrl = `${environment.apiUrl}/Ticket`;
+  private readonly baseUrl = `${environment.apiManager}/Ticket`;
 
   constructor() {}
 

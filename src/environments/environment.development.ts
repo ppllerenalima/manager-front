@@ -1,4 +1,5 @@
 export const environment = {
-  production: true,
-  apiUrl: 'https://localhost:7149/api',
+  production: false,
+  apiManager: 'https://localhost:7149/api',          // Tu API normal
+  apiReports: 'https://localhost:7150/api'
 };

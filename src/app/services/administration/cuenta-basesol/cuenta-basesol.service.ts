@@ -12,7 +12,7 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root',
 })
 export class CuentaBaseSolService {
-  apiUrl = environment.apiUrl + '/CuentaBaseSol';
+  apiUrl = environment.apiManager + '/CuentaBaseSol';
   http = inject(HttpClient);
 
   constructor() {}

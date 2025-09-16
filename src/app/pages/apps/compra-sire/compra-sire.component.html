@@ -23,11 +23,23 @@
         </div>
 
         <!-- Columna derecha -->
-        <div>
-          <a routerLink="/apps/invoice" mat-stroked-button class="m-r-10">
-            Migrar a Excel
-          </a>
-          <a mat-flat-button color="primary"> Importar Glosa </a>
+        <div class="d-flex gap-4">
+          <button
+            mat-stroked-button
+            (click)="onMigrarExcel()"
+            [disabled]="isLoading()"
+          >
+            {{ isLoading() ? "Procesando..." : "Migrar a Excel" }}
+          </button>
+
+          <button
+            mat-flat-button
+            (click)="onSearchCompras()"
+            [disabled]="isLoading()"
+          >
+            {{ isLoading() ? "Procesando..." : "Importar Glosa" }}
+          </button>
+
         </div>
       </div>
     </mat-card-content>

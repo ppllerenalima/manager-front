@@ -39,7 +39,7 @@ export interface ConsultaTipoZipRequest {
 })
 export class InvoiceService {
   // URL base del backend (ajustar según entorno real)
-  apiUrl = environment.apiUrl + '/Cpe';
+  apiUrl = environment.apiManager + '/Cpe';
   http = inject(HttpClient);
 
   private selectedComprobanteSubject = new BehaviorSubject<string | null>(null);

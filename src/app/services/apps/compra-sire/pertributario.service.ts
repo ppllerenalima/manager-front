@@ -9,7 +9,7 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root'
 })
 export class PerTributarioService {
-  apiUrl = environment.apiUrl + '/PerTributario';
+  apiUrl = environment.apiManager + '/PerTributario';
   http = inject(HttpClient);
 
   constructor() { }

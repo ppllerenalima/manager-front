@@ -40,7 +40,7 @@ export interface ConsultarEstadoTicketRequest {
   providedIn: 'root',
 })
 export class SireService {
-  apiUrl = environment.apiUrl + '/SireCompras';
+  apiUrl = environment.apiManager + '/SireCompras';
   http = inject(HttpClient);
 
   constructor() { }

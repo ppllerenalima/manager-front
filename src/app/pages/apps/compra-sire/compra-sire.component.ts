@@ -41,6 +41,7 @@ import { EXPAND_TABLE_TS_SNIPPET } from '../../tables/expand-table/code/expand-t
 import { AppDialogViewpdfComponent } from './dialog-viewpdf/dialog-viewpdf.component';
 import { MatDialog } from '@angular/material/dialog';
 import { CpeService } from 'src/app/services/apps/compra-sire/cpe.service';
+import { ReportsService } from 'src/app/services/apps/compra-sire/reports.service';
 
 @Component({
   selector: 'app-compra-sire',
@@ -127,7 +128,7 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
   perTributarioService = inject(PerTributarioService);
   comprobanteService = inject(ComprobanteService);
   cpeService = inject(CpeService);
-
+  reportsService = inject(ReportsService);
 
   /** ================================
    * 📌 6. DATOS DE APOYO
@@ -289,6 +290,9 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
     });
   }
 
+  onMigrarExcel() {
+    this.reportsService.descargarExcel(this.perTributarioId);
+  }
 
   load_Comprobantes(): void {
     this.isLoading.set(true);

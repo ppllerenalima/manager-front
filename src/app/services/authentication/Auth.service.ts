@@ -36,7 +36,7 @@ export interface JwtPayload {
 })
 export class AuthService {
   /** URL base de autenticación */
-  apiUrl = environment.apiUrl + '/User';
+  apiUrl = environment.apiManager + '/User';
 
   /** Clave donde se guarda el token en localStorage */
   private readonly tokenKey = 'token';

@@ -10,7 +10,7 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root',
 })
 export class ClienteService {
-  apiUrl = environment.apiUrl + '/Cliente';
+  apiUrl = environment.apiManager + '/Cliente';
   http = inject(HttpClient);
 
   constructor() {}

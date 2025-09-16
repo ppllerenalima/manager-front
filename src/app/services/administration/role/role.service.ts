@@ -12,7 +12,7 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root',
 })
 export class RoleService {
-  apiUrl = environment.apiUrl + '/Role';
+  apiUrl = environment.apiManager + '/Role';
 
   http = inject(HttpClient);
 

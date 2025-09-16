@@ -9,7 +9,7 @@ import { environment } from 'src/environments/environment';
 })
 export class TokenService {
   private http = inject(HttpClient);
-  private readonly baseUrl = `${environment.apiUrl}/Token`; // `apiUrl` debería estar en environment.ts
+  private readonly baseUrl = `${environment.apiManager}/Token`; // `apiUrl` debería estar en environment.ts
 
   constructor() {}
 

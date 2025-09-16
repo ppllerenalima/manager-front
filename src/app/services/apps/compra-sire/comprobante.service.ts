@@ -10,7 +10,7 @@ import { ComprobantePaginatedResponse } from 'src/app/pages/apps/compra-sire/Mod
   providedIn: 'root',
 })
 export class ComprobanteService {
-  apiUrl = environment.apiUrl + '/Comprobante';
+  apiUrl = environment.apiManager + '/Comprobante';
   http = inject(HttpClient);
 
   constructor() {}

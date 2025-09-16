@@ -26,7 +26,7 @@ export interface DescargarZipResponse {
   providedIn: 'root'
 })
 export class CpeService {
-  apiUrl = environment.apiUrl + '/Cpe';
+  apiUrl = environment.apiManager + '/Cpe';
   http = inject(HttpClient);
 
   constructor() { }
@@ -36,4 +36,6 @@ export class CpeService {
       responseType: 'blob'  // 👈 clave: recibir como Blob (PDF binario)
     });
   }
+
+
 }

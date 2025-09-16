@@ -12,7 +12,7 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root',
 })
 export class UsuarioService {
-  apiUrl = environment.apiUrl + '/User';
+  apiUrl = environment.apiManager + '/User';
 
   http = inject(HttpClient);
 
