@@ -363,7 +363,7 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
         this.perTributarioId,
         this.search,
         this.pageSize,
-        this.pageIndex + 1 // API espera base 1
+        this.pageIndex // API espera base 1
       )
       .subscribe({
         next: (res) => {
