@@ -5,6 +5,7 @@ import { environment } from 'src/environments/environment';
 import { Observable } from 'rxjs';
 import { PaginatedResponse } from 'src/app/shared/models/PaginatedResponse';
 import { ComprobantePaginatedResponse } from 'src/app/pages/apps/compra-sire/Models/Responses/ComprobantePaginatedResponse';
+import { ComprobanteImportarGlosaRequest } from 'src/app/pages/apps/compra-sire/Models/Requests/ComprobanteImportarGlosaRequest';
 
 @Injectable({
   providedIn: 'root',
@@ -33,5 +34,11 @@ export class ComprobanteService {
         params,
       }
     );
+  }
+
+  public importarGlosa(
+    request: ComprobanteImportarGlosaRequest
+  ): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/importar-glosa`, request);
   }
 }

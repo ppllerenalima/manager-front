@@ -33,7 +33,13 @@ import { MatPaginator } from '@angular/material/paginator';
 import { ComprobanteService } from 'src/app/services/apps/compra-sire/comprobante.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PerTributarioService } from 'src/app/services/apps/compra-sire/pertributario.service';
-import { animate, state, style, transition, trigger } from '@angular/animations';
+import {
+  animate,
+  state,
+  style,
+  transition,
+  trigger,
+} from '@angular/animations';
 
 // snippets
 import { EXPAND_TABLE_HTML_SNIPPET } from '../../tables/expand-table/code/expand-table-html-snippet';
@@ -42,6 +48,7 @@ import { AppDialogViewpdfComponent } from './dialog-viewpdf/dialog-viewpdf.compo
 import { MatDialog } from '@angular/material/dialog';
 import { CpeService } from 'src/app/services/apps/compra-sire/cpe.service';
 import { ReportsService } from 'src/app/services/apps/compra-sire/reports.service';
+import { ComprobanteImportarGlosaRequest } from './Models/Requests/ComprobanteImportarGlosaRequest';
 
 @Component({
   selector: 'app-compra-sire',
@@ -175,7 +182,7 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
 
   // 2 [Sticky Header with Table]
 
-  constructor(private route: ActivatedRoute, private snackBar: MatSnackBar) { }
+  constructor(private route: ActivatedRoute, private snackBar: MatSnackBar) {}
 
   /** ================================
    * 📌 7. INICIALIZACIÓN
@@ -238,30 +245,56 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
     };
 
     // 🔹 Primero: verificar si existe el PerTributario
-    this.perTributarioService.getByPeriodo(request).subscribe({
-      next: (response: PerTributarioResponse) => {
-        console.log('response', response)
-        if (response) {
-          // ✅ Existe → cargar comprobantes
-          this.perTributarioId = response.id;
-          this.load_Comprobantes();
-          this.snackBar.open(
-            `Período ${response.mes}/${response.anio} ya existe. Se cargaron los comprobantes.`,
-            'Cerrar',
-            { duration: 4000, panelClass: 'info-snackbar' }
-          );
-          this.isLoading.set(false);
-        } else {
-          // ❌ No existe → importar comprobantes
-          this.importarPeriodo(request);
-        }
-      },
-      error: (err) => {
-        console.error('❌ Error al verificar PerTributario:', err);
-        this.error.set(err.message || 'Error al verificar período');
-        this.isLoading.set(false);
-      }
-    });
+    this.perTributarioService
+      .getByPeriodo(request)
+      .pipe(
+        finalize(() => this.isLoading.set(false)) // ✅ siempre se ejecuta al final
+      )
+      .subscribe({
+        next: (response: PerTributarioResponse) => {
+          console.log('response', response);
+          if (response) {
+            this.perTributarioId = response.id;
+            this.load_Comprobantes();
+            this.snackBar.open(
+              `Período ${response.mes}/${response.anio} ya existe. Se cargaron los comprobantes.`,
+              'Cerrar',
+              { duration: 4000, panelClass: 'info-snackbar' }
+            );
+          } else {
+            this.importarPeriodo(request);
+          }
+        },
+        error: (err) => {
+          console.error('❌ Error al verificar PerTributario:', err);
+          this.error.set(err.message || 'Error al verificar período');
+        },
+      });
+
+    // this.perTributarioService.getByPeriodo(request).subscribe({
+    //   next: (response: PerTributarioResponse) => {
+    //     console.log('response', response);
+    //     if (response) {
+    //       // ✅ Existe → cargar comprobantes
+    //       this.perTributarioId = response.id;
+    //       this.load_Comprobantes();
+    //       this.snackBar.open(
+    //         `Período ${response.mes}/${response.anio} ya existe. Se cargaron los comprobantes.`,
+    //         'Cerrar',
+    //         { duration: 4000, panelClass: 'info-snackbar' }
+    //       );
+    //       this.isLoading.set(false);
+    //     } else {
+    //       // ❌ No existe → importar comprobantes
+    //       this.importarPeriodo(request);
+    //     }
+    //   },
+    //   error: (err) => {
+    //     console.error('❌ Error al verificar PerTributario:', err);
+    //     this.error.set(err.message || 'Error al verificar período');
+    //     this.isLoading.set(false);
+    //   },
+    // });
   }
 
   private importarPeriodo(request: GetPerTributarioRequest): void {
@@ -292,6 +325,34 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
 
   onMigrarExcel() {
     this.reportsService.descargarExcel(this.perTributarioId);
+  }
+
+  onImportarGlosa() {
+    const request: ComprobanteImportarGlosaRequest = {
+      perTributarioId: this.perTributarioId, // cambia por el GUID real
+      clienteId: this.clienteId,
+    };
+
+    this.comprobanteService.importarGlosa(request).subscribe({
+      next: (res) => {
+        console.log('✅ Glosa importada', res);
+
+        this.load_Comprobantes();
+
+        this.snackBar.open('✅ Glosa importada', 'Cerrar', {
+          duration: 4000,
+          panelClass: 'error-snackbar',
+        });
+      },
+      error: (err) => {
+        console.error('❌ Error al importar glosa', err);
+
+        this.snackBar.open('❌ Error al importar glosa', 'Cerrar', {
+          duration: 4000,
+          panelClass: 'error-snackbar',
+        });
+      },
+    });
   }
 
   load_Comprobantes(): void {
@@ -334,7 +395,7 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
       TipoComprobante: element.tipoComprobante,
       Serie: element.serie,
       Numero: element.numero,
-      Tipo: "01" // PDF
+      Tipo: '01', // PDF
     };
 
     this.cpeService.descargarPdf(request).subscribe({
@@ -346,7 +407,7 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
           height: '75vh',
           maxWidth: '65vw',
           maxHeight: '75vh',
-          data: { pdfUrl: fileURL }
+          data: { pdfUrl: fileURL },
         });
 
         // this.dialog.open(AppDialogViewpdfComponent, {
@@ -357,10 +418,9 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
       },
       error: (err) => {
         console.error('Error al descargar PDF:', err);
-      }
+      },
     });
   }
-
 
   // openDialog(element: ComprobantePaginatedResponse) {
   //   console.log(element);
