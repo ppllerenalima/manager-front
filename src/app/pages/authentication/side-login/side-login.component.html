@@ -8,7 +8,7 @@
           class="align-items-center justify-content-center img-height d-none d-lg-flex"
         >
           <img
-            src="/assets/images/backgrounds/login-bg.svg"
+            src="./assets/images/backgrounds/login-bg.svg"
             alt="login"
             style="max-width: 500px"
           />
@@ -42,7 +42,9 @@
                   @if(f['uname'].errors?.['required']) {
                   <div class="text-error">El usuario es obligatorio.</div>
                   } @if(f['uname'].errors?.['minlength']) {
-                  <div class="text-error">El nombre debe tener 6 caracteres.</div>
+                  <div class="text-error">
+                    El nombre debe tener 6 caracteres.
+                  </div>
                   }
                 </mat-hint>
                 }
@@ -83,7 +85,6 @@
                 {{ errorMessage }}
               </div>
             </form>
-
           </div>
         </div>
       </div>
