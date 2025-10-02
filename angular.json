@@ -52,9 +52,7 @@
                   "maximumError": "12mb"
                 }
               ],
-              "outputHashing": "all",
-              "baseHref": "/Modernize/",
-              "deployUrl": "/Modernize/"
+              "outputHashing": "all"
             },
             "development": {
               "optimization": false,
