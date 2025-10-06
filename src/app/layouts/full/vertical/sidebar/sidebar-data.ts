@@ -9,10 +9,16 @@ export const navItems: NavItem[] = [
     iconName: 'aperture',
     route: 'administration/usuario',
   },
+  // {
+  //   displayName: 'Cuenta-BaseSOL',
+  //   iconName: 'phone',
+  //   route: 'administration/cuenta-basesol',
+  // },
+
   {
-    displayName: 'Cuenta-BaseSOL',
-    iconName: 'phone',
-    route: 'administration/cuenta-basesol',
+    displayName: 'Configuración Global',
+    iconName: 'lock-access',
+    route: 'administration/configuracion-global',
   },
   //************************************************************************************************************************* */
 

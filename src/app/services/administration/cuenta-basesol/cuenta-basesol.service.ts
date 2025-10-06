@@ -5,6 +5,7 @@ import { AddCuentaBaseSol } from 'src/app/pages/administration/cuenta-basesol/mo
 import { CuentaBaseSol } from 'src/app/pages/administration/cuenta-basesol/models/CuentaBaseSol';
 import { CuentaBaseSolPaginated } from 'src/app/pages/administration/cuenta-basesol/models/CuentaBaseSolPaginated';
 import { EditCuentaBaseSol } from 'src/app/pages/administration/cuenta-basesol/models/EditCuentaBaseSol';
+import { BaseResponse } from 'src/app/shared/models/BaseResponse';
 import { PaginatedResponse } from 'src/app/shared/models/PaginatedResponse';
 import { environment } from 'src/environments/environment';
 
@@ -42,6 +43,12 @@ export class CuentaBaseSolService {
 
   public add(addCuentaBaseSol: AddCuentaBaseSol): Observable<any> {
     return this.http.post(this.apiUrl, addCuentaBaseSol);
+  }
+
+  public getFirstOrDefault(): Observable<BaseResponse<CuentaBaseSol>> {
+    return this.http.get<BaseResponse<CuentaBaseSol>>(
+      `${this.apiUrl}/FirstOrDefault`
+    );
   }
 
   public getById(id: string): Observable<CuentaBaseSol> {

@@ -1,0 +1,198 @@
+<mat-card class="cardWithShadow">
+  <mat-tab-group mat-stretch-tabs="false" animationDuration="0ms" [(selectedIndex)]="selectedTabIndex">
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <div class="d-flex align-items-center">
+          <mat-icon class="d-flex align-items-center">
+            <i-tabler
+              name="user-circle"
+              class="icon-20 m-r-8 d-flex"
+            ></i-tabler>
+          </mat-icon>
+        </div>
+        Cuenta-BaseSOL
+      </ng-template>
+      <mat-card-content class="p-y-24">
+        <div class="row">
+          <div class="col-sm-8">
+            <mat-card class="cardWithShadow">
+              <mat-card-content>
+                <mat-card-title>Datos de la Cuenta Base Sol</mat-card-title>
+                <mat-card-subtitle class="f-s-14"
+                  >El formulario Datos de la Cuenta SOL permite registrar la
+                  Clave SOL de SUNAT, necesaria para realizar búsquedas y
+                  gestiones tributarias de forma segura y
+                  autorizada.</mat-card-subtitle
+                >
+                <form [formGroup]="cuentaBaseSolForm">
+                  <div class="row m-t-24">
+                    <div class="col-sm-6">
+                      <!-- input -->
+                      <mat-label class="f-s-14 f-w-600 m-b-8 d-block"
+                        >Usuario</mat-label
+                      >
+                      <mat-form-field appearance="outline" class="w-100">
+                        <input
+                          type="text"
+                          matInput
+                          formControlName="username"
+                          placeholder="Usuario"
+                        />
+                        <mat-error
+                          *ngIf="
+                            cuentaBaseSolForm
+                              .get('username')
+                              ?.hasError('required')
+                          "
+                        >
+                          Usuario es obligatorio
+                        </mat-error>
+                      </mat-form-field>
+                      <!-- input -->
+                      <mat-label class="f-s-14 f-w-600 m-b-8 d-block"
+                        >Contraseña</mat-label
+                      >
+                      <mat-form-field appearance="outline" class="w-100">
+                        <input
+                          type="password"
+                          matInput
+                          formControlName="password"
+                          placeholder="Contraseña"
+                        />
+                        <mat-error
+                          *ngIf="
+                            cuentaBaseSolForm
+                              .get('password')
+                              ?.hasError('required')
+                          "
+                        >
+                          Contraseña es obligatoria
+                        </mat-error>
+                      </mat-form-field>
+                    </div>
+                    <div class="col-sm-6">
+                      <!-- input -->
+                      <mat-label class="f-s-14 f-w-600 m-b-8 d-block"
+                        >Client ID</mat-label
+                      >
+                      <mat-form-field appearance="outline" class="w-100">
+                        <input
+                          type="text"
+                          matInput
+                          formControlName="clientId"
+                          placeholder="Client ID"
+                        />
+                        <mat-error
+                          *ngIf="
+                            cuentaBaseSolForm
+                              .get('clientId')
+                              ?.hasError('required')
+                          "
+                        >
+                          Client ID es obligatorio
+                        </mat-error>
+                      </mat-form-field>
+                      <!-- input -->
+                      <mat-label class="f-s-14 f-w-600 m-b-8 d-block"
+                        >Client Secret</mat-label
+                      >
+                      <mat-form-field appearance="outline" class="w-100">
+                        <input
+                          type="text"
+                          matInput
+                          formControlName="clientSecret"
+                          placeholder="Client Secret"
+                        />
+                        <mat-error
+                          *ngIf="
+                            cuentaBaseSolForm
+                              .get('clientSecret')
+                              ?.hasError('required')
+                          "
+                        >
+                          Client Secret es obligatorio
+                        </mat-error>
+                      </mat-form-field>
+                    </div>
+                    <div class="col-12">
+                      <!-- input -->
+                      <mat-label class="f-s-14 f-w-600 m-b-8 d-block"
+                        >RUC</mat-label
+                      >
+                      <mat-form-field appearance="outline" class="w-100">
+                        <input
+                          type="text"
+                          matInput
+                          formControlName="ruc"
+                          placeholder="Ruc"
+                        />
+                        <mat-error
+                          *ngIf="
+                            cuentaBaseSolForm.get('ruc')?.hasError('required')
+                          "
+                        >
+                          Ruc es obligatorio
+                        </mat-error>
+                      </mat-form-field>
+                    </div>
+                  </div>
+                </form>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <div class="d-flex align-items-center">
+          <mat-icon class="d-flex align-items-center">
+            <i-tabler name="bell" class="icon-20 m-r-8 d-flex"></i-tabler>
+          </mat-icon>
+        </div>
+        Configuracion de Extracción
+      </ng-template>
+      <mat-card-content class="p-y-24">
+        <div class="row justify-content-center">
+          <div class="col-lg-9">
+            <mat-card class="cardWithShadow">
+              <mat-card-content class="p-y-24">
+                <mat-card-title
+                  >Longitud de caracteres para la Glosa</mat-card-title
+                >
+                <mat-card-subtitle class="f-s-14"
+                  >La opción Longitud de caracteres para la Glosa establece el
+                  límite máximo permitido en este campo, garantizando claridad y
+                  uniformidad en los registros.</mat-card-subtitle
+                >
+                <form [formGroup]="configuracionGlobalForm">
+                  <!-- input -->
+                  <mat-label class="f-s-14 f-w-600 m-b-8 d-block m-t-24"
+                    >Longitud de la Glosa*</mat-label
+                  >
+                  <mat-form-field
+                    appearance="outline"
+                    class="w-100"
+                    color="primary"
+                  >
+                    <input
+                      matInput
+                      type="number"
+                      formControlName="maxCaracteresGlosa"
+                      placeholder="Contraseña"
+                    />
+                    <mat-hint> Required for notificaitons.</mat-hint>
+                  </mat-form-field>
+                </form>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-tab>
+  </mat-tab-group>
+  <div class="text-right p-24 p-t-0">
+    <button mat-flat-button class="m-r-8" (click)="guardar()">Guardar</button>
+    <button mat-flat-button class="bg-error text-white">Cancelar</button>
+  </div>
+</mat-card>

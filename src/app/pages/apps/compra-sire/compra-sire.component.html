@@ -1,60 +1,51 @@
-<mat-card class="cardWithShadow overflow-hidden position-relative">
-  <!-- ------------------------------------------------------ -->
-  <!-- Desktop App -->
-  <!-- ------------------------------------------------------ -->
-
-  <div class="bg-primary text-white p-10 d-block d-lg-none">
-    <!-- ------------------------------------------------------ -->
-    <!-- Toggle mobile -->
-    <!-- ------------------------------------------------------ -->
-    <button class="text-white" mat-icon-button>
-      <mat-icon>short_text</mat-icon>
-    </button>
-  </div>
-
-  <!-- card -->
-  <mat-card class="shadow-none bg-light-secondary overflow-hidden">
-    <mat-card-content class="p-16 p-b-0">
-      <div class="d-flex justify-content-between align-items-center">
-        <!-- Columna izquierda -->
-        <div>
-          <h5 class="m-0 f-w-600 f-s-16">{{ ruc() }} {{ razonSocial() }}</h5>
-          <span class="f-s-14">{{ direccion() }}</span>
-        </div>
-
-        <!-- Columna derecha -->
-        <div class="d-flex gap-4">
-          <button
-            mat-stroked-button
-            (click)="onMigrarExcel()"
-            [disabled]="isLoading()"
-          >
-            {{ isLoading() ? "Procesando..." : "Migrar a Excel" }}
-          </button>
-
-          <button
-            mat-flat-button
-            (click)="onImportarGlosa()"
-            [disabled]="isLoading()"
-          >
-            {{ isLoading() ? "Procesando..." : "Importar Glosa" }}
-          </button>
-        </div>
+<mat-card class="shadow-none bg-light-secondary overflow-hidden">
+  <mat-card-content class="p-16 p-b-0">
+    <div class="d-flex justify-content-between align-items-center">
+      <!-- Columna izquierda -->
+      <div>
+        <h5 class="m-0 f-w-600 f-s-16">{{ ruc() }} {{ razonSocial() }}</h5>
+        <span class="f-s-14">{{ direccion() }}</span>
       </div>
-    </mat-card-content>
-  </mat-card>
 
-  <mat-sidenav-container class="email-box">
-    <!-- ------------------------------------------------------ -->
-    <!-- Sidebar contact -->
-    <!-- ------------------------------------------------------ -->
+      <!-- Columna derecha -->
+      <div class="d-flex gap-4">
+        <button
+          mat-stroked-button
+          (click)="onMigrarExcel()"
+          [disabled]="isLoading()"
+        >
+          {{ isLoading() ? "Procesando..." : "Migrar a Excel" }}
+        </button>
+
+        <button
+          mat-flat-button
+          (click)="onImportarGlosa()"
+          [disabled]="isLoading()"
+        >
+          {{ isLoading() ? "Procesando..." : "Importar Glosa" }}
+        </button>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="mat-card-top notes-app cardWithShadow overflow-hidden">
+  <mat-sidenav-container
+    [ngClass]="{
+      'side-panel-opened': sidePanelOpened(),
+      'side-panel-closed': !sidePanelOpened()
+    }"
+    class="h-100"
+  >
     <mat-sidenav
       #mailnav
       [mode]="isOver() ? 'over' : 'side'"
       [opened]="!isOver()"
-      class="mail-sidebar"
+      (open)="sidePanelOpened.set(true)"
+      (close)="sidePanelOpened.set(false)"
+      style="width: 290px"
     >
-      <div class="p-16">
+      <div class="p-16 p-b-0">
         <button
           mat-flat-button
           (click)="onSearchCompras()"
@@ -65,44 +56,81 @@
           {{ isLoading() ? "Buscando..." : "Búsqueda" }}
         </button>
       </div>
+
       <ng-scrollbar
-        style="height: calc(100vh - 380px)"
         class="position-relative"
+        style="height: calc(100vh - 400px)"
       >
         <div class="p-16">
-          <div class="flex gap-10">
-            <!-- Select de Año -->
-            <mat-form-field appearance="fill" class="w-50">
-              <mat-label>Año</mat-label>
-              <mat-select [(value)]="selectedYear">
-                <mat-option *ngFor="let year of years" [value]="year">
-                  {{ year }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
+          <mat-form-field appearance="fill" class="w-100">
+            <mat-label>Año</mat-label>
+            <mat-select [(value)]="selectedYear">
+              <mat-option *ngFor="let year of years" [value]="year">
+                {{ year }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
 
-            <!-- Select de Mes -->
-            <mat-form-field appearance="fill" class="w-50">
-              <mat-label>Mes</mat-label>
-              <mat-select [(value)]="selectedMonth">
-                <mat-option *ngFor="let month of months" [value]="month.value">
-                  {{ month.name }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-          <mat-divider></mat-divider>
-          <br />
-          <div class="p-16 bg-light-primary rounded">
-            <h5 class="f-s-14 text-primary d-flex align-items-center f-w-600">
-              <i-tabler
-                name="info-circle"
-                class="icon-20 m-r-8 d-flex"
-              ></i-tabler
-              >Person Info
-            </h5>
-          </div>
+          <!-- Select de Mes -->
+          <mat-form-field appearance="fill" class="w-100">
+            <mat-label>Mes</mat-label>
+            <mat-select [(value)]="selectedMonth">
+              <mat-option *ngFor="let month of months" [value]="month.value">
+                {{ month.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
         </div>
+
+        <h4 class="f-s-16 f-w-600 p-x-16 m-t-16">All Notes</h4>
+
+        <mat-nav-list class="p-x-16">
+          <mat-list-item
+            class="notes-item rounded m-b-8 bg-light-success"
+            (click)="onSelect(true)"
+          >
+            <span class="note-title f-w-500 text-success" matListItemTitle
+              >Con Glosa</span
+            >
+            <div class="d-flex justify-content-between">
+              <span class="note-time f-s-12 f-w-500"
+                >Se importo la glosa.
+              </span>
+              <span class="f-w-600 f-s-14"> {{ this.conGlosa }} </span>
+            </div>
+          </mat-list-item>
+          <mat-list-item
+            class="notes-item rounded m-b-8 bg-light-error"
+            (click)="onSelect(false)"
+          >
+            <span class="note-title f-w-500 text-error" matListItemTitle
+              >Sin Glosa</span
+            >
+            <div class="d-flex justify-content-between">
+              <span class="note-time f-s-12 f-w-500"
+                >No se importo la glosa.
+              </span>
+              <span class="f-w-600 f-s-14"> {{ this.sinGlosa }} </span>
+            </div>
+          </mat-list-item>
+          <mat-list-item
+            class="notes-item rounded m-b-8 bg-light-primary"
+            (click)="onSelect()"
+          >
+            <span class="note-title f-w-500 text-primary" matListItemTitle
+              >Total</span
+            >
+            <div class="d-flex justify-content-between">
+              <span class="note-time f-s-12 f-w-500"
+                >Total de regiatros importados.
+              </span>
+              <span class="f-w-600 f-s-14"> {{ this.total }} </span>
+            </div>
+          </mat-list-item>
+        </mat-nav-list>
+
+        <mat-divider></mat-divider>
+
         <div class="p-16">
           <button
             mat-flat-button
@@ -361,20 +389,20 @@
                                     ></i-tabler>
                                   </span>
                                   <div>
+                                    <button
+                                      mat-stroked-button
+                                      class="m-l-8"
+                                      color="warn"
+                                      (click)="openDialog(element)"
+                                    >
+                                      Ver PDF
+                                    </button>
+
                                     @if(element.tieneGlosa) {
                                     <div class="f-s-14 f-w-600 mat-subtitle-1">
+                                      <br />
+
                                       {{ element.glosa }}
-                                    </div>
-                                    } @else{
-                                    <div class="f-s-14 f-w-600 mat-subtitle-1">
-                                      <button
-                                        mat-stroked-button
-                                        class="m-l-8"
-                                        color="warn"
-                                        (click)="openDialog(element)"
-                                      >
-                                        Ver PDF
-                                      </button>
                                     </div>
                                     }
                                   </div>

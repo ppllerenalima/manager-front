@@ -49,6 +49,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { CpeService } from 'src/app/services/apps/compra-sire/cpe.service';
 import { ReportsService } from 'src/app/services/apps/compra-sire/reports.service';
 import { ComprobanteImportarGlosaRequest } from './Models/Requests/ComprobanteImportarGlosaRequest';
+import { Note } from '../notes/note';
 
 @Component({
   selector: 'app-compra-sire',
@@ -181,6 +182,16 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
   @ViewChild(MatSort) sort!: MatSort;
 
   // 2 [Sticky Header with Table]
+  tieneGlosa: boolean | null = null;
+  conGlosa: number = 0;
+  sinGlosa: number = 0;
+  total: number = 0;
+  selectedNote = signal<Note | null>(null);
+  notes = signal<Note[]>([]);
+  clrName = signal<string>('warning');
+  currentNoteTitle = signal<string>('');
+  selectedColor = signal<string | null>(null);
+  sidePanelOpened = signal(true);
 
   constructor(private route: ActivatedRoute, private snackBar: MatSnackBar) {}
 
@@ -270,31 +281,6 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
           this.error.set(err.message || 'Error al verificar período');
         },
       });
-
-    // this.perTributarioService.getByPeriodo(request).subscribe({
-    //   next: (response: PerTributarioResponse) => {
-    //     console.log('response', response);
-    //     if (response) {
-    //       // ✅ Existe → cargar comprobantes
-    //       this.perTributarioId = response.id;
-    //       this.load_Comprobantes();
-    //       this.snackBar.open(
-    //         `Período ${response.mes}/${response.anio} ya existe. Se cargaron los comprobantes.`,
-    //         'Cerrar',
-    //         { duration: 4000, panelClass: 'info-snackbar' }
-    //       );
-    //       this.isLoading.set(false);
-    //     } else {
-    //       // ❌ No existe → importar comprobantes
-    //       this.importarPeriodo(request);
-    //     }
-    //   },
-    //   error: (err) => {
-    //     console.error('❌ Error al verificar PerTributario:', err);
-    //     this.error.set(err.message || 'Error al verificar período');
-    //     this.isLoading.set(false);
-    //   },
-    // });
   }
 
   private importarPeriodo(request: GetPerTributarioRequest): void {
@@ -358,9 +344,28 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
   load_Comprobantes(): void {
     this.isLoading.set(true);
 
+    this.comprobanteService.getContadores(this.perTributarioId).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.conGlosa = res.data?.conGlosa!;
+          this.sinGlosa = res.data?.sinGlosa!;
+          this.total = res.data?.total!;
+
+          console.log('Con Glosa:', res.data?.conGlosa);
+          console.log('Sin Glosa:', res.data?.sinGlosa);
+        } else {
+          console.warn('Error:', res.errorMessage);
+        }
+      },
+      error: (err) => {
+        console.error('Error en contadores:', err);
+      },
+    });
+
     this.comprobanteService
       .getsPaginated(
         this.perTributarioId,
+        this.tieneGlosa,
         this.search,
         this.pageSize,
         this.pageIndex // API espera base 1
@@ -498,5 +503,10 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
         console.error('Error al obtener cliente:', err);
       },
     });
+  }
+
+  onSelect(tieneGlosa: boolean | null = null): void {
+    this.tieneGlosa = tieneGlosa;
+    this.load_Comprobantes();
   }
 }
