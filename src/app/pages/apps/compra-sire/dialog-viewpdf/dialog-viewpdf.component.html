@@ -1,0 +1,38 @@
+<h2 mat-dialog-title>Vista de Comprobante</h2>
+<mat-divider></mat-divider>
+<div class="p-16">
+   <form [formGroup]="glosaForm" (ngSubmit)="onSubmit()">
+    <div class="row justify-content-between align-items-center">
+      <div class="col-sm-9 col-lg-10">
+        <mat-form-field appearance="outline" class="w-100 hide-hint">
+          <input
+            matInput
+            #inputData
+            formControlName="glosa"
+            placeholder="Escribe la Glosa"
+          />
+        </mat-form-field>
+      </div>
+      <div class="col-sm-3 col-lg-2">
+        <button
+          mat-flat-button
+          class="w-100"
+          id="btnAddTodo"
+          type="submit"
+          [disabled]="glosaForm.invalid"
+        >
+          Actualizar Glosa
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+<mat-divider></mat-divider>
+<mat-dialog-content class="p-0">
+  <iframe
+    [src]="data.pdfUrl | safeUrl"
+    width="100%"
+    height="800px"
+    style="border: none"
+  ></iframe>
+</mat-dialog-content>

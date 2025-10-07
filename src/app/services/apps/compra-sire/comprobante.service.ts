@@ -8,6 +8,7 @@ import { ComprobantePaginatedResponse } from 'src/app/pages/apps/compra-sire/Mod
 import { ComprobanteImportarGlosaRequest } from 'src/app/pages/apps/compra-sire/Models/Requests/ComprobanteImportarGlosaRequest';
 import { BaseResponse } from 'src/app/shared/models/BaseResponse';
 import { ComprobanteContadoresResponse } from 'src/app/pages/apps/compra-sire/Models/Responses/ComprobanteContadoresResponse';
+import { EditComprobanteRequest } from 'src/app/pages/apps/compra-sire/Models/Requests/EditComprobanteRequest';
 
 @Injectable({
   providedIn: 'root',
@@ -48,6 +49,13 @@ export class ComprobanteService {
   ): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/importar-glosa`, request);
   }
+
+  public update(
+      id: string,
+      editComprobante: EditComprobanteRequest
+    ): Observable<any> {
+      return this.http.put(`${this.apiUrl}/${id}`, editComprobante);
+    }
 
   public getContadores(
     perTributarioId: string

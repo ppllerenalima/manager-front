@@ -1,4 +1,5 @@
 export interface ComprobantePaginatedResponse {
+  id: string;
   ruc?: string;
   razonSocial?: string;
   periodo?: string;

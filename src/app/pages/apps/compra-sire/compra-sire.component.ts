@@ -395,6 +395,8 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
   }
 
   openDialog(element: any) {
+    console.log('element', element);
+
     const request = {
       RucEmisor: element.numeroDocIdentidad,
       TipoComprobante: element.tipoComprobante,
@@ -409,10 +411,15 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
 
         this.dialog.open(AppDialogViewpdfComponent, {
           width: '65vw',
-          height: '75vh',
+          height: '85vh',
           maxWidth: '65vw',
-          maxHeight: '75vh',
-          data: { pdfUrl: fileURL },
+          maxHeight: '85vh',
+          data: { pdfUrl: fileURL, id: element.id, glosa: element.glosa },
+        })
+        .afterClosed()
+        .subscribe(() => {
+          // refrescar si es necesario
+          this.load_Comprobantes();
         });
 
         // this.dialog.open(AppDialogViewpdfComponent, {
