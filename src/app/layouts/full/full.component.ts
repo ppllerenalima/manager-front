@@ -21,6 +21,7 @@ import { AppHorizontalSidebarComponent } from './horizontal/sidebar/sidebar.comp
 import { AppBreadcrumbComponent } from './shared/breadcrumb/breadcrumb.component';
 import { CustomizerComponent } from './shared/customizer/customizer.component';
 import { AuthService } from 'src/app/services/authentication/Auth.service';
+import { NavItem } from './vertical/sidebar/nav-item/nav-item';
 
 const MOBILE_VIEW = 'screen and (max-width: 768px)';
 const TABLET_VIEW = 'screen and (min-width: 769px) and (max-width: 1024px)';
@@ -194,6 +195,8 @@ export class FullComponent implements OnInit {
   currentEmail: string | null = null;
   currentRole: string | null = null;
 
+  filteredNavItems: NavItem[] = [];
+  
   constructor(
     private settings: CoreService,
     private mediaMatcher: MediaMatcher,
@@ -241,7 +244,14 @@ export class FullComponent implements OnInit {
     this.router.navigate(['/authentication/login']); // 👈 Redirige a login
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    const role = this.authService.getRole()?.toUpperCase() || 'USUARIO';
+    console.log('🔹 Rol detectado:', role);
+
+    this.filteredNavItems = this.filterMenuByRole(navItems, role);
+
+    console.log('🔹 Menú filtrado:', this.filteredNavItems);
+  }
 
   ngOnDestroy() {
     this.layoutChangesSubscription.unsubscribe();
@@ -293,5 +303,30 @@ export class FullComponent implements OnInit {
 
     // Add the selected theme class
     this.htmlElement.classList.add(options.activeTheme);
+  }
+
+  /**
+   * Filtra los ítems y sus hijos según el rol del usuario.
+   */
+  private filterMenuByRole(items: NavItem[], role: string): NavItem[] {
+    return items
+      .filter((item) => {
+        // Si no tiene roles, lo mostramos
+        if (!item.roles) return true;
+
+        // Si tiene roles, el actual debe coincidir (sin importar mayúsculas/minúsculas)
+        return item.roles.some((r) => r.toUpperCase() === role);
+      })
+      .map((item) => ({
+        ...item,
+        // Filtramos recursivamente los hijos
+        children: item.children
+          ? this.filterMenuByRole(item.children, role)
+          : [],
+      }));
+  }
+
+  trackByFn(index: number, item: NavItem) {
+    return item.displayName || index;
   }
 }

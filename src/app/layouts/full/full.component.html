@@ -33,23 +33,22 @@
           [showToggle]="isOver"
         ></app-sidebar>
         <!-- <ng-scrollbar class="position-relative" style="height: 100%"> -->
-          <!-- <mat-nav-list class="sidebar-list">
+        <!-- <mat-nav-list class="sidebar-list">
             @for(item of navItems; track item) {
             <app-nav-item [item]="item" (notify)="sidenav.toggle()">
             </app-nav-item>
             }
           </mat-nav-list> -->
         <!-- </ng-scrollbar> -->
-        <!-- <ng-scrollbar class="position-relative" style="height: 100%">
+        <ng-scrollbar class="position-relative" style="height: 100%">
+          <!-- 🔹 Menú lateral -->
           <mat-nav-list class="sidebar-list">
-            <ng-container *ngFor="let item of filteredMenu">
-              <app-nav-item
-                [item]="item"
-                (notify)="sidenav.toggle()"
-              ></app-nav-item>
-            </ng-container>
+            <app-nav-item
+              *ngFor="let item of filteredNavItems; trackBy: trackByFn"
+              [item]="item"
+            ></app-nav-item>
           </mat-nav-list>
-        </ng-scrollbar> -->
+        </ng-scrollbar>
 
         <div class="p-24 m-t-auto profile-bar">
           <div
