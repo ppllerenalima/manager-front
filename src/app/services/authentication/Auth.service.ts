@@ -121,4 +121,28 @@ export class AuthService {
   isAuthenticated(): boolean {
     return !!this.getToken();
   }
+
+  // ──────────────── MÉTODOS DE ROL ────────────────
+
+  /**
+   * Devuelve el rol del usuario actual (por ejemplo 'ADMINISTRADOR' o 'USUARIO')
+   */
+  getRole(): string | null {
+    const user = this.currentUser();
+    return user?.role || null;
+  }
+
+  /**
+   * Indica si el usuario actual es administrador
+   */
+  isAdmin(): boolean {
+    return this.getRole() === 'ADMINISTRADOR';
+  }
+
+  /**
+   * Indica si el usuario actual es usuario normal
+   */
+  isUser(): boolean {
+    return this.getRole() === 'USUARIO';
+  }
 }

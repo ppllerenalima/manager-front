@@ -3,13 +3,21 @@
     <app-branding></app-branding>
   </div>
 
-  @if(showToggle) {
-  <a
-    href="javascript:void(0)"
-    (click)="toggleMobileNav.emit()"
-    class="d-flex justify-content-center ng-star-inserted icon-40 align-items-center f-s-14"
-  >
-    <i-tabler name="x" class="icon-20 d-flex"></i-tabler>
-  </a>
+  @if (showToggle) {
+    <a
+      href="javascript:void(0)"
+      (click)="toggleMobileNav.emit()"
+      class="d-flex justify-content-center icon-40 align-items-center f-s-14"
+    >
+      <i-tabler name="x" class="icon-20 d-flex"></i-tabler>
+    </a>
   }
 </div>
+
+<!-- 🔹 Menú lateral -->
+<mat-nav-list class="sidebar-list">
+  <app-nav-item
+    *ngFor="let item of filteredNavItems; trackBy: trackByFn"
+    [item]="item"
+  ></app-nav-item>
+</mat-nav-list>

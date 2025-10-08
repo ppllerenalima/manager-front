@@ -75,8 +75,6 @@ export class AppClienteComponent implements OnInit {
       .getsPaginated(this.searchText(), this.pageSize, this.pageIndex)
       .subscribe({
         next: (res) => {
-          console.log('res.data', res.data);
-
           this.cliente.set(res.data);
           this.totalItems.set(res.total);
         },

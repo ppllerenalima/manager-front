@@ -12,4 +12,6 @@ export interface NavItem {
     route?: string;
     children?: NavItem[];
     ddType?: string;
+
+    roles?: string[]; // 👈 Nuevo campo para control de acceso
 }
