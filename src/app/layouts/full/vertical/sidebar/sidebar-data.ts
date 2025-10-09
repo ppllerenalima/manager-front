@@ -3,18 +3,24 @@ import { NavItem } from './nav-item/nav-item';
 export const navItems: NavItem[] = [
   {
     navCap: 'Administracion',
-    roles: ['ADMINISTRADOR'],
-  },
-  {
-    displayName: 'Usuario',
-    iconName: 'aperture',
-    route: 'administration/usuario',
-    roles: ['ADMINISTRADOR'],
+    roles: ['ADMINISTRADOR', 'USUARIO'],
   },
   {
     displayName: 'Configuración Global',
     iconName: 'lock-access',
     route: 'administration/configuracion-global',
+    roles: ['ADMINISTRADOR'],
+  },
+  {
+    displayName: 'Cuenta',
+    iconName: 'lock-access',
+    route: 'administration/cuenta',
+    roles: ['ADMINISTRADOR', 'USUARIO'],
+  },
+  {
+    displayName: 'Usuario',
+    iconName: 'aperture',
+    route: 'administration/usuario',
     roles: ['ADMINISTRADOR'],
   },
   {
