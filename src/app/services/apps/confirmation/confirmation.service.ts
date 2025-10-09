@@ -10,10 +10,11 @@ export class ConfirmationService {
     mensaje: string,
     servicio: Observable<T>,
     onSuccess: (res: T) => void,
-    successMessage?: string
+    successMessage?: string,
+    title?: string // 👈 opcional
   ): void {
     Swal.fire({
-      title: '¿Estás seguro?',
+      title: title ?? '¿Estás seguro?', // 👈 fallback dinámico
       text: mensaje,
       icon: 'warning',
       showCancelButton: true,

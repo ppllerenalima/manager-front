@@ -143,6 +143,14 @@
             >
               <i-tabler name="trash" class="icon-18"></i-tabler>
             </a>
+            <a
+                (click)="onResetearPassword(row.id)"
+                class="m-r-10 cursor-pointer"
+                matTooltip="Restablecer la contraseña del usuario, asignando la contraseña por defecto establecida por el sistema."
+                matTooltipPosition="right"
+              >
+                <i-tabler name="repeat-once" class="icon-18"></i-tabler>
+              </a>
           </td>
         </ng-container>
 

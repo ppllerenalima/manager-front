@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
 import { jwtDecode } from 'jwt-decode';
 import { Observable, tap } from 'rxjs';
+import { ChangePasswordRequest } from 'src/app/pages/administration/usuario/models/Requests/ChangePasswordRequest';
 import { environment } from 'src/environments/environment';
 
 export interface SignInRequest {
@@ -97,6 +98,15 @@ export class AuthService {
     this.currentUser.set(null); // 🔹 limpiar usuario
   }
 
+  changePassword(
+    userId: string,
+    request: ChangePasswordRequest
+  ): Observable<{ success: boolean; message: string }> {
+    return this.http.post<{ success: boolean; message: string }>(
+      `${this.apiUrl}/${userId}/change-password`,
+      request
+    );
+  }
   // ──────────────── MÉTODOS DE CONSULTA ────────────────
 
   /**

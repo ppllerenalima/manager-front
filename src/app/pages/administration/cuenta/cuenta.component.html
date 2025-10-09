@@ -10,7 +10,7 @@
             ></i-tabler>
           </mat-icon>
         </div>
-        Account
+        Cuenta Personal
       </ng-template>
       <mat-card-content class="p-y-24">
         <div class="row">
@@ -18,22 +18,15 @@
             <mat-card class="cardWithShadow">
               <mat-card-content class="p-y-24">
                 <mat-card-title>Cambiar contraseña</mat-card-title>
-                <mat-card-subtitle class="f-s-14"
-                  >Para cambiar su contraseña por favor confirme
-                  aquí</mat-card-subtitle
-                >
-                <form class="m-t-24">
-                  <!-- input -->
+                <mat-card-subtitle class="f-s-14">
+                  Para cambiar su contraseña por favor confirme aquí
+                </mat-card-subtitle>
+
+                <form class="m-t-24" [formGroup]="loginForm">
+                  <!-- 🔹 CONTRASEÑA ACTUAL -->
                   <mat-label class="f-s-14 f-w-600 m-b-8 d-block"
                     >Contraseña actual</mat-label
                   >
-                  <!-- <mat-form-field
-                      appearance="outline"
-                      class="w-100"
-                      color="primary"
-                    >
-                      <input matInput type="password" value="" placeholder="Ingrese Contraseña Actual" />
-                    </mat-form-field> -->
                   <mat-form-field
                     appearance="outline"
                     class="w-100"
@@ -42,7 +35,7 @@
                     <input
                       matInput
                       [type]="hide ? 'password' : 'text'"
-                      [formControl]="loginForm.controls.OldPassword"
+                      formControlName="CurrentPassword"
                     />
                     <button
                       mat-icon-button
@@ -55,16 +48,19 @@
                         hide ? "visibility_off" : "visibility"
                       }}</mat-icon>
                     </button>
-                    @if(loginForm.controls.OldPassword.touched &&
-                    loginForm.controls.OldPassword.invalid){
+
+                    @if(loginForm.controls.CurrentPassword.touched &&
+                    loginForm.controls.CurrentPassword.invalid) {
                     <mat-hint class="m-b-16 error-msg">
-                      @if (loginForm.controls.OldPassword.hasError('minlength')
-                      && !loginForm.controls.OldPassword.hasError('required')) {
+                      @if
+                      (loginForm.controls.CurrentPassword.hasError('minlength'))
+                      {
                       <div class="text-error">
                         Contraseña debe tener al menos 5 dígitos
                       </div>
                       } @if
-                      (loginForm.controls.OldPassword.hasError('required')) {
+                      (loginForm.controls.CurrentPassword.hasError('required'))
+                      {
                       <div class="text-error">
                         Contraseña actual es <strong>requerida</strong>
                       </div>
@@ -72,7 +68,8 @@
                     </mat-hint>
                     }
                   </mat-form-field>
-                  <!-- input -->
+
+                  <!-- 🔹 NUEVA CONTRASEÑA -->
                   <mat-label class="f-s-14 f-w-600 m-b-8 d-block"
                     >Nueva contraseña</mat-label
                   >
@@ -84,7 +81,7 @@
                     <input
                       matInput
                       [type]="alignhide ? 'password' : 'text'"
-                      [formControl]="loginForm.controls.NewPassword"
+                      formControlName="NewPassword"
                     />
                     <button
                       mat-icon-button
@@ -97,7 +94,7 @@
                         alignhide ? "visibility_off" : "visibility"
                       }}</mat-icon>
                     </button>
-                    <!-- errores -->
+
                     @if(loginForm.controls.NewPassword.touched &&
                     loginForm.controls.NewPassword.invalid) {
                     <mat-hint class="m-b-16 error-msg">
@@ -131,21 +128,52 @@
                     </mat-hint>
                     }
                   </mat-form-field>
-                  <!-- input -->
+
+                  <!-- 🔹 CONFIRMAR CONTRASEÑA -->
                   <mat-label class="f-s-14 f-w-600 m-b-8 d-block"
                     >Confirmar contraseña</mat-label
                   >
                   <mat-form-field
                     appearance="outline"
-                    class="w-100 hide-hint"
+                    class="w-100"
                     color="primary"
                   >
                     <input
                       matInput
-                      type="password"
-                      value=""
-                      placeholder="Ingrese Confirmar contraseñagit "
+                      [type]="alignhide2 ? 'password' : 'text'"
+                      formControlName="ConfirmPassword"
                     />
+                    <button
+                      mat-icon-button
+                      matSuffix
+                      (click)="alignhide2 = !alignhide2"
+                      [attr.aria-label]="'Hide password'"
+                      [attr.aria-pressed]="alignhide2"
+                    >
+                      <mat-icon class="op-5">{{
+                        alignhide2 ? "visibility_off" : "visibility"
+                      }}</mat-icon>
+                    </button>
+
+                    @if(loginForm.controls.ConfirmPassword.touched &&
+                    loginForm.controls.ConfirmPassword.invalid) {
+                    <mat-hint class="m-b-16 error-msg">
+                      @if
+                      (loginForm.controls.ConfirmPassword.hasError('required'))
+                      {
+                      <div class="text-error">
+                        La confirmación de contraseña es
+                        <strong>requerida</strong>.
+                      </div>
+                      }
+                      @if(loginForm.controls.ConfirmPassword.hasError('passwordMismatch'))
+                      {
+                      <div class="text-error">
+                        Las contraseñas no coinciden.
+                      </div>
+                      }
+                    </mat-hint>
+                    }
                   </mat-form-field>
                 </form>
               </mat-card-content>
@@ -156,7 +184,14 @@
     </mat-tab>
   </mat-tab-group>
   <div class="text-right p-24 p-t-0">
-    <button mat-flat-button class="m-r-8">Guardar</button>
+    <button
+      mat-flat-button
+      class="m-r-8"
+      [disabled]="loginForm.invalid || isLoading"
+      (click)="ChangePassword()"
+    >
+      @if (!isLoading) { Cambiar contraseña } @else { Procesando… }
+    </button>
     <button mat-flat-button class="bg-error text-white">Cancelar</button>
   </div>
 </mat-card>

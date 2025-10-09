@@ -155,4 +155,19 @@ export class AppUsuarioComponent implements OnInit, AfterViewInit {
       }
     );
   }
+
+  onResetearPassword(id: string) {
+    this.confirmationService.confirmAndExecute(
+      '¡Se restablecerá la contraseña de este usuario a una contraseña por defecto.!',
+      this.usuarioService.resetPassword(id),
+      (res) => {
+        if (res.success) {
+          this.load_Usuarios();
+        } else {
+        }
+      },
+      'La contraseña fue reiniciada correctamente.',
+      'Confirmar reinicio de contraseña'
+    );
+  }
 }

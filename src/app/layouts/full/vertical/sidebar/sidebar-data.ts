@@ -13,7 +13,7 @@ export const navItems: NavItem[] = [
   },
   {
     displayName: 'Cuenta',
-    iconName: 'lock-access',
+    iconName: 'zoom-code',
     route: 'administration/cuenta',
     roles: ['ADMINISTRADOR', 'USUARIO'],
   },

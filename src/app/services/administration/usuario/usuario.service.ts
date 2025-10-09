@@ -55,4 +55,13 @@ export class UsuarioService {
   public delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  public resetPassword(
+    userId: string
+  ): Observable<{ success: boolean; message: string }> {
+    return this.http.post<{ success: boolean; message: string }>(
+      `${this.apiUrl}/${userId}/reset-password`,
+      {}
+    );
+  }
 }
