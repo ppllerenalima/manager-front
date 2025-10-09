@@ -14,7 +14,7 @@ export const AdministrationRoutes: Routes = [
         data: {
           title: 'Usuario',
           urls: [
-            { title: 'Dashboard', url: '/dashboards/dashboard1' },
+            { title: 'Dashboard' },
             { title: 'Usuario' },
           ],
         },
@@ -25,7 +25,7 @@ export const AdministrationRoutes: Routes = [
         data: {
           title: 'Cuenta-BaseSOL',
           urls: [
-            { title: 'Dashboard', url: '/dashboards/dashboard1' },
+            { title: 'Dashboard' },
             { title: 'Cuenta-BaseSOL' },
           ],
         },
@@ -36,7 +36,7 @@ export const AdministrationRoutes: Routes = [
         data: {
           title: 'Configuración-Global',
           urls: [
-            { title: 'Dashboard', url: '/dashboards/dashboard1' },
+            { title: 'Dashboard' },
             { title: 'Configuración-Global' },
           ],
         },

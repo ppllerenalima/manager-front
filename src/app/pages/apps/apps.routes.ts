@@ -151,7 +151,7 @@ export const AppsRoutes: Routes = [
         data: {
           title: 'Grupo',
           urls: [
-            { title: 'Dashboard', url: '/dashboards/dashboard1' },
+            { title: 'Dashboard' },
             { title: 'Grupo' },
           ],
         },
@@ -162,7 +162,7 @@ export const AppsRoutes: Routes = [
         data: {
           title: 'Cliente',
           urls: [
-            { title: 'Dashboard', url: '/dashboards/dashboard1' },
+            { title: 'Dashboard' },
             { title: 'Cliente' },
           ],
         },
@@ -186,7 +186,7 @@ export const AppsRoutes: Routes = [
         data: {
           title: 'Compra-Sire',
           urls: [
-            { title: 'Dashboard', url: '/dashboards/dashboard1' },
+            { title: 'Dashboard' },
             { title: 'Compra-Sire' },
           ],
         },
