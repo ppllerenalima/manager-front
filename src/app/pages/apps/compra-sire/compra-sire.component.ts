@@ -183,9 +183,12 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
 
   // 2 [Sticky Header with Table]
   tieneGlosa: boolean | null = null;
-  conGlosa: number = 0;
-  sinGlosa: number = 0;
-  total: number = 0;
+  conGlosa = signal(0);
+  sinGlosa = signal(0);
+
+  // total se puede calcular automáticamente 👇
+  total = computed(() => this.conGlosa() + this.sinGlosa());
+
   selectedNote = signal<Note | null>(null);
   notes = signal<Note[]>([]);
   clrName = signal<string>('warning');
@@ -347,9 +350,8 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
     this.comprobanteService.getContadores(this.perTributarioId).subscribe({
       next: (res) => {
         if (res.success) {
-          this.conGlosa = res.data?.conGlosa!;
-          this.sinGlosa = res.data?.sinGlosa!;
-          this.total = res.data?.total!;
+          this.conGlosa.set(res.data?.conGlosa ?? 0);
+          this.sinGlosa.set(res.data?.sinGlosa ?? 0);
 
           console.log('Con Glosa:', res.data?.conGlosa);
           console.log('Sin Glosa:', res.data?.sinGlosa);
@@ -409,18 +411,19 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
       next: (blob: Blob) => {
         const fileURL = URL.createObjectURL(blob);
 
-        this.dialog.open(AppDialogViewpdfComponent, {
-          width: '65vw',
-          height: '85vh',
-          maxWidth: '65vw',
-          maxHeight: '85vh',
-          data: { pdfUrl: fileURL, id: element.id, glosa: element.glosa },
-        })
-        .afterClosed()
-        .subscribe(() => {
-          // refrescar si es necesario
-          this.load_Comprobantes();
-        });
+        this.dialog
+          .open(AppDialogViewpdfComponent, {
+            width: '65vw',
+            height: '85vh',
+            maxWidth: '65vw',
+            maxHeight: '85vh',
+            data: { pdfUrl: fileURL, id: element.id, glosa: element.glosa },
+          })
+          .afterClosed()
+          .subscribe(() => {
+            // refrescar si es necesario
+            this.load_Comprobantes();
+          });
 
         // this.dialog.open(AppDialogViewpdfComponent, {
         //   width: '80%',
@@ -433,19 +436,6 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
       },
     });
   }
-
-  // openDialog(element: ComprobantePaginatedResponse) {
-  //   console.log(element);
-
-  //   this.dialog
-  //     .open(AppDialogViewpdfComponent, {
-  //       data: element, // pasas el comprobante directo
-  //     })
-  //     .afterClosed()
-  //     .subscribe(() => {
-  //       this.load_Comprobantes(); // refrescar lista al cerrar
-  //     });
-  // }
 
   /** Selecciona un comprobante y lo consulta */
   selectComprobante(registro: registroSIRE): void {
