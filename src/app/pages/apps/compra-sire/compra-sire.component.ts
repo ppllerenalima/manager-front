@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   computed,
   inject,
@@ -196,7 +197,11 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
   selectedColor = signal<string | null>(null);
   sidePanelOpened = signal(true);
 
-  constructor(private route: ActivatedRoute, private snackBar: MatSnackBar) {}
+  constructor(
+    private cdRef: ChangeDetectorRef,
+    private route: ActivatedRoute,
+    private snackBar: MatSnackBar
+  ) {}
 
   /** ================================
    * 📌 7. INICIALIZACIÓN
@@ -356,6 +361,8 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
 
           this.conGlosa.set(conGlosa);
           this.sinGlosa.set(sinGlosa);
+
+          this.cdRef.markForCheck(); // 👈 fuerza la actualización
 
           console.log(`Con Glosa: ${conGlosa}`);
           console.log(`Sin Glosa: ${sinGlosa}`);
