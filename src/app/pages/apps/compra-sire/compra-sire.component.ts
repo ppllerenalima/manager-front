@@ -349,18 +349,33 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
 
     this.comprobanteService.getContadores(this.perTributarioId).subscribe({
       next: (res) => {
-        if (res.success) {
-          this.conGlosa.set(res.data?.conGlosa ?? 0);
-          this.sinGlosa.set(res.data?.sinGlosa ?? 0);
+        // ✅ Validar que la respuesta tenga estructura esperada
+        if (res?.success) {
+          const conGlosa = res.data?.conGlosa ?? 0;
+          const sinGlosa = res.data?.sinGlosa ?? 0;
 
-          console.log('Con Glosa:', res.data?.conGlosa);
-          console.log('Sin Glosa:', res.data?.sinGlosa);
+          this.conGlosa.set(conGlosa);
+          this.sinGlosa.set(sinGlosa);
+
+          console.log(`Con Glosa: ${conGlosa}`);
+          console.log(`Sin Glosa: ${sinGlosa}`);
         } else {
-          console.warn('Error:', res.errorMessage);
+          console.warn(
+            '⚠️ Error en respuesta:',
+            res?.errorMessage || 'Respuesta inválida del servidor'
+          );
         }
       },
       error: (err) => {
-        console.error('Error en contadores:', err);
+        // 🧠 Manejo más detallado del error HTTP
+        console.error('❌ Error al obtener contadores:', err);
+
+        // Si querés mostrar un mensaje visual (ej. snackbar o toast)
+        this.snackBar.open(
+          err.error?.message || 'Error al obtener contadores.',
+          'Cerrar',
+          { duration: 3000, panelClass: ['snackbar-error'] }
+        );
       },
     });
 
