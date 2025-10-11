@@ -1,6 +1,21 @@
 <mat-card class="cardWithShadow">
   <mat-card-content>
     <div class="row justify-content-between gap-16">
+      <div class="col-sm-2">
+        <mat-form-field appearance="outline" class="w-100 hide-hint">
+          <mat-label>Grupo</mat-label>
+          <mat-select
+            [formControl]="grupoControl"
+            (selectionChange)="onGrupoChange($event.value)"
+          >
+            <mat-option [value]="null">Todos</mat-option>
+            <mat-option *ngFor="let grupo of grupos()" [value]="grupo.id">
+              {{ grupo.descripcion }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
       <div class="col-sm-4">
         <mat-form-field appearance="outline" class="w-100 hide-hint">
           <input
@@ -12,11 +27,9 @@
             <i-tabler name="search" class="icon-20 d-flex m-t-2"></i-tabler>
           </mat-icon>
         </mat-form-field>
-        @if(cliente().length === 0){
-        <p>No clientes available.</p>
-        }
       </div>
-      <div class="col-sm-6 d-flex align-items-center justify-content-end">
+
+      <div class="col-sm-5 d-flex align-items-center justify-content-end">
         <button mat-flat-button (click)="openDialog('Add', {})" color="primary">
           Agregar Cliente
         </button>
@@ -26,7 +39,9 @@
 </mat-card>
 
 <div class="row">
-  @for(cliente of cliente(); track cliente.razonsocial ) {
+  <!-- ✅ Mostrar lista de clientes -->
+  @if (cliente().length > 0) { @for (cliente of cliente(); track
+  cliente.razonsocial) {
   <div class="col-sm-6 col-lg-3">
     <mat-card class="cardWithShadow">
       <!-- contact actions -->
@@ -92,20 +107,31 @@
       <mat-divider></mat-divider>
     </mat-card>
   </div>
+  } }
+
+  <!-- 🚫 Mensaje cuando no hay clientes -->
+  @else {
+  <div class="col-12">
+    <div
+      class="d-flex flex-column justify-content-center align-items-center text-center py-5"
+      style="min-height: 250px"
+    >
+      <i-tabler name="users" class="icon-48 text-muted mb-3"></i-tabler>
+      <p class="f-s-16 text-muted mb-0">No hay clientes disponibles.</p>
+    </div>
+  </div>
   }
 
-  <p class="text-center" *ngIf="cliente().length === 0">
-    No hay clientes disponibles.
-  </p>
-
+  <!-- 📄 Paginador -->
   <div class="col-12 mt-4">
     <mat-paginator
-      [length]="this.totalItems()"
-      [pageSize]="this.pageSize"
-      [pageSizeOptions]="[5, 10, 25]"
+      [length]="totalItems()"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="[8, 16, 40, 80]"
       (page)="onPageChange($event)"
       aria-label="Select page"
     >
     </mat-paginator>
   </div>
 </div>
+

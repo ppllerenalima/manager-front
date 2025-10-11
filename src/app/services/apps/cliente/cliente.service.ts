@@ -15,15 +15,20 @@ export class ClienteService {
 
   constructor() {}
 
-  public getsPaginated(
-    search: string,
-    pageSize: number,
-    pageIndex: number
+  public getPaginated(
+    search: string = '',
+    pageSize: number = 10,
+    pageIndex: number = 0,
+    grupoId?: string // 👈 opcional
   ): Observable<PaginatedResponse<clientePaginated>> {
-    const params = new HttpParams()
+    let params = new HttpParams()
       .set('search', search)
       .set('pageSize', pageSize)
       .set('pageIndex', pageIndex);
+
+    if (grupoId) {
+      params = params.set('grupoId', grupoId);
+    }
 
     return this.http.get<PaginatedResponse<clientePaginated>>(this.apiUrl, {
       params,

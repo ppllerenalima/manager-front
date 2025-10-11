@@ -526,6 +526,13 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
 
   onSelect(tieneGlosa: boolean | null = null): void {
     this.tieneGlosa = tieneGlosa;
+    this.pageIndex = 0; // cuando cambie orden reiniciamos a la primera página
+
+    // 👇 Si existe el paginador, lo reseteamos visualmente también
+    if (this.paginator) {
+      this.paginator.firstPage();
+    }
+
     this.load_Comprobantes();
   }
 }

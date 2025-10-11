@@ -56,23 +56,36 @@ export class AppClienteComponent implements OnInit {
   searchText = signal<string>('');
 
   // Paginación
-  pageSize = 5;
+  pageSize = 8;
   pageIndex = 0;
   totalItems = signal(0);
 
   // Utilidades
   fileUtils = FileUtils;
 
+  grupos = signal<Grupo[]>([]);
+  grupoService = inject(GrupoService);
+
+  selectedGrupoId?: string | null = null;
+  grupoControl = new FormControl(null); // 👈 para el select
+
   constructor(private router: Router) {}
 
   ngOnInit(): void {
+    this.cargarGrupos();
+
     this.load_Clientes();
   }
 
   // Carga la lista de clientes paginada
   load_Clientes() {
     this.clienteService
-      .getsPaginated(this.searchText(), this.pageSize, this.pageIndex)
+      .getPaginated(
+        this.searchText(),
+        this.pageSize,
+        this.pageIndex,
+        this.selectedGrupoId ?? undefined // 👈 pasa el grupo si existe
+      )
       .subscribe({
         next: (res) => {
           this.cliente.set(res.data);
@@ -86,6 +99,29 @@ export class AppClienteComponent implements OnInit {
         },
       });
   }
+
+  onGrupoChange(grupoId: string | null) {
+    this.selectedGrupoId = grupoId;
+    this.pageIndex = 0; // reinicia a la primera página
+    this.load_Clientes();
+  }
+
+  // load_Clientes() {
+  //   this.clienteService
+  //     .getsPaginated(this.searchText(), this.pageSize, this.pageIndex)
+  //     .subscribe({
+  //       next: (res) => {
+  //         this.cliente.set(res.data);
+  //         this.totalItems.set(res.total);
+  //       },
+  //       error: (err) => {
+  //         console.error('Error al cargar clientes:', err);
+  //         this.snackBar.open('Error al cargar clientes', 'Cerrar', {
+  //           duration: 3000,
+  //         });
+  //       },
+  //     });
+  // }
 
   // Maneja evento de cambio de página
   onPageChange(event: PageEvent) {
@@ -206,6 +242,23 @@ export class AppClienteComponent implements OnInit {
         });
       },
     });
+  }
+
+  // ----------------------------
+  // Data Loading
+  // ----------------------------
+  private async cargarGrupos(): Promise<void> {
+    try {
+      const res = await firstValueFrom(this.grupoService.getsPaginated());
+      const mapped = res.data.map((g) => ({
+        ...g,
+        isinactive: g.isinactive ? 'true' : 'false',
+      })) as Grupo[];
+
+      this.grupos.set(mapped);
+    } catch (err) {
+      console.error('Error cargando grupos:', err);
+    }
   }
 }
 
