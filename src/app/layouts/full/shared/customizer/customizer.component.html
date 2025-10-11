@@ -1,7 +1,7 @@
 <div class="customizerNav">
   <ng-scrollbar class="position-relative" style="height: calc(100vh - 50px)">
     <div class="p-24">
-      <h6 class="f-s-16 f-w-600 f-s-16 m-b-16">Theme Option</h6>
+      <h6 class="f-s-16 f-w-600 f-s-16 m-b-16">Opción de Tema</h6>
       <mat-button-toggle-group #group="matButtonToggleGroup" [(ngModel)]="options.theme" (change)="setDark()"
         class="customizer-button-group gap-16" [hideSingleSelectionIndicator]="hideSingleSelectionIndicator()">
         <mat-button-toggle [value]="'light'">
@@ -20,7 +20,7 @@
 
       <div>
         <h6 class="f-s-16 f-w-600 f-s-16 m-b-16 m-t-24 p-t-16">
-          Theme Colors
+          Colores del Tema
         </h6>
         <mat-button-toggle-group #group="matButtonToggleGroup" [(ngModel)]="options.activeTheme"
           (change)="setColor($event.value)" class="customizer-button-group theme-colors two-row"
@@ -66,7 +66,7 @@
       </div>
 
       <h6 class="f-s-16 f-w-600 f-s-16 m-b-16 m-t-24">
-        Theme Direction
+        Dirección del Tema
       </h6>
 
       <mat-button-toggle-group #group="matButtonToggleGroup" [(ngModel)]="options.dir" (change)="setDir($event.value)"
@@ -110,7 +110,7 @@
       </div>
       }
       <h6 class="f-s-16 f-w-600 f-s-16 m-b-16 m-t-24 p-t-16">
-        Layout type
+        Tipo de Diseño
       </h6>
 
       <mat-button-toggle-group #group="matButtonToggleGroup" [(ngModel)]="options.horizontal"
@@ -130,7 +130,7 @@
       </mat-button-toggle-group>
 
       <h6 class="f-s-16 f-w-600 f-s-16 m-b-16 m-t-24 p-t-16">
-        Card with
+        Tarjeta con
       </h6>
 
       <mat-button-toggle-group #group="matButtonToggleGroup" [(ngModel)]="options.cardBorder"
@@ -150,7 +150,7 @@
       </mat-button-toggle-group>
 
       <h6 class="f-s-16 f-w-600 f-s-16 m-b-16 m-t-24 p-t-16">
-        Container Option
+        Opción de Contenedor
       </h6>
 
       <mat-button-toggle-group #group="matButtonToggleGroup" [(ngModel)]="options.boxed"
