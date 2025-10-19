@@ -173,11 +173,12 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
   expandedElement: ComprobantePaginatedResponse | null = null;
 
   dataSource: ComprobantePaginatedResponse[] = [];
-
   search: string = '';
+
+  // Paginación
   pageIndex: number = 0; // MatPaginator usa base 0
   pageSize: number = 10;
-  totalRecords = 0;
+  totalRecords: number = 0;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;

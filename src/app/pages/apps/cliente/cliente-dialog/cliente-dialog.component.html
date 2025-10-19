@@ -1,134 +1,135 @@
-<div
-  class="d-flex align-items-center justify-content-between m-b-16 p-x-20 p-t-16"
->
-  <h3>{{ action }} Cliente</h3>
-  <button
-    mat-icon-button
-    mat-dialog-close
-    class="d-flex justify-content-center"
-  >
-    <i-tabler name="x" class="icon-20 d-flex"></i-tabler>
-  </button>
-</div>
+<h2 mat-dialog-title class="m-b-24">{{ titulo }}</h2>
 
-@if(action !== 'Delete') {
-<mat-dialog-content>
-  <form #userForm="ngForm">
-    <mat-label class="f-w-600 m-b-8 d-block">Subir imagen</mat-label>
-    <div class="file-input-container m-b-16">
-      @if(local_data.image){
-      <img
-        [src]="local_data.image"
-        alt="Selected Image"
-        class="m-r-16"
-        height="100"
-        width="100"
-      />
-      }
-      <input type="file" (change)="onFileSelected($event)" accept="image/*" />
+<mat-divider></mat-divider>
+
+<mat-dialog-content class="mat-typography" style="max-width: 600px">
+  <form [formGroup]="clienteForm" (ngSubmit)="onSubmit()">
+    <!-- IMAGEN -->
+    <div class="row">
+      <div class="col-md-6">
+        <mat-label class="f-w-600 m-b-8 d-block">Subir imagen</mat-label>
+        <div class="file-input-container m-b-16">
+          @if (clienteForm.get('image')?.value) {
+            <img
+              [src]="clienteForm.get('image')?.value"
+              alt="Imagen seleccionada"
+              class="m-r-16"
+              height="100"
+              width="100"
+            />
+          }
+          <input type="file" (change)="onFileSelected($event)" accept="image/*" />
+        </div>
+      </div>
     </div>
+
+    <!-- RUC Y RAZÓN SOCIAL -->
     <div class="row">
       <div class="col-md-4">
-        <mat-label class="f-w-600 m-b-8 d-block">Ruc</mat-label>
+        <mat-label class="f-w-600 m-b-8 d-block">RUC</mat-label>
         <mat-form-field appearance="outline" class="w-100">
           <input
-            type="text"
             matInput
+            type="text"
             required
             minlength="11"
             maxlength="11"
-            name="ruc"
-            [(ngModel)]="local_data.ruc"
-            placeholder="Ruc"
+            placeholder="RUC"
+            formControlName="ruc"
           />
-          <mat-error *ngIf="rucErrorMessage()">
+          <mat-error *ngIf="clienteForm.get('ruc')?.invalid">
             {{ rucErrorMessage() }}
           </mat-error>
         </mat-form-field>
       </div>
+
       <div class="col-md-8">
-        <mat-label class="f-w-600 m-b-8 d-block">Razon social</mat-label>
+        <mat-label class="f-w-600 m-b-8 d-block">Razón Social</mat-label>
         <mat-form-field appearance="outline" class="w-100">
           <input
-            type="text"
             matInput
+            type="text"
             required
-            name="razonsocial"
-            [(ngModel)]="local_data.razonsocial"
-            placeholder="Razon social"
+            placeholder="Razón Social"
+            formControlName="razonsocial"
           />
         </mat-form-field>
       </div>
     </div>
 
-    <mat-label class="f-w-600 m-b-8 d-block">Dirección</mat-label>
-    <mat-form-field appearance="outline" class="w-100">
-      <input
-        type="text"
-        matInput
-        required
-        name="direccion"
-        [(ngModel)]="local_data.direccion"
-        placeholder="Dirección"
-      />
-    </mat-form-field>
+    <!-- DIRECCIÓN -->
+    <div class="row">
+      <div class="col-md-12">
+        <mat-label class="f-w-600 m-b-8 d-block">Dirección</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <input
+            matInput
+            type="text"
+            required
+            placeholder="Dirección"
+            formControlName="direccion"
+          />
+        </mat-form-field>
+      </div>
+    </div>
 
+    <!-- NÚMERO DE CONTACTO -->
     <div class="row">
       <div class="col-md-6">
-        <mat-label class="f-w-600 m-b-8 d-block">Número Contacto</mat-label>
+        <mat-label class="f-w-600 m-b-8 d-block">Número de Contacto</mat-label>
         <mat-form-field appearance="outline" class="w-100">
           <input
-            type="text"
             matInput
+            type="text"
             required
-            name="numero"
-            [(ngModel)]="local_data.numero"
             pattern="[0-9]*"
             maxlength="15"
-            placeholder="Número Contacto"
+            placeholder="Número"
+            formControlName="numero"
           />
         </mat-form-field>
       </div>
     </div>
 
+    <!-- CUENTA ASOCIADA Y GRUPO -->
     <div class="row">
+      <!-- CUENTA ASOCIADA -->
       <div class="col-sm-6">
         <mat-label class="f-w-600 m-b-8 d-block">Cuenta Asociada</mat-label>
         <mat-form-field class="w-100" appearance="outline">
           <input
+            matInput
             type="text"
             placeholder="Buscar cuenta asociada..."
-            matInput
             [formControl]="filterControlUsuario"
             [matAutocomplete]="autoUsuario"
           />
-
           <mat-autocomplete
             #autoUsuario="matAutocomplete"
-            (optionSelected)="onGrupoSelected($event.option.value)"
+            (optionSelected)="onUsuarioSelected($event.option.value)"
             [displayWith]="displayUsuario"
           >
             <mat-option
               *ngFor="let usuario of filteredUsuarios | async"
               [value]="usuario"
             >
-              {{ usuario.nombreCompleto }}
+              {{ usuario.text }}
             </mat-option>
           </mat-autocomplete>
         </mat-form-field>
       </div>
 
+      <!-- GRUPO -->
       <div class="col-sm-6">
         <mat-label class="f-w-600 m-b-8 d-block">Grupo</mat-label>
         <mat-form-field class="w-100" appearance="outline">
           <input
+            matInput
             type="text"
             placeholder="Buscar grupo..."
-            matInput
             [formControl]="filterControlGrupo"
             [matAutocomplete]="autoGrupo"
           />
-
           <mat-autocomplete
             #autoGrupo="matAutocomplete"
             (optionSelected)="onGrupoSelected($event.option.value)"
@@ -138,107 +139,88 @@
               *ngFor="let grupo of filteredGrupos | async"
               [value]="grupo"
             >
-              {{ grupo.descripcion }}
+              {{ grupo.text }}
             </mat-option>
           </mat-autocomplete>
         </mat-form-field>
       </div>
     </div>
 
+    <!-- USUARIO Y CONTRASEÑA -->
     <div class="row">
       <div class="col-md-6">
         <mat-label class="f-w-600 m-b-8 d-block">Usuario</mat-label>
         <mat-form-field appearance="outline" class="w-100">
           <input
-            type="text"
             matInput
+            type="text"
             required
-            name="username"
-            [(ngModel)]="local_data.username"
             placeholder="Usuario"
+            formControlName="username"
           />
         </mat-form-field>
       </div>
+
       <div class="col-md-6">
         <mat-label class="f-w-600 m-b-8 d-block">Contraseña</mat-label>
         <mat-form-field appearance="outline" class="w-100">
           <input
-            type="text"
             matInput
+            type="password"
             required
-            name="password"
-            [(ngModel)]="local_data.password"
-            placeholder="Constraseña"
+            placeholder="Contraseña"
+            formControlName="password"
           />
         </mat-form-field>
       </div>
     </div>
 
+    <!-- CLIENT ID / SECRET -->
     <div class="row">
       <div class="col-md-6">
         <mat-label class="f-w-600 m-b-8 d-block">Client ID</mat-label>
         <mat-form-field appearance="outline" class="w-100">
           <input
-            type="text"
             matInput
+            type="text"
             required
-            name="clientId"
-            [(ngModel)]="local_data.clientId"
             placeholder="Client ID"
+            formControlName="clientId"
           />
         </mat-form-field>
       </div>
+
       <div class="col-md-6">
         <mat-label class="f-w-600 m-b-8 d-block">Client Secret</mat-label>
         <mat-form-field appearance="outline" class="w-100">
           <input
-            type="text"
             matInput
+            type="text"
             required
-            name="clientSecret"
-            [(ngModel)]="local_data.clientSecret"
             placeholder="Client Secret"
+            formControlName="clientSecret"
           />
         </mat-form-field>
       </div>
     </div>
   </form>
 </mat-dialog-content>
+
 <mat-divider></mat-divider>
-<mat-dialog-actions>
+
+<mat-dialog-actions class="p-24">
   <button
     mat-flat-button
-    [mat-dialog-close]="true"
-    [disabled]="!userForm.form.valid"
     color="primary"
-    (click)="doAction()"
+    type="submit"
+    [mat-dialog-close]="true"
+    [disabled]="clienteForm.invalid"
+    (click)="onSubmit()"
   >
-    Agregar Cliente
+    Guardar
   </button>
+
   <button mat-flat-button class="bg-error text-white" mat-dialog-close>
     Cancelar
   </button>
 </mat-dialog-actions>
-}
-<!-- -------------------------------------------------------------- -->
-<!-- Delete Cliente info -->
-<!-- -------------------------------------------------------------- -->
-
-@else {
-<div class="p-x-24 m-y-8">
-  <p class="f-s-14">
-    Estas seguro de eliminar:
-    <span class="f-w-600">{{ local_data.razonsocial }}</span> ?
-  </p>
-</div>
-<div mat-dialog-actions class="p-x-24 p-b-24">
-  <button (click)="doAction()" mat-flat-button>{{ action }}</button>
-  <button
-    mat-flat-button
-    (click)="closeDialog()"
-    class="m-l-8 bg-error text-white"
-  >
-    Cancelar
-  </button>
-</div>
-}

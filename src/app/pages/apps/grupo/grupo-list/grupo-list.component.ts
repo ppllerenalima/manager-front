@@ -7,6 +7,7 @@ import {
   OnInit,
   Optional,
   signal,
+  ViewChild,
 } from '@angular/core';
 import {
   FormControl,
@@ -28,10 +29,11 @@ import {
 import { GrupoData } from '../models/GrupoData';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { GrupoService } from 'src/app/services/apps/grupo/grupo.service';
-import { PageEvent } from '@angular/material/paginator';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { AddGrupo } from '../models/AddGrupo';
 import { EditGrupo } from '../models/EditGrupo';
+import { MatSort } from '@angular/material/sort';
 import { GrupoPaginated } from '../models/GrupoPaginated';
 
 @Component({
@@ -51,32 +53,56 @@ export class AppGrupoListComponent implements OnInit {
   dialog = inject(MatDialog);
   snackBar = inject(MatSnackBar);
   grupoService = inject(GrupoService);
-  grupoPaginated: MatTableDataSource<GrupoPaginated> =
-    new MatTableDataSource<GrupoPaginated>();
 
+  dataSource: GrupoPaginated[] = [];
   searchText = signal<string>('');
 
   // Paginación
-  pageSize = 5;
-  pageIndex = 0;
-  totalItems = signal(0);
+  pageIndex: number = 0;
+  pageSize: number = 10;
+  totalRecords: number = 0;
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
 
   displayedColumns: string[] = ['id', 'descripcion', 'isinactive', 'actions'];
 
   constructor() {}
 
   ngOnInit() {
-    this.loadGrupo();
+    this.load_Grupo();
+  }
+
+  ngAfterViewInit() {
+    // 📌 Paginación
+    this.paginator.page.subscribe(() => {
+      this.pageIndex = this.paginator.pageIndex;
+      this.pageSize = this.paginator.pageSize;
+      this.load_Grupo();
+    });
+
+    // 📌 Ordenamiento
+    this.sort.sortChange.subscribe(() => {
+      // cuando cambie el orden reiniciamos a la primera página
+      this.pageIndex = 0;
+      this.load_Grupo();
+    });
   }
 
   // Carga la lista de Grupos paginada
-  loadGrupo() {
+  load_Grupo() {
     this.grupoService
       .getsPaginated(this.searchText(), this.pageSize, this.pageIndex)
       .subscribe({
         next: (res) => {
-          this.grupoPaginated.data = res.data;
-          this.totalItems.set(res.total);
+          this.dataSource = res.data;
+          this.totalRecords = res.total;
+
+          if (this.paginator) {
+            // 🔹 Asegura que los valores del paginator se sincronicen
+            this.paginator.length = this.totalRecords;
+            this.paginator.pageIndex = this.pageIndex;
+          }
         },
         error: (err) => {
           console.error('Error al cargar Grupos:', err);
@@ -87,11 +113,18 @@ export class AppGrupoListComponent implements OnInit {
       });
   }
 
-  // Maneja evento de cambio de página
-  onPageChange(event: PageEvent) {
-    this.pageSize = event.pageSize;
-    this.pageIndex = event.pageIndex;
-    this.loadGrupo();
+  // Filtro de búsqueda simple (puedes implementar backend o frontend)
+  applyFilter(event: Event): void {
+    const filterValue = (event.target as HTMLInputElement).value.trim();
+    this.searchText.set(filterValue);
+    this.pageIndex = 0;
+
+    // 🔹 Reiniciar visualmente el paginator
+    if (this.paginator) {
+      this.paginator.pageIndex = 0;
+    }
+
+    this.load_Grupo();
   }
 
   // Abre el diálogo para agregar o editar un Grupo
@@ -125,14 +158,6 @@ export class AppGrupoListComponent implements OnInit {
     this.openDialog('Delete', grupo);
   }
 
-  // Filtro de búsqueda simple (puedes implementar backend o frontend)
-  applyFilter(event: Event): void {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.searchText.set(filterValue);
-    // Implementar filtrado si es necesario
-    this.loadGrupo();
-  }
-
   addGrupo(row_obj: any): void {
     const newGrupo: AddGrupo = {
       descripcion: row_obj.descripcion,
@@ -140,7 +165,7 @@ export class AppGrupoListComponent implements OnInit {
 
     this.grupoService.add(newGrupo).subscribe({
       next: () => {
-        this.loadGrupo();
+        this.load_Grupo();
         this.snackBar.open('¡Nuevo Grupo añadido exitosamente!', 'Close', {
           duration: 3000,
           horizontalPosition: 'center',
@@ -165,7 +190,7 @@ export class AppGrupoListComponent implements OnInit {
 
     this.grupoService.update(Id, editGrupo).subscribe({
       next: () => {
-        this.loadGrupo();
+        this.load_Grupo();
         this.snackBar.open('¡Grupo actualizado exitosamente!', 'Cerrar', {
           duration: 3000,
           horizontalPosition: 'center',
@@ -184,7 +209,7 @@ export class AppGrupoListComponent implements OnInit {
   deleteGrupo(Id: string): void {
     this.grupoService.delete(Id).subscribe({
       next: () => {
-        this.loadGrupo();
+        this.load_Grupo();
         this.snackBar.open('¡Grupo actualizado exitosamente!', 'Cerrar', {
           duration: 3000,
           horizontalPosition: 'center',

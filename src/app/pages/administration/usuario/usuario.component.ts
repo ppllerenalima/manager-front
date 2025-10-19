@@ -42,6 +42,20 @@ import { DialogUsuarioComponent } from './dialog-usuario/dialog-usuario.componen
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppUsuarioComponent implements OnInit, AfterViewInit {
+  usuarioService = inject(UsuarioService);
+  confirmationService = inject(ConfirmationService);
+  dialog = inject(MatDialog);
+
+  dataSource: UsuarioPaginated[] = [];
+  search: string = '';
+
+  pageIndex: number = 0; // MatPaginator usa base 0
+  pageSize: number = 10;
+  totalRecords: number = 0;
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort, { static: false }) sort!: MatSort;
+
   displayedColumns: string[] = [
     'item',
     'nombreCompleto',
@@ -50,19 +64,6 @@ export class AppUsuarioComponent implements OnInit, AfterViewInit {
     'isInactive',
     'actions',
   ];
-  dataSource = new MatTableDataSource<UsuarioPaginated>([]);
-
-  search: string = '';
-  pageIndex: number = 0; // MatPaginator usa base 0
-  pageSize: number = 10;
-
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort, { static: false }) sort!: MatSort;
-
-  usuarioService = inject(UsuarioService);
-  confirmationService = inject(ConfirmationService);
-
-  dialog = inject(MatDialog);
 
   constructor(private snackBar: MatSnackBar) {}
 
@@ -91,13 +92,20 @@ export class AppUsuarioComponent implements OnInit, AfterViewInit {
       .getsPaginated(this.search, this.pageSize, this.pageIndex)
       .subscribe({
         next: (res) => {
-          this.dataSource.data = res.data;
-          this.dataSource.paginator = this.paginator;
-          this.dataSource.sort = this.sort;
+          this.dataSource = res.data;
+          this.totalRecords = res.total;
+
+          if (this.paginator) {
+            // 🔹 Asegura que los valores del paginator se sincronicen
+            this.paginator.length = this.totalRecords;
+            this.paginator.pageIndex = this.pageIndex;
+          }
         },
         error: (err) => {
-          console.error('Error al obtener aplicaciones', err);
-          //this.isLoading = false; // ⚠️ No olvides apagar loading en error
+          console.error('Error al obtener usuarios', err);
+          this.snackBar.open('Error al cargar Usuarios', 'Cerrar', {
+            duration: 3000,
+          });
         },
       });
   }
@@ -105,6 +113,12 @@ export class AppUsuarioComponent implements OnInit, AfterViewInit {
   applyFilter(value: string) {
     this.search = value.trim().toLowerCase();
     this.pageIndex = 0;
+
+    // 🔹 Reiniciar visualmente el paginator
+    if (this.paginator) {
+      this.paginator.pageIndex = 0;
+    }
+
     this.load_Usuarios();
   }
 

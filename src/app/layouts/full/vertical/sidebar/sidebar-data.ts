@@ -30,7 +30,6 @@ export const navItems: NavItem[] = [
   {
     displayName: 'Grupo',
     iconName: 'file-invoice',
-    route: '',
     roles: ['ADMINISTRADOR', 'USUARIO'],
     children: [
       {
@@ -49,7 +48,6 @@ export const navItems: NavItem[] = [
   },
 ];
 
-
 // export const navItems: NavItem[] = [
 //   {
 //     navCap: 'Home',
@@ -63,6 +61,12 @@ export const navItems: NavItem[] = [
 //     displayName: 'eCommerce',
 //     iconName: 'shopping-cart',
 //     route: '/dashboards/dashboard2',
+//   },
+//   {
+//     displayName: 'Usuario',
+//     iconName: 'aperture',
+//     route: 'administration/usuario',
+//     roles: ['ADMINISTRADOR'],
 //   },
 //   {
 //     navCap: 'Apps',
@@ -187,7 +191,8 @@ export const navItems: NavItem[] = [
 //       {
 //         displayName: 'Detail',
 //         iconName: 'point',
-//         route: 'apps/blog/detail/Early Black Friday Amazon deals: cheap TVs, headphones, laptops',
+//         route:
+//           'apps/blog/detail/Early Black Friday Amazon deals: cheap TVs, headphones, laptops',
 //       },
 //     ],
 //   },

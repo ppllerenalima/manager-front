@@ -5,9 +5,11 @@ import {
   DestroyRef,
   Inject,
   inject,
+  NgZone,
   OnInit,
   Optional,
   signal,
+  ViewChild,
 } from '@angular/core';
 import {
   FormControl,
@@ -33,7 +35,28 @@ import { PageEvent } from '@angular/material/paginator';
 import { Router } from '@angular/router';
 import { GrupoService } from 'src/app/services/apps/grupo/grupo.service';
 import { Grupo } from '../grupo/models/Grupo';
-import { firstValueFrom } from 'rxjs';
+import {
+  BehaviorSubject,
+  catchError,
+  debounceTime,
+  distinctUntilChanged,
+  finalize,
+  firstValueFrom,
+  map,
+  Observable,
+  of,
+  startWith,
+  Subscription,
+  switchMap,
+  tap,
+} from 'rxjs';
+import { UsuarioService } from 'src/app/services/administration/usuario/usuario.service';
+import { Usuario } from '../../administration/usuario/models/Usuario';
+import { UsuarioPaginated } from '../../administration/usuario/models/UsuarioPaginated';
+import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
+import { GrupoPaginated } from '../grupo/models/GrupoPaginated';
+import { AppClienteDialogComponent } from './cliente-dialog/cliente-dialog.component';
+import { SelectResponse } from 'src/app/shared/models/SelectResponse';
 
 @Component({
   selector: 'app-cliente',
@@ -48,6 +71,11 @@ import { firstValueFrom } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppClienteComponent implements OnInit {
+  private readonly usuarioService = inject(UsuarioService);
+  private readonly grupoService = inject(GrupoService);
+
+  constructor(private router: Router) {}
+
   dialog = inject(MatDialog);
   snackBar = inject(MatSnackBar);
   clienteService = inject(ClienteService);
@@ -64,15 +92,36 @@ export class AppClienteComponent implements OnInit {
   fileUtils = FileUtils;
 
   grupos = signal<Grupo[]>([]);
-  grupoService = inject(GrupoService);
 
+  selectedUserId?: string | null = null;
   selectedGrupoId?: string | null = null;
-  grupoControl = new FormControl(null); // 👈 para el select
-
-  constructor(private router: Router) {}
+  filterControlUsuario = new FormControl<SelectResponse | string>('');
+  filterControlGrupo = new FormControl<SelectResponse | string>('');
+  filteredUsuarios!: Observable<SelectResponse[]>;
+  filteredGrupos!: Observable<SelectResponse[]>;
 
   ngOnInit(): void {
-    this.cargarGrupos();
+    this.filteredUsuarios = this.filterControlUsuario.valueChanges.pipe(
+      startWith(''),
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((value) => {
+        const searchTerm =
+          typeof value === 'string' ? value : value?.text || '';
+        return this.buscarUsuarios(searchTerm);
+      })
+    );
+
+    this.filteredGrupos = this.filterControlGrupo.valueChanges.pipe(
+      startWith(''),
+      debounceTime(300), // Espera 300ms antes de buscar
+      distinctUntilChanged(), // Evita peticiones repetidas
+      switchMap((value) => {
+        const searchTerm =
+          typeof value === 'string' ? value : value?.text || '';
+        return this.buscarGrupos(searchTerm);
+      })
+    );
 
     this.load_Clientes();
   }
@@ -84,7 +133,8 @@ export class AppClienteComponent implements OnInit {
         this.searchText(),
         this.pageSize,
         this.pageIndex,
-        this.selectedGrupoId ?? undefined // 👈 pasa el grupo si existe
+        this.selectedGrupoId ?? undefined,
+        this.selectedUserId ?? undefined // 👈 pasa el grupo si existe
       )
       .subscribe({
         next: (res) => {
@@ -100,28 +150,19 @@ export class AppClienteComponent implements OnInit {
       });
   }
 
+  // Filtro de búsqueda simple (puedes implementar backend o frontend)
+  applyFilter(event: Event): void {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.searchText.set(filterValue);
+    // Implementar filtrado si es necesario
+    this.load_Clientes();
+  }
+
   onGrupoChange(grupoId: string | null) {
     this.selectedGrupoId = grupoId;
     this.pageIndex = 0; // reinicia a la primera página
     this.load_Clientes();
   }
-
-  // load_Clientes() {
-  //   this.clienteService
-  //     .getsPaginated(this.searchText(), this.pageSize, this.pageIndex)
-  //     .subscribe({
-  //       next: (res) => {
-  //         this.cliente.set(res.data);
-  //         this.totalItems.set(res.total);
-  //       },
-  //       error: (err) => {
-  //         console.error('Error al cargar clientes:', err);
-  //         this.snackBar.open('Error al cargar clientes', 'Cerrar', {
-  //           duration: 3000,
-  //         });
-  //       },
-  //     });
-  // }
 
   // Maneja evento de cambio de página
   onPageChange(event: PageEvent) {
@@ -131,46 +172,64 @@ export class AppClienteComponent implements OnInit {
   }
 
   // Abre el diálogo para agregar o editar un cliente
-  openDialog(action: string, obj: Cliente | any): void {
-    obj.action = action;
 
-    console.log('openDialog obj:', obj);
-    const dialogRef = this.dialog.open(AppClienteDialogContentComponent, {
-      data: obj,
-      autoFocus: false,
-    });
+  openDialog(id: string | null) {
+    const open = (data: any) => {
+      this.dialog
+        .open(AppClienteDialogComponent, {
+          data: data, // lo que ya traes (puede ser null o un objeto con id, etc.)
+        })
+        .afterClosed()
+        .subscribe(() => {
+          // refrescar si es necesario
+          this.load_Clientes();
+        });
+    };
 
-    dialogRef.afterClosed().subscribe((result) => {
-      if (!result) return;
-
-      if (result.event === 'Add') {
-        this.addCliente(result.data);
-      } else if (result.event === 'Edit') {
-        this.updateCliente(result.data.id, result.data);
-      } else if (result.event === 'Delete') {
-        this.deleteCliente(result.data.id);
-      }
-    });
+    if (id === null) {
+      // Crear → pasamos null o estructura base
+      open(null);
+    } else {
+      // Editar → primero consultamos al backend
+      this.clienteService.getById(id).subscribe({
+        next: (res) => open(res),
+        error: (err) => console.error('Error obteniendo usuario UO', err),
+      });
+    }
   }
 
-  openEditDialog(cliente: Cliente): void {
-    this.openDialog('Edit', cliente);
-  }
+  // openDialog(action: string, obj: Cliente | any): void {
+  //   obj.action = action;
+
+  //   console.log('openDialog obj:', obj);
+  //   const dialogRef = this.dialog.open(AppClienteDialogContentComponent, {
+  //     data: obj,
+  //     autoFocus: false,
+  //   });
+
+  //   dialogRef.afterClosed().subscribe((result) => {
+  //     if (!result) return;
+
+  //     if (result.event === 'Add') {
+  //       this.addCliente(result.data);
+  //     } else if (result.event === 'Edit') {
+  //       this.updateCliente(result.data.id, result.data);
+  //     } else if (result.event === 'Delete') {
+  //       this.deleteCliente(result.data.id);
+  //     }
+  //   });
+  // }
+
+  // openEditDialog(cliente: Cliente): void {
+  //   this.openDialog('Edit', cliente);
+  // }
 
   openDeleteDialog(cliente: Cliente): void {
-    this.openDialog('Delete', cliente);
+    // this.openDialog('Delete', cliente);
   }
 
   goToCompras(cliente: Cliente): void {
     this.router.navigate(['/apps/compra-sire', cliente.id]);
-  }
-
-  // Filtro de búsqueda simple (puedes implementar backend o frontend)
-  applyFilter(event: Event): void {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.searchText.set(filterValue);
-    // Implementar filtrado si es necesario
-    this.load_Clientes();
   }
 
   addCliente(row_obj: any): void {
@@ -184,45 +243,50 @@ export class AppClienteComponent implements OnInit {
       clientSecret: row_obj.clientSecret,
       username: row_obj.username,
       password: row_obj.password,
+
+      userId: row_obj.userId,
       grupoId: row_obj.grupoId,
+
       grupo: row_obj.grupo,
     };
 
-    this.clienteService.add(newCliente).subscribe({
-      next: () => {
-        this.load_Clientes();
-        this.snackBar.open('¡Nuevo cliente añadido exitosamente!', 'Close', {
-          duration: 3000,
-          horizontalPosition: 'center',
-          verticalPosition: 'top',
-        });
-      },
-      error: (err) => {
-        console.error('Error al registrar cliente:', err);
-        this.snackBar.open('Error al registrar cliente', 'Cerrar', {
-          duration: 3000,
-        });
-      },
-    });
+    console.log('newCliente', newCliente);
+
+    // this.clienteService.add(newCliente).subscribe({
+    //   next: () => {
+    //     this.load_Clientes();
+    //     this.snackBar.open('¡Nuevo cliente añadido exitosamente!', 'Close', {
+    //       duration: 3000,
+    //       horizontalPosition: 'center',
+    //       verticalPosition: 'top',
+    //     });
+    //   },
+    //   error: (err) => {
+    //     console.error('Error al registrar cliente:', err);
+    //     this.snackBar.open('Error al registrar cliente', 'Cerrar', {
+    //       duration: 3000,
+    //     });
+    //   },
+    // });
   }
 
   updateCliente(Id: string, cliente: Cliente): void {
-    this.clienteService.update(Id, cliente).subscribe({
-      next: () => {
-        this.load_Clientes();
-        this.snackBar.open('¡Cliente actualizado exitosamente!', 'Cerrar', {
-          duration: 3000,
-          horizontalPosition: 'center',
-          verticalPosition: 'top',
-        });
-      },
-      error: (err) => {
-        console.error('Error al actualizar cliente:', err);
-        this.snackBar.open('Error al actualizar cliente', 'Cerrar', {
-          duration: 3000,
-        });
-      },
-    });
+    // this.clienteService.update(Id, cliente).subscribe({
+    //   next: () => {
+    //     this.load_Clientes();
+    //     this.snackBar.open('¡Cliente actualizado exitosamente!', 'Cerrar', {
+    //       duration: 3000,
+    //       horizontalPosition: 'center',
+    //       verticalPosition: 'top',
+    //     });
+    //   },
+    //   error: (err) => {
+    //     console.error('Error al actualizar cliente:', err);
+    //     this.snackBar.open('Error al actualizar cliente', 'Cerrar', {
+    //       duration: 3000,
+    //     });
+    //   },
+    // });
   }
 
   deleteCliente(Id: string): void {
@@ -245,167 +309,62 @@ export class AppClienteComponent implements OnInit {
   }
 
   // ----------------------------
-  // Data Loading
+  // Data Grupos
   // ----------------------------
-  private async cargarGrupos(): Promise<void> {
-    try {
-      const res = await firstValueFrom(this.grupoService.getsPaginated());
-      const mapped = res.data.map((g) => ({
-        ...g,
-        isinactive: g.isinactive ? 'true' : 'false',
-      })) as Grupo[];
-
-      this.grupos.set(mapped);
-    } catch (err) {
-      console.error('Error cargando grupos:', err);
-    }
-  }
-}
-
-// ---------------------------------
-// COMPONENTE DEL DIÁLOGO DE CLIENTE
-// ---------------------------------
-@Component({
-  selector: 'app-dialog-content',
-  imports: [
-    MaterialModule,
-    FormsModule,
-    ReactiveFormsModule,
-    CommonModule,
-    TablerIconsModule,
-  ],
-  templateUrl: 'cliente-edit/cliente-edit.component.html',
-})
-export class AppClienteDialogContentComponent implements OnInit {
-  // ----------------------------
-  // Dependencies & Services
-  // ----------------------------
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly grupoService = inject(GrupoService);
-
-  // ----------------------------
-  // Signals & State
-  // ----------------------------
-  grupos = signal<Grupo[]>([]);
-  rucErrorMessage = signal('');
-  razonSocialErrorMessage = signal('');
-
-  // ----------------------------
-  // Reactive Form Controls
-  // ----------------------------
-  readonly ruc = new FormControl('', [
-    Validators.required,
-    Validators.minLength(11),
-    Validators.maxLength(11),
-    Validators.pattern(/^\d+$/),
-  ]);
-
-  readonly razonsocial = new FormControl('', [Validators.required]);
-
-  // ----------------------------
-  // Data from Dialog
-  // ----------------------------
-  action!: string;
-  local_data!: Cliente;
-  selectedFile: File | null = null;
-
-  // ----------------------------
-  // Utils (helpers)
-  // ----------------------------
-  FormUtils = FormUtils;
-  InputUtils = InputUtils;
-
-  // ----------------------------
-  // Constructor
-  // ----------------------------
-  constructor(
-    public dialogRef: MatDialogRef<AppClienteDialogContentComponent>,
-    @Optional() @Inject(MAT_DIALOG_DATA) public data: ClienteData
-  ) {
-    console.log('constructor data:', data);
-  }
-
-  // ----------------------------
-  // Lifecycle
-  // ----------------------------
-  async ngOnInit(): Promise<void> {
-    this.local_data = { ...this.data };
-    this.action = this.data.action;
-
-    await this.cargarGrupos();
-
-    // Set grupoId only if viene en data
-    if (this.data?.grupoId != null) {
-      this.local_data.grupoId = this.data.grupoId;
-    }
-
-    // Register validations (con señales para errores)
-    FormUtils.registerControlValidation(
-      this.destroyRef,
-      this.ruc,
-      this.rucErrorMessage,
-      'RUC',
-      11
-    );
-    FormUtils.registerControlValidation(
-      this.destroyRef,
-      this.razonsocial,
-      this.razonSocialErrorMessage,
-      'Razón Social'
+  buscarUsuarios(search: string): Observable<SelectResponse[]> {
+    return this.usuarioService.getsPaginated(search).pipe(
+      map((res) =>
+        (res.data || []).map((u) => ({
+          id: u.id,
+          text: u.nombreCompleto,
+        }))
+      ),
+      catchError((err) => {
+        console.error('Error cargando usuarios:', err);
+        return of([] as SelectResponse[]);
+      })
     );
   }
 
-  // ----------------------------
-  // Data Loading
-  // ----------------------------
-  private async cargarGrupos(): Promise<void> {
-    try {
-      const res = await firstValueFrom(this.grupoService.getsPaginated());
-      const mapped = res.data.map((g) => ({
-        ...g,
-        isinactive: g.isinactive ? 'true' : 'false',
-      })) as Grupo[];
-
-      this.grupos.set(mapped);
-    } catch (err) {
-      console.error('Error cargando grupos:', err);
-    }
+  displayUsuario(usuario: any): string {
+    return usuario && usuario.text ? usuario.text : '';
   }
 
-  // ----------------------------
-  // Actions
-  // ----------------------------
-  async doAction(): Promise<void> {
-    if (!this.local_data.image) {
-      // default image si no se subió ninguna
-      const defaultBase64 = await FileUtils.loadUrlAsBase64(
-        'assets/images/profile/user-1.jpg'
-      );
-      this.local_data.image = defaultBase64;
+  onUsuarioSelected(usuario: SelectResponse): void {
+    if (usuario === null) {
+      this.selectedUserId = null;
+    } else {
+      this.selectedUserId = usuario.id;
     }
-
-    this.dialogRef.close({ event: this.action, data: this.local_data });
+    
+    this.load_Clientes();
+  }
+  //----------------------------------------------------------------------------------
+  buscarGrupos(search: string): Observable<SelectResponse[]> {
+    return this.grupoService.getsPaginated(search).pipe(
+      map((res) =>
+        (res.data || []).map((u) => ({
+          id: u.id,
+          text: u.descripcion,
+        }))
+      ),
+      catchError((err) => {
+        console.error('Error cargando grupos:', err);
+        return of([] as SelectResponse[]);
+      })
+    );
   }
 
-  closeDialog(): void {
-    this.dialogRef.close({ event: 'Cancel' });
+  displayGrupo(grupo: any): string {
+    return grupo && grupo.text ? grupo.text : '';
   }
 
-  // ----------------------------
-  // File Handling
-  // ----------------------------
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-
-    if (input.files && input.files.length > 0) {
-      this.selectedFile = input.files[0];
-      const reader = new FileReader();
-
-      reader.onload = (e) => {
-        this.local_data.image = e.target?.result as string; // Base64
-      };
-
-      reader.readAsDataURL(this.selectedFile);
+  onGrupoSelected(grupo: SelectResponse): void {
+    if (grupo === null) {
+      this.selectedGrupoId = null;
+    } else {
+      this.selectedGrupoId = grupo.id;
     }
+    this.load_Clientes();
   }
 }
