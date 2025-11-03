@@ -2,61 +2,37 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
-  Inject,
   inject,
-  NgZone,
   OnInit,
-  Optional,
   signal,
-  ViewChild,
 } from '@angular/core';
-import {
-  FormControl,
-  FormsModule,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { MaterialModule } from 'src/app/material.module';
 import { ClienteService } from 'src/app/services/apps/cliente/cliente.service';
 import { Cliente } from './models/cliente';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import {
-  MAT_DIALOG_DATA,
-  MatDialog,
-  MatDialogRef,
-} from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { FileUtils } from 'src/app/shared/utils/FileUtils';
-import { FormUtils } from 'src/app/shared/utils/FormUtils';
-import { InputUtils } from 'src/app/shared/utils/input-utils';
-import { ClienteData } from './models/clienteData';
 import { PageEvent } from '@angular/material/paginator';
 import { Router } from '@angular/router';
 import { GrupoService } from 'src/app/services/apps/grupo/grupo.service';
 import { Grupo } from '../grupo/models/Grupo';
 import {
-  BehaviorSubject,
   catchError,
   debounceTime,
   distinctUntilChanged,
-  finalize,
-  firstValueFrom,
   map,
   Observable,
   of,
   startWith,
-  Subscription,
   switchMap,
-  tap,
 } from 'rxjs';
 import { UsuarioService } from 'src/app/services/administration/usuario/usuario.service';
-import { Usuario } from '../../administration/usuario/models/Usuario';
-import { UsuarioPaginated } from '../../administration/usuario/models/UsuarioPaginated';
-import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
-import { GrupoPaginated } from '../grupo/models/GrupoPaginated';
 import { AppClienteDialogComponent } from './cliente-dialog/cliente-dialog.component';
 import { SelectResponse } from 'src/app/shared/models/SelectResponse';
+import { MessageService } from 'src/app/services/messages/messages.service';
+import { AppClientePermisoDialogComponent } from './cliente-permiso-dialog/cliente-permiso-dialog.component';
 
 @Component({
   selector: 'app-cliente',
@@ -74,7 +50,7 @@ export class AppClienteComponent implements OnInit {
   private readonly usuarioService = inject(UsuarioService);
   private readonly grupoService = inject(GrupoService);
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private msg: MessageService) {}
 
   dialog = inject(MatDialog);
   snackBar = inject(MatSnackBar);
@@ -198,114 +174,32 @@ export class AppClienteComponent implements OnInit {
     }
   }
 
-  // openDialog(action: string, obj: Cliente | any): void {
-  //   obj.action = action;
-
-  //   console.log('openDialog obj:', obj);
-  //   const dialogRef = this.dialog.open(AppClienteDialogContentComponent, {
-  //     data: obj,
-  //     autoFocus: false,
-  //   });
-
-  //   dialogRef.afterClosed().subscribe((result) => {
-  //     if (!result) return;
-
-  //     if (result.event === 'Add') {
-  //       this.addCliente(result.data);
-  //     } else if (result.event === 'Edit') {
-  //       this.updateCliente(result.data.id, result.data);
-  //     } else if (result.event === 'Delete') {
-  //       this.deleteCliente(result.data.id);
-  //     }
-  //   });
-  // }
-
-  // openEditDialog(cliente: Cliente): void {
-  //   this.openDialog('Edit', cliente);
-  // }
-
   openDeleteDialog(cliente: Cliente): void {
     // this.openDialog('Delete', cliente);
   }
 
+  openPermisosDialog(clienteId: string): void {
+    // this.openDialog('Delete', cliente);
+  }
+
   goToCompras(cliente: Cliente): void {
+    if (!cliente.tienePermiso) {
+      this.msg.info('El Cliente no tiene permiso para realizar las busquedas');
+
+      this.dialog
+        .open(AppClientePermisoDialogComponent, {
+          data: cliente.id!, // lo que ya traes (puede ser null o un objeto con id, etc.)
+        })
+        .afterClosed()
+        .subscribe(() => {
+          // refrescar si es necesario
+          this.load_Clientes();
+        });
+
+      return;
+    }
+
     this.router.navigate(['/apps/compra-sire', cliente.id]);
-  }
-
-  addCliente(row_obj: any): void {
-    const newCliente: Cliente = {
-      ruc: row_obj.ruc,
-      razonsocial: row_obj.razonsocial,
-      numero: row_obj.numero,
-      direccion: row_obj.direccion,
-      image: row_obj.image,
-      clientId: row_obj.clientId,
-      clientSecret: row_obj.clientSecret,
-      username: row_obj.username,
-      password: row_obj.password,
-
-      userId: row_obj.userId,
-      grupoId: row_obj.grupoId,
-
-      grupo: row_obj.grupo,
-    };
-
-    console.log('newCliente', newCliente);
-
-    // this.clienteService.add(newCliente).subscribe({
-    //   next: () => {
-    //     this.load_Clientes();
-    //     this.snackBar.open('¡Nuevo cliente añadido exitosamente!', 'Close', {
-    //       duration: 3000,
-    //       horizontalPosition: 'center',
-    //       verticalPosition: 'top',
-    //     });
-    //   },
-    //   error: (err) => {
-    //     console.error('Error al registrar cliente:', err);
-    //     this.snackBar.open('Error al registrar cliente', 'Cerrar', {
-    //       duration: 3000,
-    //     });
-    //   },
-    // });
-  }
-
-  updateCliente(Id: string, cliente: Cliente): void {
-    // this.clienteService.update(Id, cliente).subscribe({
-    //   next: () => {
-    //     this.load_Clientes();
-    //     this.snackBar.open('¡Cliente actualizado exitosamente!', 'Cerrar', {
-    //       duration: 3000,
-    //       horizontalPosition: 'center',
-    //       verticalPosition: 'top',
-    //     });
-    //   },
-    //   error: (err) => {
-    //     console.error('Error al actualizar cliente:', err);
-    //     this.snackBar.open('Error al actualizar cliente', 'Cerrar', {
-    //       duration: 3000,
-    //     });
-    //   },
-    // });
-  }
-
-  deleteCliente(Id: string): void {
-    this.clienteService.delete(Id).subscribe({
-      next: () => {
-        this.load_Clientes();
-        this.snackBar.open('¡Cliente actualizado exitosamente!', 'Cerrar', {
-          duration: 3000,
-          horizontalPosition: 'center',
-          verticalPosition: 'top',
-        });
-      },
-      error: (err) => {
-        console.error('Error al actualizar cliente:', err);
-        this.snackBar.open('Error al actualizar cliente', 'Cerrar', {
-          duration: 3000,
-        });
-      },
-    });
   }
 
   // ----------------------------
@@ -336,7 +230,7 @@ export class AppClienteComponent implements OnInit {
     } else {
       this.selectedUserId = usuario.id;
     }
-    
+
     this.load_Clientes();
   }
   //----------------------------------------------------------------------------------

@@ -51,6 +51,8 @@ import { CpeService } from 'src/app/services/apps/compra-sire/cpe.service';
 import { ReportsService } from 'src/app/services/apps/compra-sire/reports.service';
 import { ComprobanteImportarGlosaRequest } from './Models/Requests/ComprobanteImportarGlosaRequest';
 import { Note } from '../notes/note';
+import { MessageService } from 'src/app/services/messages/messages.service';
+import { Cpe_DescargarZipRequest } from './Models/Requests/Cpe_DescargarZipRequest';
 
 @Component({
   selector: 'app-compra-sire',
@@ -201,7 +203,8 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
   constructor(
     private cdRef: ChangeDetectorRef,
     private route: ActivatedRoute,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private msg: MessageService
   ) {}
 
   /** ================================
@@ -282,7 +285,7 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
               { duration: 4000, panelClass: 'info-snackbar' }
             );
           } else {
-            this.importarPeriodo(request);
+            this.onImportarPeriodo(request);
           }
         },
         error: (err) => {
@@ -292,7 +295,7 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
       });
   }
 
-  private importarPeriodo(request: GetPerTributarioRequest): void {
+  onImportarPeriodo(request: GetPerTributarioRequest): void {
     this.sireService.importarComprobantes(request).subscribe({
       next: (response: PerTributarioResponse) => {
         console.log('✅ PerTributario creado e importado:', response);
@@ -332,20 +335,19 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
       next: (res) => {
         console.log('✅ Glosa importada', res);
 
-        this.load_Comprobantes();
+        if (res.success) {
+          this.msg.success(res.message!);
+        } else {
+          this.msg.warning(res.message!);
+        }
 
-        this.snackBar.open('✅ Glosa importada', 'Cerrar', {
-          duration: 4000,
-          panelClass: 'error-snackbar',
-        });
+        this.load_Comprobantes();
       },
       error: (err) => {
         console.error('❌ Error al importar glosa', err);
 
-        this.snackBar.open('❌ Error al importar glosa', 'Cerrar', {
-          duration: 4000,
-          panelClass: 'error-snackbar',
-        });
+        const msg = err?.error?.errorMessage || 'Error al registrar usuario.';
+        this.msg.error(msg);
       },
     });
   }
@@ -370,7 +372,7 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
         } else {
           console.warn(
             '⚠️ Error en respuesta:',
-            res?.errorMessage || 'Respuesta inválida del servidor'
+            res?.message || 'Respuesta inválida del servidor'
           );
         }
       },
@@ -420,17 +422,15 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
   }
 
   openDialog(element: any) {
-    console.log('element', element);
-
-    const request = {
-      RucEmisor: element.numeroDocIdentidad,
-      TipoComprobante: element.tipoComprobante,
-      Serie: element.serie,
-      Numero: element.numero,
-      Tipo: '01', // PDF
+    const request: Cpe_DescargarZipRequest = {
+      rucEmisor: element.numeroDocIdentidad,
+      tipoComprobante: element.tipoComprobante,
+      serie: element.serie,
+      numero: element.numero,
+      tipo: '01', // PDF
     };
 
-    this.cpeService.descargarPdf(request).subscribe({
+    this.cpeService.descargarPdf(this.clienteId, request).subscribe({
       next: (blob: Blob) => {
         const fileURL = URL.createObjectURL(blob);
 
@@ -447,15 +447,10 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
             // refrescar si es necesario
             this.load_Comprobantes();
           });
-
-        // this.dialog.open(AppDialogViewpdfComponent, {
-        //   width: '80%',
-        //   height: '90%',
-        //   data: { pdfUrl: fileURL } // 👈 pasar la URL al dialog
-        // });
       },
       error: (err) => {
-        console.error('Error al descargar PDF:', err);
+        const msg = err?.error?.errorMessage || 'Error al registrar usuario.';
+        this.msg.error(msg);
       },
     });
   }

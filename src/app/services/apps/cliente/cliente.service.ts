@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { Cliente } from 'src/app/pages/apps/cliente/models/cliente';
 import { clientePaginated } from 'src/app/pages/apps/cliente/models/clientePaginated';
 import { ClienteRequestDto } from 'src/app/pages/apps/cliente/models/ClienteRequestDto';
+import { BaseResponse } from 'src/app/shared/models/BaseResponse';
 import { PaginatedResponse } from 'src/app/shared/models/PaginatedResponse';
 import { environment } from 'src/environments/environment';
 
@@ -53,6 +54,10 @@ export class ClienteService {
     return this.http.put(`${this.apiUrl}/${id}`, cliente);
   }
 
+  darPermiso(id: string): Observable<BaseResponse> {
+    return this.http.put<BaseResponse>(`${this.apiUrl}/dar-permiso/${id}`, null);
+  }
+  
   public delete(id: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }

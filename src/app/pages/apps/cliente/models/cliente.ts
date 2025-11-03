@@ -11,6 +11,7 @@ export interface Cliente {
   clientSecret: string;
   username: string;
   password: string;
+  tienePermiso: boolean;
 
   userId?: string | null;
   grupoId?: string | null;

@@ -6,9 +6,13 @@ import { Observable } from 'rxjs';
 import { PaginatedResponse } from 'src/app/shared/models/PaginatedResponse';
 import { ComprobantePaginatedResponse } from 'src/app/pages/apps/compra-sire/Models/Responses/ComprobantePaginatedResponse';
 import { ComprobanteImportarGlosaRequest } from 'src/app/pages/apps/compra-sire/Models/Requests/ComprobanteImportarGlosaRequest';
-import { BaseResponse } from 'src/app/shared/models/BaseResponse';
+import {
+  BaseResponse,
+  BaseResponseGeneric,
+} from 'src/app/shared/models/BaseResponse';
 import { ComprobanteContadoresResponse } from 'src/app/pages/apps/compra-sire/Models/Responses/ComprobanteContadoresResponse';
 import { EditComprobanteRequest } from 'src/app/pages/apps/compra-sire/Models/Requests/EditComprobanteRequest';
+import { Comprobante_ImportarGlosaResponse } from 'src/app/pages/apps/compra-sire/Models/Responses/Comprobante_ImportarGlosaResponse ';
 
 @Injectable({
   providedIn: 'root',
@@ -46,23 +50,25 @@ export class ComprobanteService {
 
   public importarGlosa(
     request: ComprobanteImportarGlosaRequest
-  ): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/importar-glosa`, request);
+  ): Observable<BaseResponseGeneric<Comprobante_ImportarGlosaResponse>> {
+    return this.http.post<
+      BaseResponseGeneric<Comprobante_ImportarGlosaResponse>
+    >(`${this.apiUrl}/importar-glosa`, request);
   }
 
   public update(
-      id: string,
-      editComprobante: EditComprobanteRequest
-    ): Observable<any> {
-      return this.http.put(`${this.apiUrl}/${id}`, editComprobante);
-    }
+    id: string,
+    editComprobante: EditComprobanteRequest
+  ): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}`, editComprobante);
+  }
 
   public getContadores(
     perTributarioId: string
-  ): Observable<BaseResponse<ComprobanteContadoresResponse>> {
+  ): Observable<BaseResponseGeneric<ComprobanteContadoresResponse>> {
     const params = new HttpParams().set('perTributarioId', perTributarioId);
 
-    return this.http.get<BaseResponse<ComprobanteContadoresResponse>>(
+    return this.http.get<BaseResponseGeneric<ComprobanteContadoresResponse>>(
       `${this.apiUrl}/contadores`,
       { params }
     );

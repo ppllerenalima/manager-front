@@ -1,0 +1,89 @@
+<h2 mat-dialog-title class="m-b-24">{{ titulo }}</h2>
+
+<mat-divider></mat-divider>
+
+<mat-dialog-content class="mat-typography" style="max-width: 600px">
+  <form [formGroup]="clientePermisoForm" (ngSubmit)="onSubmit()">
+    <!-- TOKEN -->
+    <div class="row">
+      <div class="col-md-12">
+        <mat-label class="f-w-600 m-b-8 d-block">Token</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <input
+            matInput
+            type="text"
+            required
+            placeholder="Token"
+            formControlName="token"
+          />
+        </mat-form-field>
+      </div>
+    </div>
+
+     <!-- ID -->
+    <div class="row">
+      <div class="col-md-12">
+        <mat-label class="f-w-600 m-b-8 d-block">ID</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <input
+            matInput
+            type="text"
+            required
+            placeholder="ID"
+            formControlName="id"
+          />
+        </mat-form-field>
+      </div>
+    </div>
+
+     <!-- NOMAPP -->
+    <div class="row">
+      <div class="col-md-12">
+        <mat-label class="f-w-600 m-b-8 d-block">NomApp</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <input
+            matInput
+            type="text"
+            required
+            placeholder="NomApp"
+            formControlName="nomApp"
+          />
+        </mat-form-field>
+      </div>
+    </div>
+
+     <!-- DESURLAPP -->
+    <div class="row">
+      <div class="col-md-12">
+        <mat-label class="f-w-600 m-b-8 d-block">DesUrlApp</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <input
+            matInput
+            type="text"
+            required
+            placeholder="DesUrlApp"
+            formControlName="desUrlApp"
+          />
+        </mat-form-field>
+      </div>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-divider></mat-divider>
+
+<mat-dialog-actions class="p-24">
+  <button
+    mat-flat-button
+    color="primary"
+    type="submit"
+    [disabled]="clientePermisoForm.invalid"
+    (click)="onSubmit()"
+  >
+    Guardar
+  </button>
+
+  <button mat-flat-button class="bg-error text-white" mat-dialog-close>
+    Cancelar
+  </button>
+</mat-dialog-actions>

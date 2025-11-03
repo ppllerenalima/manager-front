@@ -14,6 +14,14 @@
           (click)="onMigrarExcel()"
           [disabled]="isLoading()"
         >
+          {{ isLoading() ? "Procesando..." : "Descargar SIRE" }}
+        </button>
+
+        <button
+          mat-stroked-button
+          (click)="onMigrarExcel()"
+          [disabled]="isLoading()"
+        >
           {{ isLoading() ? "Procesando..." : "Migrar a Excel" }}
         </button>
 

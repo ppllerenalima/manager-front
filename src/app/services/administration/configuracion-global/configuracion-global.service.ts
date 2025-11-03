@@ -5,7 +5,7 @@ import { AddConfiguracionGlobal } from 'src/app/pages/administration/configuraci
 import { ConfiguracionGlobal } from 'src/app/pages/administration/configuracion-global/models/ConfiguracionGlobal';
 import { ConfiguracionGlobalPaginated } from 'src/app/pages/administration/configuracion-global/models/ConfiguracionGlobalPaginated';
 import { EditConfiguracionGlobal } from 'src/app/pages/administration/configuracion-global/models/EditConfiguracionGlobal';
-import { BaseResponse } from 'src/app/shared/models/BaseResponse';
+import { BaseResponse, BaseResponseGeneric } from 'src/app/shared/models/BaseResponse';
 import { PaginatedResponse } from 'src/app/shared/models/PaginatedResponse';
 import { environment } from 'src/environments/environment';
 
@@ -45,8 +45,8 @@ export class ConfiguracionGlobalService {
     return this.http.post(this.apiUrl, addConfiguracionGlobal);
   }
 
-  public getFirstOrDefault(): Observable<BaseResponse<ConfiguracionGlobal>> {
-    return this.http.get<BaseResponse<ConfiguracionGlobal>>(
+  public getFirstOrDefault(): Observable<BaseResponseGeneric<ConfiguracionGlobal>> {
+    return this.http.get<BaseResponseGeneric<ConfiguracionGlobal>>(
       `${this.apiUrl}/FirstOrDefault`
     );
   }
