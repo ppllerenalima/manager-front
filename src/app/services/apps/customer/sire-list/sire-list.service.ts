@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { GetPerTributarioRequest } from 'src/app/pages/apps/compra-sire/Models/Requests/GetPerTributarioRequest';
 import { PerTributarioResponse } from 'src/app/pages/apps/compra-sire/Models/Responses/PerTributarioResponse';
+import { BaseResponseGeneric } from 'src/app/shared/models/BaseResponse';
 import { environment } from 'src/environments/environment';
 
 export interface AceptarPropuestaRequest {
@@ -43,7 +44,7 @@ export class SireService {
   apiUrl = environment.apiManager + '/SireCompras';
   http = inject(HttpClient);
 
-  constructor() { }
+  constructor() {}
 
   getToken(clienteId: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/${clienteId}/token`);
@@ -65,8 +66,8 @@ export class SireService {
 
   importarComprobantes(
     request: GetPerTributarioRequest
-  ): Observable<PerTributarioResponse> {
-    return this.http.post<PerTributarioResponse>(
+  ): Observable<BaseResponseGeneric<PerTributarioResponse>> {
+    return this.http.post<BaseResponseGeneric<PerTributarioResponse>>(
       `${this.apiUrl}/importar-comprobantes`,
       request
     );

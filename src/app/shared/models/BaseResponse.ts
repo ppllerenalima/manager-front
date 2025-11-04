@@ -1,9 +1,3 @@
-// export interface BaseResponse<T> {
-//   success: boolean;
-//   data?: T;
-//   errorMessage?: string;
-// }
-
 export interface BaseResponse {
   success: boolean;
   message?: string;

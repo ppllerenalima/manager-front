@@ -15,7 +15,17 @@ import { MatDividerModule } from '@angular/material/divider';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { NgScrollbarModule } from 'ngx-scrollbar';
-import { filter, finalize, Subject, takeUntil } from 'rxjs';
+import {
+  catchError,
+  filter,
+  finalize,
+  of,
+  Subject,
+  switchMap,
+  takeUntil,
+  tap,
+  throwError,
+} from 'rxjs';
 import { MaterialModule } from 'src/app/material.module';
 import { SireService } from 'src/app/services/apps/customer/sire-list/sire-list.service';
 import { registroSIRE } from '../customer/sire-list/listing/registroSIRE';
@@ -251,9 +261,6 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
     return this.mediaMatcher.matches;
   }
 
-  /** ================================
-   * 📌 9. BÚSQUEDA DE COMPRAS
-   * ================================ */
   onSearchCompras(): void {
     // Reinicia estados
     this.error.set(null);
@@ -267,90 +274,175 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
       mes: this.selectedMonth,
     };
 
-    // 🔹 Primero: verificar si existe el PerTributario
     this.perTributarioService
       .getByPeriodo(request)
       .pipe(
-        finalize(() => this.isLoading.set(false)) // ✅ siempre se ejecuta al final
-      )
-      .subscribe({
-        next: (response: PerTributarioResponse) => {
-          console.log('response', response);
-          if (response) {
-            this.perTributarioId = response.id;
+        switchMap((res) => {
+          if (res.success && res.data) {
+            this.perTributarioId = res.data.id;
+            this.msg.info(
+              `Período ${res.data.mes}/${res.data.anio} ya existe. Se cargaron los comprobantes.`
+            );
             this.load_Comprobantes();
-            this.snackBar.open(
-              `Período ${response.mes}/${response.anio} ya existe. Se cargaron los comprobantes.`,
-              'Cerrar',
-              { duration: 4000, panelClass: 'info-snackbar' }
+            return of(null); // termina aquí
+          } else {
+            // Si no existe, forzamos error para entrar al catchError
+            return throwError(() => ({ status: 404 }));
+          }
+        }),
+        catchError((err) => {
+          if (err.status === 404) {
+            // No existe -> importamos desde SUNAT
+            return this.sireService.importarComprobantes(request).pipe(
+              tap((res) => {
+                if (res.success && res.data) {
+                  this.perTributarioId = res.data.id;
+                  this.load_Comprobantes();
+                  this.msg.success('Comprobantes importados correctamente.');
+                } else if (res.statusCode === 202) {
+                  this.msg.info(
+                    res.message ||
+                      'El ticket aún no ha sido aceptado por SUNAT.'
+                  );
+                } else {
+                  this.msg.warning(
+                    res.message || 'No se pudo importar los comprobantes.'
+                  );
+                }
+              })
             );
           } else {
-            this.onImportarPeriodo(request);
+            const msg =
+              err?.error?.message || 'Error al buscar el período tributario.';
+            this.msg.error(msg);
+            return of(null);
           }
-        },
-        error: (err) => {
-          console.error('❌ Error al verificar PerTributario:', err);
-          this.error.set(err.message || 'Error al verificar período');
-        },
-      });
+        }),
+        finalize(() => this.isLoading.set(false))
+      )
+      .subscribe();
   }
 
-  onImportarPeriodo(request: GetPerTributarioRequest): void {
-    this.sireService.importarComprobantes(request).subscribe({
-      next: (response: PerTributarioResponse) => {
-        console.log('✅ PerTributario creado e importado:', response);
+  // onSearchCompras(): void {
+  //   // Reinicia estados
+  //   this.error.set(null);
+  //   this.registros.set([]);
+  //   this.selectedComprobante.set(null);
+  //   this.isLoading.set(true);
 
-        this.perTributarioId = response.id;
-        this.load_Comprobantes();
+  //   const request: GetPerTributarioRequest = {
+  //     clienteId: this.clienteId,
+  //     anio: this.selectedYear,
+  //     mes: this.selectedMonth,
+  //   };
 
-        this.snackBar.open(
-          `Se importó correctamente el período ${response.mes}/${response.anio}`,
-          'Cerrar',
-          { duration: 4000, panelClass: 'success-snackbar' }
-        );
-      },
-      error: (err) => {
-        console.error('❌ Error al importar comprobantes:', err);
-        this.error.set(err.message || 'Error al importar comprobantes');
-        this.snackBar.open('Hubo un error al importar comprobantes', 'Cerrar', {
-          duration: 4000,
-          panelClass: 'error-snackbar',
-        });
-      },
-      complete: () => this.isLoading.set(false),
-    });
-  }
+  //   // 🔹 Primero: verificar si existe el PerTributario
+  //   this.perTributarioService
+  //     .getByPeriodo(request)
+  //     .pipe(
+  //       finalize(() => this.isLoading.set(false)) // ✅ siempre se ejecuta al final
+  //     )
+  //     .subscribe({
+  //       next: (res) => {
+  //         this.perTributarioId = res.data!.id;
+  //         this.load_Comprobantes();
+
+  //         this.msg.info(
+  //           `Período ${res.data!.mes}/${
+  //             res.data!.anio
+  //           } ya existe. Se cargaron los comprobantes.`
+  //         );
+  //       },
+  //       error: (err) => {
+  //         if (err.status === 404) {
+  //           this.sireService.importarComprobantes(request).subscribe({
+  //             next: (res) => {
+  //               this.perTributarioId = res.data!.id;
+
+  //               this.load_Comprobantes();
+  //             },
+  //             error: (err) => {
+  //               const msg =
+  //                 err?.error?.errorMessage || 'Error al importar comprobantes.';
+  //               this.msg.error(msg);
+  //             },
+  //             complete: () => this.isLoading.set(false),
+  //           });
+  //         } else {
+  //           const msg =
+  //             err?.error?.message || 'Error al buscar el período tributario.';
+  //           this.msg.error(msg);
+  //         }
+  //       },
+  //     });
+  // }
+
+  onImportarPeriodo(request: GetPerTributarioRequest): void {}
 
   onMigrarExcel() {
     this.reportsService.descargarExcel(this.perTributarioId);
   }
 
-  onImportarGlosa() {
+  onImportarGlosa(): void {
+    // ✅ Marca inicio de carga
+    this.isLoading.set(true);
+
     const request: ComprobanteImportarGlosaRequest = {
-      perTributarioId: this.perTributarioId, // cambia por el GUID real
+      perTributarioId: this.perTributarioId,
       clienteId: this.clienteId,
     };
 
-    this.comprobanteService.importarGlosa(request).subscribe({
-      next: (res) => {
-        console.log('✅ Glosa importada', res);
+    this.comprobanteService
+      .importarGlosa(request)
+      .pipe(
+        finalize(() => this.isLoading.set(false)) // ✅ Siempre se ejecuta al final
+      )
+      .subscribe({
+        next: (res) => {
+          console.log('✅ Glosa importada', res);
 
-        if (res.success) {
-          this.msg.success(res.message!);
-        } else {
-          this.msg.warning(res.message!);
-        }
+          if (res.success) {
+            this.msg.success(res.message!);
+          } else {
+            this.msg.warning(res.message!);
+          }
 
-        this.load_Comprobantes();
-      },
-      error: (err) => {
-        console.error('❌ Error al importar glosa', err);
-
-        const msg = err?.error?.errorMessage || 'Error al registrar usuario.';
-        this.msg.error(msg);
-      },
-    });
+          this.load_Comprobantes();
+        },
+        error: (err) => {
+          console.error('❌ Error al importar glosa', err);
+          const msg = err?.error?.errorMessage || 'Error al importar glosa.';
+          this.msg.error(msg);
+        },
+      });
   }
+
+  // onImportarGlosa() {
+  //   const request: ComprobanteImportarGlosaRequest = {
+  //     perTributarioId: this.perTributarioId, // cambia por el GUID real
+  //     clienteId: this.clienteId,
+  //   };
+
+  //   this.comprobanteService.importarGlosa(request).subscribe({
+  //     next: (res) => {
+  //       console.log('✅ Glosa importada', res);
+
+  //       if (res.success) {
+  //         this.msg.success(res.message!);
+  //       } else {
+  //         this.msg.warning(res.message!);
+  //       }
+
+  //       this.load_Comprobantes();
+  //     },
+  //     error: (err) => {
+  //       console.error('❌ Error al importar glosa', err);
+
+  //       const msg = err?.error?.errorMessage || 'Error al importar glosa.';
+  //       this.msg.error(msg);
+  //     },
+  //   });
+  // }
 
   load_Comprobantes(): void {
     this.isLoading.set(true);
