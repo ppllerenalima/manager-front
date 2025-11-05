@@ -291,6 +291,8 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
           }
         }),
         catchError((err) => {
+          console.log('err (catchError)', err);
+
           if (err.status === 404) {
             // No existe -> importamos desde SUNAT
             return this.sireService.importarComprobantes(request).pipe(
@@ -309,6 +311,15 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
                     res.message || 'No se pudo importar los comprobantes.'
                   );
                 }
+              }),
+              // 🧩 Manejo de errores de la importación
+              catchError((err2) => {
+                console.error('Error en importarComprobantes', err2);
+                const msg =
+                  err2?.error?.message ||
+                  'Error al importar los comprobantes desde SUNAT.';
+                this.msg.error(msg);
+                return of(null); // devuelve un observable vacío para no romper la cadena
               })
             );
           } else {
