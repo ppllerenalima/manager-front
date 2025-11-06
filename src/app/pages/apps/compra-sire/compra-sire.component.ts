@@ -17,27 +17,21 @@ import { TablerIconsModule } from 'angular-tabler-icons';
 import { NgScrollbarModule } from 'ngx-scrollbar';
 import {
   catchError,
-  filter,
   finalize,
   of,
   Subject,
   switchMap,
-  takeUntil,
   tap,
   throwError,
 } from 'rxjs';
 import { MaterialModule } from 'src/app/material.module';
 import { SireService } from 'src/app/services/apps/customer/sire-list/sire-list.service';
 import { registroSIRE } from '../customer/sire-list/listing/registroSIRE';
-import { strFromU8, unzipSync } from 'fflate';
-import { FileUtils } from 'src/app/shared/utils/FileUtils';
 import { InvoiceService } from 'src/app/services/apps/invoice-view/invoice-view.service';
 import { ConsultaCpeRequest } from '../invoice-view/Models/Requests/ConsultaCpeRequest';
 import { GetPerTributarioRequest } from './Models/Requests/GetPerTributarioRequest';
 import { ClienteService } from 'src/app/services/apps/cliente/cliente.service';
 import { MatCardModule } from '@angular/material/card';
-import { PerTributarioResponse } from './Models/Responses/PerTributarioResponse';
-import { MatTableDataSource } from '@angular/material/table';
 import { ComprobantePaginatedResponse } from './Models/Responses/ComprobantePaginatedResponse';
 import { MatSort } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
@@ -551,8 +545,23 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
             this.load_Comprobantes();
           });
       },
-      error: (err) => {
-        const msg = err?.error?.errorMessage || 'Error al registrar usuario.';
+      error: async (err) => {
+        console.error('err', err);
+
+        let msg = 'Error desconocido';
+
+        // Si el backend devolvió JSON dentro de un blob
+        if (
+          err.error instanceof Blob &&
+          err.error.type === 'application/json'
+        ) {
+          const errorText = await err.error.text();
+          const errorJson = JSON.parse(errorText);
+          msg = errorJson.message || errorJson.details || 'Error del servidor';
+        } else if (err.error?.message) {
+          msg = err.error.message;
+        }
+
         this.msg.error(msg);
       },
     });
