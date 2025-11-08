@@ -285,7 +285,7 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
           }
         }),
         catchError((err) => {
-          console.log('err (catchError)', err);
+          console.log('Error (perTributarioService)', err);
 
           if (err.status === 404) {
             // No existe -> importamos desde SUNAT
@@ -308,17 +308,14 @@ export class AppCompraSireComponent implements OnInit, AfterViewInit {
               }),
               // 🧩 Manejo de errores de la importación
               catchError((err2) => {
-                console.error('Error en importarComprobantes', err2);
-                const msg =
-                  err2?.error?.message ||
-                  'Error al importar los comprobantes desde SUNAT.';
+                console.error('Error (importarComprobantes)', err2);
+                const msg = err2?.error;
                 this.msg.error(msg);
                 return of(null); // devuelve un observable vacío para no romper la cadena
               })
             );
           } else {
-            const msg =
-              err?.error?.message || 'Error al buscar el período tributario.';
+            const msg = err?.error;
             this.msg.error(msg);
             return of(null);
           }
